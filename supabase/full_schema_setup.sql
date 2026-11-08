@@ -1,6 +1,6 @@
 -- ============================================================
--- FOGGO DATABASE SCHEMA (SUPABASE POSTGRES)
--- Migration: 20261109000001_initial_schema.sql
+-- FOGGO DATABASE SCHEMA & SETUP (SUPABASE POSTGRES)
+-- Toàn bộ CSDL cho Dự án Foggo (Giai đoạn 0 -> Giai đoạn 8)
 -- ============================================================
 
 -- Bật extension cần thiết
@@ -68,13 +68,18 @@ create table if not exists public.profiles (
   class_id uuid references public.classes(id),
   recovery_code_hash text,
   must_change_password boolean not null default false,
+  xp integer not null default 0,
+  level integer not null default 1,
   created_at timestamptz not null default now()
 );
 
 create unique index if not exists profiles_username_lower on public.profiles (lower(username));
 
--- Liên kết khóa ngoại teacher_id & created_by sau khi profiles đã tạo
+-- Liên kết khóa ngoại teacher_id & created_by an toàn (idempotent)
+alter table public.schools drop constraint if exists fk_schools_creator;
 alter table public.schools add constraint fk_schools_creator foreign key (created_by) references public.profiles(id) on delete set null;
+
+alter table public.classes drop constraint if exists fk_classes_teacher;
 alter table public.classes add constraint fk_classes_teacher foreign key (teacher_id) references public.profiles(id) on delete set null;
 
 -- Tự động tạo profile khi người dùng đăng ký qua auth.users
@@ -96,7 +101,10 @@ begin
     coalesce(new.raw_user_meta_data->>'role', 'student'),
     coalesce(new.raw_user_meta_data->>'auth_type', 'email'),
     new.raw_user_meta_data->>'avatar_url'
-  );
+  )
+  on conflict (id) do update set
+    display_name = coalesce(excluded.display_name, public.profiles.display_name),
+    avatar_url = coalesce(excluded.avatar_url, public.profiles.avatar_url);
   return new;
 end; $$;
 
@@ -144,16 +152,20 @@ create table if not exists public.questions (
   answer_key jsonb not null,
   time_limit_sec integer not null default 20,
   points integer not null default 1000,
+  difficulty smallint not null default 1 check (difficulty between 1 and 3),
+  tags text[] not null default '{}',
   explanation text,
   created_at timestamptz not null default now()
 );
 
 create index if not exists idx_questions_set_position on public.questions(set_id, position);
+create index if not exists idx_questions_set_diff on public.questions(set_id, difficulty);
 
 -- ============ 7. THẾ GIỚI / PHIÊN GAME (GAME SESSIONS) ============
 create table if not exists public.game_sessions (
   id uuid primary key default gen_random_uuid(),
   host_id uuid not null references public.profiles(id),
+  teacher_id uuid references public.profiles(id),
   kind text not null default 'class' check (kind in ('class','link','solo','quick')),
   class_id uuid references public.classes(id),
   set_id uuid references public.question_sets(id),
@@ -165,6 +177,8 @@ create table if not exists public.game_sessions (
   allow_guests boolean not null default false,
   max_players integer,
   status text not null default 'scheduled' check (status in ('scheduled','open','paused','closed')),
+  wave integer not null default 1,
+  round integer not null default 0,
   starts_at timestamptz,
   ends_at timestamptz,
   current_index integer not null default -1,
@@ -172,6 +186,12 @@ create table if not exists public.game_sessions (
   created_at timestamptz not null default now(),
   closed_at timestamptz
 );
+
+-- Đảm bảo các cột mở rộng luôn có mặt nếu bảng đã tồn tại trước đó
+alter table public.game_sessions
+  add column if not exists teacher_id uuid references public.profiles(id),
+  add column if not exists wave integer not null default 1,
+  add column if not exists round integer not null default 0;
 
 create index if not exists idx_game_sessions_class on public.game_sessions (class_id, status);
 create index if not exists idx_game_sessions_host on public.game_sessions (host_id, created_at desc);
@@ -186,12 +206,29 @@ create table if not exists public.session_players (
   avatar text,
   score integer not null default 0,
   gold integer not null default 0,
+  hp integer not null default 100,
+  max_hp integer not null default 100,
+  inventory jsonb not null default '[]'::jsonb,
+  equipment jsonb not null default '{}'::jsonb,
+  stats jsonb not null default '{"kills": 0, "damage_dealt": 0, "damage_taken": 0, "items_crafted": 0, "bosses_defeated": 0}'::jsonb,
+  is_alive boolean not null default true,
+  wave_reached integer not null default 1,
   state jsonb not null default '{}',
   joined_at timestamptz not null default now(),
   banned boolean not null default false,
   state_version integer not null default 0,
   updated_at timestamptz not null default now()
 );
+
+-- Đảm bảo các cột mở rộng cho session_players
+alter table public.session_players
+  add column if not exists hp integer not null default 100,
+  add column if not exists max_hp integer not null default 100,
+  add column if not exists inventory jsonb not null default '[]'::jsonb,
+  add column if not exists equipment jsonb not null default '{}'::jsonb,
+  add column if not exists stats jsonb not null default '{"kills": 0, "damage_dealt": 0, "damage_taken": 0, "items_crafted": 0, "bosses_defeated": 0}'::jsonb,
+  add column if not exists is_alive boolean not null default true,
+  add column if not exists wave_reached integer not null default 1;
 
 create index if not exists idx_session_players_session on public.session_players(session_id);
 create unique index if not exists session_players_user_unique
@@ -207,9 +244,13 @@ create table if not exists public.session_answers (
   score_ratio numeric(4,3) not null,
   points_awarded integer not null,
   response_ms integer,
+  round integer not null default 0,
   created_at timestamptz not null default now(),
   unique (player_id, question_id)
 );
+
+alter table public.session_answers
+  add column if not exists round integer not null default 0;
 
 -- ============ 10. GÓI ĐĂNG KÝ (SUBSCRIPTIONS) ============
 create table if not exists public.subscriptions (
@@ -240,8 +281,20 @@ create table if not exists public.user_cosmetics (
   primary key (user_id, cosmetic_id)
 );
 
+-- ============ 12. NHẬT KÝ SỰ KIỆN SINH TỒN (SURVIVAL EVENTS) ============
+create table if not exists public.survival_events (
+  id bigserial primary key,
+  session_id uuid not null references public.game_sessions(id) on delete cascade,
+  player_id uuid not null references public.session_players(id) on delete cascade,
+  type text not null, -- 'kill','loot','craft','death','wave_result','boss_down','buy','sell','explore'
+  payload jsonb not null default '{}',
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_survival_events_session on public.survival_events (session_id, created_at);
+
 -- ============================================================
--- ROW LEVEL SECURITY (RLS) POLICIES
+-- ROW LEVEL SECURITY (RLS) POLICIES (DROP & RECREATE SAFELY)
 -- ============================================================
 
 alter table public.profiles enable row level security;
@@ -256,39 +309,48 @@ alter table public.session_answers enable row level security;
 alter table public.subscriptions enable row level security;
 alter table public.cosmetics enable row level security;
 alter table public.user_cosmetics enable row level security;
+alter table public.survival_events enable row level security;
 
--- PROFILES: Mọi người có thể đọc profile cơ bản, chỉ chủ tài khoản được sửa
+-- PROFILES
+drop policy if exists "Profiles are viewable by everyone" on public.profiles;
 create policy "Profiles are viewable by everyone" on public.profiles
   for select using (true);
 
+drop policy if exists "Users can update own profile" on public.profiles;
 create policy "Users can update own profile" on public.profiles
   for update using (auth.uid() = id);
 
--- SCHOOLS: Mọi người có thể đọc thông tin trường để tìm kiếm khi đăng ký
+-- SCHOOLS
+drop policy if exists "Schools viewable by everyone" on public.schools;
 create policy "Schools viewable by everyone" on public.schools
   for select using (true);
 
+drop policy if exists "Authenticated users can create school" on public.schools;
 create policy "Authenticated users can create school" on public.schools
   for insert with check (auth.role() = 'authenticated');
 
--- CLASSES: Mọi người có thể xem lớp trong trường
+-- CLASSES
+drop policy if exists "Classes viewable by authenticated users" on public.classes;
 create policy "Classes viewable by authenticated users" on public.classes
   for select using (auth.role() = 'authenticated');
 
+drop policy if exists "Teachers can manage their classes" on public.classes;
 create policy "Teachers can manage their classes" on public.classes
   for all using (teacher_id = auth.uid());
 
--- QUESTION SETS: Xem public/unlisted, hoặc xem bộ câu hỏi của chính mình
+-- QUESTION SETS
+drop policy if exists "Question sets viewable if public or owner" on public.question_sets;
 create policy "Question sets viewable if public or owner" on public.question_sets
   for select using (
     visibility in ('public', 'unlisted') or owner_id = auth.uid()
   );
 
+drop policy if exists "Users can manage own question sets" on public.question_sets;
 create policy "Users can manage own question sets" on public.question_sets
   for all using (owner_id = auth.uid());
 
--- QUESTIONS: Chỉ chủ sở hữu bộ câu hỏi mới truy cập trực tiếp qua client
--- Người chơi khi thi đấu sẽ nhận câu hỏi qua API Server (không kèm answer_key)
+-- QUESTIONS
+drop policy if exists "Owners can manage questions" on public.questions;
 create policy "Owners can manage questions" on public.questions
   for all using (
     exists (
@@ -297,60 +359,38 @@ create policy "Owners can manage questions" on public.questions
     )
   );
 
--- GAME SESSIONS: Host quản lý, người chơi xem được nếu có liên quan
+-- GAME SESSIONS
+drop policy if exists "Hosts can manage game sessions" on public.game_sessions;
 create policy "Hosts can manage game sessions" on public.game_sessions
-  for all using (host_id = auth.uid());
+  for all using (host_id = auth.uid() or teacher_id = auth.uid());
 
+drop policy if exists "Sessions viewable by players" on public.game_sessions;
 create policy "Sessions viewable by players" on public.game_sessions
   for select using (
-    status in ('open', 'paused') or host_id = auth.uid()
+    status in ('open', 'paused') or host_id = auth.uid() or teacher_id = auth.uid()
   );
 
--- SESSION PLAYERS: Xem người chơi trong cùng session
+-- SESSION PLAYERS
+drop policy if exists "Session players viewable by participants" on public.session_players;
 create policy "Session players viewable by participants" on public.session_players
   for select using (true);
 
--- COSMETICS: Ai cũng có thể xem cửa hàng skin
+-- COSMETICS
+drop policy if exists "Cosmetics viewable by everyone" on public.cosmetics;
 create policy "Cosmetics viewable by everyone" on public.cosmetics
   for select using (true);
 
+drop policy if exists "Users can view own cosmetics" on public.user_cosmetics;
 create policy "Users can view own cosmetics" on public.user_cosmetics
   for select using (user_id = auth.uid());
 
--- ============================================================================
--- FOGGO SURVIVAL SCHEMA MIGRATION
--- Giai đoạn 5: Cơ sở dữ liệu cho Chế độ Sinh tồn tri thức (Survival Quiz)
--- ============================================================================
-
--- 1. Thêm độ khó và nhãn chủ đề cho câu hỏi
-alter table public.questions
-  add column if not exists difficulty smallint not null default 1 check (difficulty between 1 and 3),
-  add column if not exists tags text[] not null default '{}';
-
-create index if not exists idx_questions_set_diff on public.questions (set_id, difficulty);
-
--- 2. Thêm cột round cho lượt trả lời để xoay vòng câu hỏi
-alter table public.session_answers
-  add column if not exists round integer not null default 0;
-
--- 3. Bảng nhật ký sự kiện sinh tồn (Survival Events)
-create table if not exists public.survival_events (
-  id bigserial primary key,
-  session_id uuid not null references public.game_sessions(id) on delete cascade,
-  player_id uuid not null references public.session_players(id) on delete cascade,
-  type text not null, -- 'kill','loot','craft','death','wave_result','boss_down','buy','sell','explore'
-  payload jsonb not null default '{}',
-  created_at timestamptz not null default now()
-);
-
-create index if not exists idx_survival_events_session on public.survival_events (session_id, created_at);
-alter table public.survival_events enable row level security;
-
+-- SURVIVAL EVENTS
+drop policy if exists "Survival events readable by teacher and owner" on public.survival_events;
 create policy "Survival events readable by teacher and owner" on public.survival_events
   for select using (
     exists (
       select 1 from public.game_sessions s
-      where s.id = survival_events.session_id and s.teacher_id = auth.uid()
+      where s.id = survival_events.session_id and (s.host_id = auth.uid() or s.teacher_id = auth.uid())
     )
     or exists (
       select 1 from public.session_players p
@@ -358,17 +398,12 @@ create policy "Survival events readable by teacher and owner" on public.survival
     )
   );
 
+drop policy if exists "Survival events insertable by session participants" on public.survival_events;
 create policy "Survival events insertable by session participants" on public.survival_events
   for insert with check (true);
 
--- 4. Tiến trình lâu dài tài khoản học sinh
-alter table public.profiles
-  add column if not exists xp integer not null default 0,
-  add column if not exists level integer not null default 1;
-
 -- ============================================================
 -- FOGGO SEED DATA
--- supabase/seed.sql
 -- ============================================================
 
 -- 1. Cosmetics mẫu (Linh vật Cáo Gô và skin cơ bản)
@@ -402,4 +437,7 @@ on conflict (id) do update set
   role = 'admin',
   plan = 'plus';
 
-
+-- Đồng bộ metadata trong auth.users cho tài khoản hoaifongg@gmail.com
+update auth.users
+set raw_user_meta_data = coalesce(raw_user_meta_data, '{}'::jsonb) || jsonb_build_object('role', 'admin', 'plan', 'plus')
+where email = 'hoaifongg@gmail.com';

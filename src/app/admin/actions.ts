@@ -101,3 +101,4 @@ export async function verifySchool({
   revalidatePath("/admin");
   return { success: true };
 }
+
