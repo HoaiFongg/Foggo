@@ -2379,11 +2379,11 @@ Dùng **Vercel Cron** hoặc **Supabase pg_cron** để chạy việc kiểm tra
 - **Kết quả:** đăng nhập được, có dashboard trống, deploy chạy trên Vercel.
 
 ### Giai đoạn 2: Tạo bộ câu hỏi (Tuần 4–6)
-- [ ] CRUD bộ câu hỏi (danh sách, tạo, sửa, xóa).
-- [ ] Trình soạn câu hỏi: thêm/xóa/sắp xếp câu, đặt thời gian và điểm.
+- [x] CRUD bộ câu hỏi (danh sách, tạo, sửa, xóa).
+- [x] Trình soạn câu hỏi: thêm/xóa/sắp xếp câu, đặt thời gian và điểm.
 - [ ] Upload ảnh lên Supabase Storage.
-- [ ] Xây **registry** dạng câu hỏi + làm 2 dạng đầu: `single_choice`, `true_false` (Editor + Player + grade).
-- [ ] Nút xem trước (Preview) từng câu.
+- [x] Xây **registry** dạng câu hỏi + làm 2 dạng đầu: `single_choice`, `true_false` (Editor + Player + grade).
+- [x] Nút xem trước (Preview) từng câu.
 - **Kết quả:** giáo viên tạo được bộ câu hỏi cơ bản.
 
 ### Giai đoạn 3: Thế giới của lớp + realtime (Tuần 7–10)
