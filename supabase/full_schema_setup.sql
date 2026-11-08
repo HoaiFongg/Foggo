@@ -374,3 +374,18 @@ values
   ('THCS Chu Văn An', 'Hà Nội', 'Tây Hồ', 'thcs', 'verified')
 on conflict do nothing;
 
+-- 3. Tự động liên kết và nâng cấp tài khoản hoaifongg@gmail.com thành ADMIN + GÓI PLUS
+insert into public.profiles (id, display_name, role, plan, auth_type)
+select 
+  id, 
+  coalesce(raw_user_meta_data->>'display_name', 'Phạm Nguyễn Hoài Phong (Admin)'),
+  'admin',
+  'plus',
+  'email'
+from auth.users
+where email = 'hoaifongg@gmail.com'
+on conflict (id) do update set
+  role = 'admin',
+  plan = 'plus';
+
+
