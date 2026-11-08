@@ -1,7 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
+import { getOptionalUser } from "@/lib/auth";
 import { ExploreClient } from "./ExploreClient";
 
 export default async function ExplorePage() {
+  const { profile } = await getOptionalUser();
   const supabase = await createClient();
 
   const { data: publicSets } = await supabase
@@ -11,10 +13,10 @@ export default async function ExplorePage() {
       title,
       description,
       subject,
-      grade,
+      grade_level,
       visibility,
       created_at,
-      profiles:created_by (
+      profiles:owner_id (
         display_name,
         avatar_url
       ),
@@ -26,6 +28,5 @@ export default async function ExplorePage() {
     .order("created_at", { ascending: false })
     .limit(30);
 
-  return <ExploreClient initialSets={publicSets || []} />;
+  return <ExploreClient initialSets={publicSets || []} profile={profile} />;
 }
-

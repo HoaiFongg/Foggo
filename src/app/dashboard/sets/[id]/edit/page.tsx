@@ -9,17 +9,18 @@ interface EditPageProps {
 
 export default async function EditQuestionSetPage({ params }: EditPageProps) {
   const { id } = await params;
-  const { user } = await requireUser(["teacher", "admin"]);
+  const { user, profile } = await requireUser(["teacher", "admin"]);
   const supabase = await createClient();
+  const isAdmin = profile.role === "admin";
 
   // Tải thông tin bộ câu hỏi
-  const { data: set } = await supabase
-    .from("question_sets")
-    .select("*")
-    .eq("id", id)
-    .single();
+  let query = supabase.from("question_sets").select("*").eq("id", id);
+  if (!isAdmin) {
+    query = query.eq("owner_id", user.id);
+  }
+  const { data: set } = await query.single();
 
-  if (!set || set.owner_id !== user.id) {
+  if (!set) {
     notFound();
   }
 
@@ -49,4 +50,3 @@ export default async function EditQuestionSetPage({ params }: EditPageProps) {
     />
   );
 }
-

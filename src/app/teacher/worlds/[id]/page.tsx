@@ -9,15 +9,16 @@ interface TeacherWorldPageProps {
 
 export default async function TeacherWorldPage({ params }: TeacherWorldPageProps) {
   const { id } = await params;
-  const { user } = await requireUser(["teacher", "admin"]);
+  const { user, profile } = await requireUser(["teacher", "admin"]);
   const supabase = await createClient();
+  const isAdmin = profile.role === "admin";
 
-  const { data: session } = await supabase
-    .from("game_sessions")
-    .select("*")
-    .eq("id", id)
-    .eq("host_id", user.id)
-    .single();
+  let query = supabase.from("game_sessions").select("*").eq("id", id);
+  if (!isAdmin) {
+    query = query.eq("host_id", user.id);
+  }
+
+  const { data: session } = await query.single();
 
   if (!session) {
     notFound();
@@ -36,4 +37,3 @@ export default async function TeacherWorldPage({ params }: TeacherWorldPageProps
     />
   );
 }
-

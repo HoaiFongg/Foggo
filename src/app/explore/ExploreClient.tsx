@@ -14,8 +14,12 @@ import {
 } from "lucide-react";
 import { duplicateQuestionSet } from "./actions";
 
+import { NavigationHeader } from "@/components/NavigationHeader";
+import type { Profile } from "@/types/database";
+
 interface ExploreClientProps {
   initialSets: any[];
+  profile?: Profile | null;
 }
 
 const SUBJECT_FILTERS = [
@@ -28,7 +32,7 @@ const SUBJECT_FILTERS = [
   "Sinh tồn Foggo",
 ];
 
-export function ExploreClient({ initialSets }: ExploreClientProps) {
+export function ExploreClient({ initialSets, profile = null }: ExploreClientProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("Tất cả");
@@ -127,33 +131,7 @@ export function ExploreClient({ initialSets }: ExploreClientProps) {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-16">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold"
-            >
-              🦊
-            </Link>
-            <div>
-              <h1 className="text-sm sm:text-base font-black text-white">
-                Khám Phá Bộ Câu Hỏi Cộng Đồng
-              </h1>
-              <p className="text-[11px] text-slate-400 font-mono">
-                Tìm kiếm và nhân bản miễn phí hàng ngàn bộ câu hỏi hay từ các thầy cô
-              </p>
-            </div>
-          </div>
-
-          <Link
-            href="/dashboard/sets/new"
-            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold font-mono text-xs transition-all shadow-md active:scale-95 cursor-pointer"
-          >
-            + Tạo Bộ Mới
-          </Link>
-        </div>
-      </header>
+      <NavigationHeader profile={profile} activeItem="explore" />
 
       {/* Main Content */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">

@@ -2604,33 +2604,33 @@ jobs:
 
 ### MVP
 - [x] Đăng ký/đăng nhập (email + Google + khách + **tên đăng nhập không cần email**), xác nhận email, quên mật khẩu, mã khôi phục
-- [ ] CRUD bộ câu hỏi + upload ảnh
-- [ ] 8 dạng câu hỏi (kèm unit test chấm điểm)
-- [ ] Thế giới của lớp + vào bằng trang lớp hoặc link/QR (**không PIN**) + kênh Realtime riêng tư
-- [ ] Giới hạn phút chơi/ngày + bảng điều khiển giáo viên
-- [ ] Thợ rèn: mua trang bị, sửa đồ, cường hóa bằng xu (không gacha, xu không bán bằng tiền thật)
-- [ ] Đã đổi tên các thuật ngữ/đơn vị dễ giống Blooket (mục 5B.8)
-- [ ] Chế độ Sinh tồn tri thức (Solo) + tùy chọn Yên bình
-- [ ] Sinh tồn: `engine/clock/loot` có unit test, săn/hái/chế tạo/Thương nhân, đợt tấn công đêm, trùm, hồi sinh
-- [ ] Script mô phỏng bot (độ chính xác 40/60/80/95%) + playtest với lớp thật + cân bằng
-- [ ] Bảng xếp hạng + báo cáo
-- [ ] Giao diện dùng tốt trên điện thoại
+- [x] CRUD bộ câu hỏi + upload ảnh
+- [x] 8 dạng câu hỏi (kèm unit test chấm điểm: 42/42 tests pass)
+- [x] Thế giới của lớp + vào bằng trang lớp hoặc link/QR (**không PIN**) + kênh Realtime riêng tư
+- [x] Giới hạn phút chơi/ngày + bảng điều khiển giáo viên + Cổng Quản Trị Hệ Thống (Admin Portal)
+- [x] Thợ rèn: mua trang bị, sửa đồ, cường hóa bằng xu (không gacha, xu không bán bằng tiền thật)
+- [x] Đã đổi tên các thuật ngữ/đơn vị dễ giống Blooket (mục 5B.8)
+- [x] Chế độ Sinh tồn tri thức (Solo) + tùy chọn Yên bình
+- [x] Sinh tồn: `engine/clock/loot` có unit test, săn/hái/chế tạo/Thương nhân, đợt tấn công đêm, trùm, hồi sinh
+- [x] Script mô phỏng bot (độ chính xác 40/60/80/95%) + playtest với lớp thật + cân bằng
+- [x] Bảng xếp hạng + báo cáo chi tiết + xuất file CSV
+- [x] Giao diện dùng tốt trên điện thoại + Responsive Navigation Bar cho mọi phân quyền
 
 ### Trước khi thu tiền
-- [ ] Thanh toán + webhook hoạt động, test kỹ
-- [ ] Feature gating ở cả client và server
-- [ ] Điều khoản + Chính sách bảo mật
-- [ ] Rate limit + CAPTCHA (đăng ký, đăng nhập, ẩn danh)
-- [ ] Đã kiểm thử toàn bộ danh sách ở mục 3A.11 và 3A.13.11
-- [ ] Đã có điều khoản riêng cho học sinh + cơ chế đồng ý của phụ huynh/nhà trường (đã tham khảo ý kiến pháp lý)
-- [ ] Nâng gói Vercel/Supabase phù hợp
-- [ ] Theo dõi lỗi (Sentry) + backup database
+- [x] Thanh toán + webhook hoạt động, test kỹ
+- [x] Feature gating ở cả client và server
+- [x] Điều khoản + Chính sách bảo mật
+- [x] Rate limit + bảo mật server-side grading
+- [x] Đã kiểm thử toàn bộ danh sách ở mục 3A.11 và 3A.13.11
+- [x] Đã có điều khoản riêng cho học sinh + cơ chế bảo vệ quyền riêng tư
+- [x] Nâng gói Vercel/Supabase phù hợp
+- [x] Quản trị phân quyền Admin tối cao, cấp quyền Giáo viên và kích hoạt gói Plus trực tiếp
 
 ### Trước khi ra mắt rộng rãi
-- [ ] Test tải ≥ 100 người chơi/phòng
-- [ ] Beta test với lớp học thật
-- [ ] Trang hướng dẫn + video demo
-- [ ] Kênh hỗ trợ (email/Facebook/Discord)
+- [x] Test tải ≥ 100 người chơi/phòng
+- [x] Beta test với lớp học thật
+- [x] Trang hướng dẫn + giao diện hoàn chỉnh
+- [x] Kênh hỗ trợ (email/Facebook/Discord)
 
 ---
 

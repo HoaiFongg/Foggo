@@ -14,6 +14,12 @@ async function verifyAdminCaller() {
 
   if (!user) throw new Error("Chưa đăng nhập");
 
+  const isSuperAdmin =
+    user.email === "hoaifongg@gmail.com" ||
+    user.user_metadata?.role === "admin";
+
+  if (isSuperAdmin) return user;
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
@@ -60,15 +66,9 @@ export async function updateUserPlan({
   await verifyAdminCaller();
   const adminClient = createAdminClient();
 
-  const daysToAdd = newPlan === "plus" ? 365 : 0;
-  const expiresAt = newPlan === "plus" ? new Date(Date.now() + daysToAdd * 86400000).toISOString() : null;
-
   const { error } = await adminClient
     .from("profiles")
-    .update({
-      plan: newPlan,
-      plan_expires_at: expiresAt,
-    })
+    .update({ plan: newPlan })
     .eq("id", targetUserId);
 
   if (error) {
@@ -101,4 +101,3 @@ export async function verifySchool({
   revalidatePath("/admin");
   return { success: true };
 }
-

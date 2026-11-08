@@ -26,6 +26,7 @@ export async function createWorld(formData: FormData) {
     .from("game_sessions")
     .insert({
       host_id: user.id,
+      teacher_id: user.id,
       title,
       set_id: setId,
       mode,
@@ -47,65 +48,77 @@ export async function createWorld(formData: FormData) {
   }
 
   revalidatePath("/teacher/worlds");
+  revalidatePath("/worlds");
   redirect(`/teacher/worlds/${data.id}`);
 }
 
 export async function pauseWorld(sessionId: string) {
-  const { user } = await requireUser(["teacher", "admin"]);
+  const { user, profile } = await requireUser(["teacher", "admin"]);
   const supabase = await createClient();
+  const isAdmin = profile.role === "admin";
 
-  await supabase
-    .from("game_sessions")
-    .update({ status: "paused" })
-    .eq("id", sessionId)
-    .eq("host_id", user.id);
+  let query = supabase.from("game_sessions").update({ status: "paused" }).eq("id", sessionId);
+  if (!isAdmin) {
+    query = query.eq("host_id", user.id);
+  }
+  await query;
 
   revalidatePath(`/teacher/worlds/${sessionId}`);
+  revalidatePath("/worlds");
   return { success: true };
 }
 
 export async function resumeWorld(sessionId: string) {
-  const { user } = await requireUser(["teacher", "admin"]);
+  const { user, profile } = await requireUser(["teacher", "admin"]);
   const supabase = await createClient();
+  const isAdmin = profile.role === "admin";
 
-  await supabase
-    .from("game_sessions")
-    .update({ status: "open" })
-    .eq("id", sessionId)
-    .eq("host_id", user.id);
+  let query = supabase.from("game_sessions").update({ status: "open" }).eq("id", sessionId);
+  if (!isAdmin) {
+    query = query.eq("host_id", user.id);
+  }
+  await query;
 
   revalidatePath(`/teacher/worlds/${sessionId}`);
+  revalidatePath("/worlds");
   return { success: true };
 }
 
 export async function closeWorld(sessionId: string) {
-  const { user } = await requireUser(["teacher", "admin"]);
+  const { user, profile } = await requireUser(["teacher", "admin"]);
   const supabase = await createClient();
+  const isAdmin = profile.role === "admin";
 
-  await supabase
+  let query = supabase
     .from("game_sessions")
     .update({
       status: "closed",
       closed_at: new Date().toISOString(),
     })
-    .eq("id", sessionId)
-    .eq("host_id", user.id);
+    .eq("id", sessionId);
+
+  if (!isAdmin) {
+    query = query.eq("host_id", user.id);
+  }
+  await query;
 
   revalidatePath(`/teacher/worlds/${sessionId}`);
+  revalidatePath("/worlds");
   return { success: true };
 }
 
 export async function regenerateJoinToken(sessionId: string) {
-  const { user } = await requireUser(["teacher", "admin"]);
+  const { user, profile } = await requireUser(["teacher", "admin"]);
   const supabase = await createClient();
+  const isAdmin = profile.role === "admin";
   const newToken = generateJoinToken();
 
-  const { error } = await supabase
-    .from("game_sessions")
-    .update({ join_token: newToken })
-    .eq("id", sessionId)
-    .eq("host_id", user.id);
+  let query = supabase.from("game_sessions").update({ join_token: newToken }).eq("id", sessionId);
+  if (!isAdmin) {
+    query = query.eq("host_id", user.id);
+  }
 
+  const { error } = await query;
   if (error) return { error: error.message };
 
   revalidatePath(`/teacher/worlds/${sessionId}`);
@@ -117,18 +130,21 @@ export async function toggleBanPlayer(
   sessionId: string,
   banned: boolean
 ) {
-  const { user } = await requireUser(["teacher", "admin"]);
+  const { user, profile } = await requireUser(["teacher", "admin"]);
   const supabase = await createClient();
+  const isAdmin = profile.role === "admin";
 
-  // Kiểm tra quyền chủ phòng
-  const { data: session } = await supabase
-    .from("game_sessions")
-    .select("id")
-    .eq("id", sessionId)
-    .eq("host_id", user.id)
-    .single();
+  // Kiểm tra quyền chủ phòng hoặc Admin
+  if (!isAdmin) {
+    const { data: session } = await supabase
+      .from("game_sessions")
+      .select("id")
+      .eq("id", sessionId)
+      .eq("host_id", user.id)
+      .single();
 
-  if (!session) return { error: "Không có quyền thực hiện" };
+    if (!session) return { error: "Không có quyền thực hiện" };
+  }
 
   await supabase
     .from("session_players")
@@ -139,4 +155,3 @@ export async function toggleBanPlayer(
   revalidatePath(`/teacher/worlds/${sessionId}`);
   return { success: true };
 }
-

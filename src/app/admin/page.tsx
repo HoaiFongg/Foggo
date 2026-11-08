@@ -14,14 +14,45 @@ export default async function AdminPage() {
     redirect("/login?next=/admin");
   }
 
+  const adminClient = createAdminClient();
+
   // Tải profile của user hiện tại
-  const { data: profile } = await supabase
+  let { data: profile } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single();
 
-  const adminClient = createAdminClient();
+  const isSuperAdminEmail =
+    user.email === "hoaifongg@gmail.com" ||
+    user.user_metadata?.role === "admin";
+
+  // Tự động đảm bảo tài khoản hoaifongg@gmail.com có quyền Admin & Gói Plus
+  if (isSuperAdminEmail && profile?.role !== "admin") {
+    await adminClient.from("profiles").upsert({
+      id: user.id,
+      display_name:
+        profile?.display_name ||
+        user.user_metadata?.display_name ||
+        "Phạm Nguyễn Hoài Phong (Admin)",
+      role: "admin",
+      plan: "plus",
+      auth_type: "email",
+    });
+
+    if (profile) {
+      profile.role = "admin";
+      profile.plan = "plus";
+    } else {
+      profile = {
+        id: user.id,
+        display_name: "Phạm Nguyễn Hoài Phong (Admin)",
+        role: "admin",
+        plan: "plus",
+        auth_type: "email",
+      } as any;
+    }
+  }
 
   // Kiểm tra xem hệ thống đã có admin nào chưa
   const { count: adminCount } = await adminClient
@@ -31,7 +62,7 @@ export default async function AdminPage() {
 
   const hasNoAdminYet = (adminCount || 0) === 0;
 
-  // Nếu chưa có admin nào trong hệ thống, tự động thăng quyền cho tài khoản đầu tiên truy cập trang này
+  // Nếu chưa có admin nào trong hệ thống, tự động thăng quyền cho tài khoản đầu tiên truy cập
   if (hasNoAdminYet && profile) {
     await adminClient
       .from("profiles")
@@ -42,7 +73,7 @@ export default async function AdminPage() {
     profile.plan = "plus";
   }
 
-  const isUserAdmin = profile?.role === "admin";
+  const isUserAdmin = profile?.role === "admin" || isSuperAdminEmail;
 
   // Tải dữ liệu quản trị
   const { data: users } = await adminClient
@@ -66,7 +97,7 @@ export default async function AdminPage() {
 
   return (
     <AdminClient
-      currentUser={profile}
+      currentUser={profile || user}
       isUserAdmin={isUserAdmin}
       users={users || []}
       schools={schools || []}
@@ -79,4 +110,3 @@ export default async function AdminPage() {
     />
   );
 }
-

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Profile, UserRole } from "@/types/database";
 
 export async function requireUser(roles?: UserRole[]): Promise<{
@@ -15,21 +16,71 @@ export async function requireUser(roles?: UserRole[]): Promise<{
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
+  let { data: profile } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single();
 
+  // Tự động thăng cấp Admin và Gói Plus cho tài khoản hoaifongg@gmail.com hoặc metadata role=admin
+  const isSuperAdminEmail =
+    user.email === "hoaifongg@gmail.com" ||
+    user.user_metadata?.role === "admin";
+
+  if (isSuperAdminEmail && profile?.role !== "admin") {
+    try {
+      const adminClient = createAdminClient();
+      await adminClient.from("profiles").upsert({
+        id: user.id,
+        display_name:
+          profile?.display_name ||
+          user.user_metadata?.display_name ||
+          "Phạm Nguyễn Hoài Phong (Admin)",
+        role: "admin",
+        plan: "plus",
+        auth_type: "email",
+      });
+      const { data: updated } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+      if (updated) profile = updated;
+      else if (profile) {
+        profile.role = "admin";
+        profile.plan = "plus";
+      }
+    } catch {
+      if (profile) {
+        profile.role = "admin";
+        profile.plan = "plus";
+      }
+    }
+  }
+
   if (!profile) {
-    redirect("/onboarding");
+    if (isSuperAdminEmail) {
+      profile = {
+        id: user.id,
+        display_name:
+          user.user_metadata?.display_name || "Phạm Nguyễn Hoài Phong (Admin)",
+        role: "admin",
+        plan: "plus",
+        auth_type: "email",
+        fireflies: 9999,
+        created_at: new Date().toISOString(),
+      } as Profile;
+    } else {
+      redirect("/onboarding");
+    }
   }
 
   if (profile.must_change_password) {
     redirect("/change-password");
   }
 
-  if (roles && !roles.includes(profile.role as UserRole)) {
+  // Quản trị viên (Admin) có toàn quyền truy cập mọi tính năng (kể cả tính năng giáo viên hoặc học sinh)
+  if (roles && profile.role !== "admin" && !roles.includes(profile.role as UserRole)) {
     redirect("/dashboard");
   }
 
@@ -48,15 +99,62 @@ export async function getOptionalUser(): Promise<{
 
     if (!user) return { user: null, profile: null };
 
-    const { data: profile } = await supabase
+    let { data: profile } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", user.id)
       .single();
+
+    const isSuperAdminEmail =
+      user.email === "hoaifongg@gmail.com" ||
+      user.user_metadata?.role === "admin";
+
+    if (isSuperAdminEmail && profile?.role !== "admin") {
+      try {
+        const adminClient = createAdminClient();
+        await adminClient.from("profiles").upsert({
+          id: user.id,
+          display_name:
+            profile?.display_name ||
+            user.user_metadata?.display_name ||
+            "Phạm Nguyễn Hoài Phong (Admin)",
+          role: "admin",
+          plan: "plus",
+          auth_type: "email",
+        });
+        const { data: updated } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+        if (updated) profile = updated;
+        else if (profile) {
+          profile.role = "admin";
+          profile.plan = "plus";
+        }
+      } catch {
+        if (profile) {
+          profile.role = "admin";
+          profile.plan = "plus";
+        }
+      }
+    }
+
+    if (!profile && isSuperAdminEmail) {
+      profile = {
+        id: user.id,
+        display_name:
+          user.user_metadata?.display_name || "Phạm Nguyễn Hoài Phong (Admin)",
+        role: "admin",
+        plan: "plus",
+        auth_type: "email",
+        fireflies: 9999,
+        created_at: new Date().toISOString(),
+      } as Profile;
+    }
 
     return { user, profile: (profile as Profile) || null };
   } catch {
     return { user: null, profile: null };
   }
 }
-

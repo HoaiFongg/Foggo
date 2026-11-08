@@ -63,14 +63,16 @@ export async function createQuestionSet(formData: FormData) {
 }
 
 export async function deleteQuestionSet(id: string) {
-  const { user } = await requireUser(["teacher", "admin"]);
+  const { user, profile } = await requireUser(["teacher", "admin"]);
   const supabase = await createClient();
+  const isAdmin = profile.role === "admin";
 
-  const { error } = await supabase
-    .from("question_sets")
-    .delete()
-    .eq("id", id)
-    .eq("owner_id", user.id);
+  let query = supabase.from("question_sets").delete().eq("id", id);
+  if (!isAdmin) {
+    query = query.eq("owner_id", user.id);
+  }
+
+  const { error } = await query;
 
   if (error) {
     return { error: error.message };
@@ -90,10 +92,11 @@ export async function saveQuestionSetDetails(
     visibility?: "private" | "unlisted" | "public";
   }
 ) {
-  const { user } = await requireUser(["teacher", "admin"]);
+  const { user, profile } = await requireUser(["teacher", "admin"]);
   const supabase = await createClient();
+  const isAdmin = profile.role === "admin";
 
-  const { error } = await supabase
+  let query = supabase
     .from("question_sets")
     .update({
       title: details.title,
@@ -103,8 +106,13 @@ export async function saveQuestionSetDetails(
       visibility: details.visibility || "private",
       updated_at: new Date().toISOString(),
     })
-    .eq("id", id)
-    .eq("owner_id", user.id);
+    .eq("id", id);
+
+  if (!isAdmin) {
+    query = query.eq("owner_id", user.id);
+  }
+
+  const { error } = await query;
 
   if (error) return { error: error.message };
   revalidatePath("/dashboard/sets");
@@ -124,16 +132,16 @@ export async function saveQuestionsBatch(
     explanation?: string;
   }>
 ) {
-  const { user } = await requireUser(["teacher", "admin"]);
+  const { user, profile } = await requireUser(["teacher", "admin"]);
   const supabase = await createClient();
+  const isAdmin = profile.role === "admin";
 
-  // Kiểm tra quyền sở hữu bộ câu hỏi
-  const { data: set } = await supabase
-    .from("question_sets")
-    .select("id")
-    .eq("id", setId)
-    .eq("owner_id", user.id)
-    .single();
+  // Kiểm tra quyền sở hữu bộ câu hỏi (hoặc quyền Admin)
+  let checkQuery = supabase.from("question_sets").select("id").eq("id", setId);
+  if (!isAdmin) {
+    checkQuery = checkQuery.eq("owner_id", user.id);
+  }
+  const { data: set } = await checkQuery.single();
 
   if (!set) {
     return { error: "Bạn không có quyền chỉnh sửa bộ câu hỏi này" };
@@ -153,13 +161,12 @@ export async function saveQuestionsBatch(
     explanation: q.explanation || null,
   }));
 
-  const { error } = await supabase.from("questions").insert(rows);
-
-  if (error) {
-    return { error: error.message };
+  if (rows.length > 0) {
+    const { error } = await supabase.from("questions").insert(rows);
+    if (error) return { error: error.message };
   }
 
   revalidatePath(`/dashboard/sets/${setId}/edit`);
+  revalidatePath("/dashboard/sets");
   return { success: true };
 }
-
