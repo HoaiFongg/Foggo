@@ -9,6 +9,8 @@ import {
   BookOpen,
   Crown,
   LayoutDashboard,
+  Users,
+  GraduationCap,
 } from "lucide-react";
 import { logout } from "@/app/(auth)/actions";
 import type { Profile } from "@/types/database";
@@ -80,6 +82,26 @@ export function NavigationHeader({
               >
                 <BookOpen className="w-3.5 h-3.5" />
                 <span>Bộ câu hỏi</span>
+              </Link>
+            )}
+
+            {isAdmin && (
+              <Link
+                href="/admin?tab=students"
+                className="px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-900 transition-colors"
+              >
+                <Users className="w-3.5 h-3.5" />
+                <span>Học sinh</span>
+              </Link>
+            )}
+
+            {isAdmin && (
+              <Link
+                href="/admin?tab=teachers"
+                className="px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-900 transition-colors"
+              >
+                <GraduationCap className="w-3.5 h-3.5" />
+                <span>Giáo viên</span>
               </Link>
             )}
 

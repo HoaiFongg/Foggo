@@ -16,7 +16,6 @@ export default async function AdminPage() {
 
   const adminClient = createAdminClient();
 
-  // Tải profile của user hiện tại
   let { data: profile } = await supabase
     .from("profiles")
     .select("*")
@@ -27,7 +26,6 @@ export default async function AdminPage() {
     user.email === "hoaifongg@gmail.com" ||
     user.user_metadata?.role === "admin";
 
-  // Tự động đảm bảo tài khoản hoaifongg@gmail.com có quyền Admin & Gói Plus
   if (isSuperAdminEmail && profile?.role !== "admin") {
     await adminClient.from("profiles").upsert({
       id: user.id,
@@ -54,7 +52,6 @@ export default async function AdminPage() {
     }
   }
 
-  // Kiểm tra xem hệ thống đã có admin nào chưa
   const { count: adminCount } = await adminClient
     .from("profiles")
     .select("*", { count: "exact", head: true })
@@ -62,7 +59,6 @@ export default async function AdminPage() {
 
   const hasNoAdminYet = (adminCount || 0) === 0;
 
-  // Nếu chưa có admin nào trong hệ thống, tự động thăng quyền cho tài khoản đầu tiên truy cập
   if (hasNoAdminYet && profile) {
     await adminClient
       .from("profiles")
@@ -75,12 +71,12 @@ export default async function AdminPage() {
 
   const isUserAdmin = profile?.role === "admin" || isSuperAdminEmail;
 
-  // Tải dữ liệu quản trị
+  // Tải danh sách người dùng kèm trường và lớp
   const { data: users } = await adminClient
     .from("profiles")
-    .select("*")
+    .select("*, schools(name), classes(name)")
     .order("created_at", { ascending: false })
-    .limit(50);
+    .limit(150);
 
   const { data: schools } = await adminClient
     .from("schools")

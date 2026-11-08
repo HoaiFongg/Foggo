@@ -101,3 +101,53 @@ export async function verifySchool({
   revalidatePath("/admin");
   return { success: true };
 }
+
+export async function awardFireflies({
+  targetUserId,
+  amount,
+}: {
+  targetUserId: string;
+  amount: number;
+}) {
+  await verifyAdminCaller();
+  const adminClient = createAdminClient();
+
+  const { data: userProfile } = await adminClient
+    .from("profiles")
+    .select("fireflies")
+    .eq("id", targetUserId)
+    .single();
+
+  const newFireflies = Math.max(0, (userProfile?.fireflies || 0) + amount);
+
+  const { error } = await adminClient
+    .from("profiles")
+    .update({ fireflies: newFireflies })
+    .eq("id", targetUserId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+  return { success: true, newFireflies };
+}
+
+export async function resetStudentRecoveryCode({
+  studentId,
+}: {
+  studentId: string;
+}) {
+  await verifyAdminCaller();
+  const adminClient = createAdminClient();
+
+  const newCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+  const { error } = await adminClient
+    .from("profiles")
+    .update({ recovery_code_hash: newCode, must_change_password: false })
+    .eq("id", studentId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+  return { success: true, newCode };
+}
