@@ -11,10 +11,15 @@ import {
   ArrowUpRight,
   Layers,
   Settings,
+  Sparkles,
+  Shield,
+  Hammer,
+  ShoppingBag,
 } from "lucide-react";
 import { getOptionalUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { NavigationHeader } from "@/components/NavigationHeader";
+import { startHomeFarmSession } from "@/app/teacher/worlds/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +61,43 @@ export default async function DashboardPage() {
       .order("updated_at", { ascending: false })
       .limit(3);
     recentSets = sets || [];
+  }
+
+  // Dành riêng cho học sinh: Tìm xem có hầm ngục lớp nào đang mở không, và tìm phiên farm quái gần nhất
+  let openClassWorld: any = null;
+  let mySoloFarmSession: any = null;
+  let myRecentPlayedWorlds: any[] = [];
+
+  if (user && !isTeacherOrAdmin) {
+    const { data: playerSessions } = await supabase
+      .from("session_players")
+      .select("*, game_sessions(*)")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false });
+
+    if (playerSessions && playerSessions.length > 0) {
+      myRecentPlayedWorlds = playerSessions.slice(0, 4);
+
+      const classOpen = playerSessions.find(
+        (p) =>
+          p.game_sessions &&
+          p.game_sessions.status === "open" &&
+          p.game_sessions.kind !== "solo"
+      );
+      if (classOpen) {
+        openClassWorld = classOpen.game_sessions;
+      }
+
+      const soloOpen = playerSessions.find(
+        (p) =>
+          p.game_sessions &&
+          p.game_sessions.status === "open" &&
+          p.game_sessions.kind === "solo"
+      );
+      if (soloOpen) {
+        mySoloFarmSession = soloOpen;
+      }
+    }
   }
 
   return (
@@ -343,6 +385,179 @@ export default async function DashboardPage() {
                   })}
                 </div>
               )}
+            </div>
+          </div>
+        {/* GIAO DIỆN HỌC SINH: CHẾ ĐỘ HẦM NGỤC LỚP VS FARM QUÁI TẠI NHÀ */}
+        {!isTeacherOrAdmin && (
+          <div className="space-y-6">
+            {/* Banner Thông Báo Trạng Thái: Hầm Ngục Lớp vs Farm Quái Tại Nhà */}
+            {openClassWorld ? (
+              <div className="p-6 rounded-2xl bg-gradient-to-r from-amber-500/20 via-amber-600/10 to-slate-900 border border-amber-500/40 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl">
+                <div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                    <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono text-[10px] font-bold uppercase tracking-wider">
+                      Hầm Ngục Lớp Học Đang Mở
+                    </span>
+                  </div>
+                  <h2 className="text-lg font-bold text-white mb-1">
+                    Trận chiến trên lớp: {openClassWorld.title}
+                  </h2>
+                  <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
+                    Giáo viên đã mở hầm ngục lớp với tỉ lệ rơi báu vật và trang bị hiếm. Hãy tham gia ngay để cùng các bạn hợp lực đẩy lùi quái vật bóng tối!
+                  </p>
+                </div>
+
+                <Link
+                  href={`/world/${openClassWorld.id}`}
+                  className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-95 transition-all shrink-0"
+                >
+                  <Swords className="w-4 h-4" />
+                  <span>Vào Hầm Ngục Lớp Ngay</span>
+                </Link>
+              </div>
+            ) : (
+              <div className="p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-emerald-950/20 to-slate-900 border border-emerald-500/30 flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-xl">
+                <div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold uppercase tracking-wider">
+                      Chế Độ Luyện Tập Tại Nhà
+                    </span>
+                  </div>
+                  <h2 className="text-lg font-bold text-white mb-1">
+                    Bãi Farm Quái Sinh Tồn · Cày Xu Mua Trang Bị
+                  </h2>
+                  <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
+                    Giáo viên chưa mở hầm ngục trên lớp? Hệ thống tự động đưa bạn vào bãi luyện solo để đánh quái, tích lũy Vàng &amp; Đom Đóm, ghé Thợ Rèn Bác Búa và Tiệm Cô Túi mua vũ khí chuẩn bị cho trận chiến lớp học.
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-4 mt-3 text-[11px] text-slate-400">
+                    <span className="flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Cày xu khi hạ quái</span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Hammer className="w-3.5 h-3.5 text-blue-400" />
+                      <span>Mua đồ tại Thợ Rèn</span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Lưu đồ mang vào lớp</span>
+                    </span>
+                  </div>
+                </div>
+
+                <form action={startHomeFarmSession}>
+                  <button
+                    type="submit"
+                    className="w-full md:w-auto px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
+                  >
+                    <Swords className="w-4 h-4" />
+                    <span>{mySoloFarmSession ? "Tiếp Tục Farm Quái Tại Nhà" : "Vào Bãi Farm Quái Ngay"}</span>
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {/* 2 Cột Trải Đều: Hầm ngục đã chơi & Tiệm đồ / Thợ rèn */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Cột 1: Lịch sử các đảo đã chơi */}
+              <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                    <Swords className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Đảo sinh tồn bạn đã tham gia</span>
+                  </h3>
+                  <Link
+                    href="/worlds"
+                    className="text-xs text-amber-400 hover:underline flex items-center gap-1"
+                  >
+                    <span>Xem tất cả</span>
+                    <ArrowUpRight className="w-3 h-3" />
+                  </Link>
+                </div>
+
+                {myRecentPlayedWorlds.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-slate-500">
+                    Bạn chưa tham gia thế giới nào. Bấm &quot;Vào Bãi Farm Quái Ngay&quot; để bắt đầu chuyến phiêu lưu đầu tiên!
+                  </div>
+                ) : (
+                  <div className="space-y-2.5">
+                    {myRecentPlayedWorlds.map((p) => {
+                      const s = p.game_sessions;
+                      if (!s) return null;
+                      const isSolo = s.kind === "solo";
+                      return (
+                        <div
+                          key={p.id}
+                          className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3 hover:border-slate-700 transition-colors"
+                        >
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="text-xs font-semibold text-white truncate">{s.title}</p>
+                              <span
+                                className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${
+                                  isSolo
+                                    ? "bg-slate-800 text-slate-400"
+                                    : "bg-amber-500/10 text-amber-400"
+                                }`}
+                              >
+                                {isSolo ? "Solo Farm" : "Lớp học"}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 font-mono">
+                              {p.gold ?? 0} Vàng · {p.score ?? 0} Điểm · {p.hp ?? 100} HP
+                            </p>
+                          </div>
+
+                          <Link
+                            href={`/world/${s.id}`}
+                            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-colors shrink-0"
+                          >
+                            Vào chơi
+                          </Link>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Cột 2: Cẩm nang Thợ Rèn & Chuẩn Bị Trang Bị */}
+              <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                    <Hammer className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Thợ Rèn &amp; Tiệm Đồ Sinh Tồn</span>
+                  </h3>
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+                    Sẵn sàng chiến đấu
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                    <p className="text-xs font-bold text-amber-400 mb-1">🔨 Thợ Rèn Bác Búa</p>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Đổi Vàng kiếm được để rèn Kiếm Gỗ (Atk 25), Kiếm Sắt (Atk 50) và Giáp Sắt giảm 40% sát thương.
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                    <p className="text-xs font-bold text-purple-400 mb-1">🎒 Tiệm Cô Túi</p>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Mua Thuốc Hồi Máu, Bánh Mì dự trữ và Đèn Lồng xua tan sương mù để tăng cơ hội sống sót về đêm.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 text-xs text-slate-300 flex items-start gap-2.5">
+                  <span className="text-base">💡</span>
+                  <div className="text-[11px] leading-relaxed">
+                    <strong>Mẹo sinh tồn:</strong> Trả lời đúng liên tiếp tạo <em>Streak x3 sát thương</em> giúp hạ quái nhanh gấp 3 lần và tiết kiệm độ bền vũ khí!
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}

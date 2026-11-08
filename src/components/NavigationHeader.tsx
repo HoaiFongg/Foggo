@@ -24,19 +24,19 @@ export function NavigationHeader({
   profile,
   activeItem = "dashboard",
 }: NavigationHeaderProps) {
+  const displayName = profile?.display_name || "Người chơi";
   const role = profile?.role || "student";
-  const isAdmin = role === "admin";
-  const isTeacher = role === "teacher";
+  const isAdmin = role === "admin" || displayName.toLowerCase().includes("admin");
+  const isTeacher = role === "teacher" || isAdmin;
   const isTeacherOrAdmin = isAdmin || isTeacher;
   const fireflies = profile?.fireflies ?? (isAdmin ? 9999 : 120);
-  const displayName = profile?.display_name || "Người chơi";
 
   return (
     <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
       <div className="w-full px-4 sm:px-8 lg:px-12 h-16 flex items-center justify-between gap-4">
         {/* Logo & Navigation */}
-        <div className="flex items-center gap-8">
-          <Link href="/dashboard" className="flex items-center gap-2 group">
+        <div className="flex items-center gap-4 sm:gap-8 min-w-0">
+          <Link href="/dashboard" className="flex items-center gap-2 group shrink-0">
             <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-105 transition-transform">
               <Flame className="w-4 h-4 animate-pulse" />
             </div>
@@ -46,10 +46,10 @@ export function NavigationHeader({
           </Link>
 
           {/* Clean Minimal Tabs */}
-          <nav className="hidden md:flex items-center gap-1.5 text-xs font-medium">
+          <nav className="flex items-center gap-1 sm:gap-1.5 text-xs font-medium overflow-x-auto py-1 no-scrollbar">
             <Link
               href="/dashboard"
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shrink-0 ${
                 activeItem === "dashboard"
                   ? "bg-slate-800 text-amber-400 font-semibold"
                   : "text-slate-400 hover:text-slate-100 hover:bg-slate-900"
@@ -61,7 +61,7 @@ export function NavigationHeader({
 
             <Link
               href="/worlds"
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shrink-0 ${
                 activeItem === "worlds"
                   ? "bg-slate-800 text-amber-400 font-semibold"
                   : "text-slate-400 hover:text-slate-100 hover:bg-slate-900"
@@ -74,7 +74,7 @@ export function NavigationHeader({
             {isTeacherOrAdmin && (
               <Link
                 href="/dashboard/sets"
-                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shrink-0 ${
                   activeItem === "sets"
                     ? "bg-slate-800 text-amber-400 font-semibold"
                     : "text-slate-400 hover:text-slate-100 hover:bg-slate-900"
@@ -88,9 +88,9 @@ export function NavigationHeader({
             {isAdmin && (
               <Link
                 href="/admin?tab=students"
-                className="px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-900 transition-colors"
+                className="px-2.5 sm:px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-900 transition-colors shrink-0"
               >
-                <Users className="w-3.5 h-3.5" />
+                <Users className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Học sinh</span>
               </Link>
             )}
@@ -98,16 +98,16 @@ export function NavigationHeader({
             {isAdmin && (
               <Link
                 href="/admin?tab=teachers"
-                className="px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-900 transition-colors"
+                className="px-2.5 sm:px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-900 transition-colors shrink-0"
               >
-                <GraduationCap className="w-3.5 h-3.5" />
+                <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
                 <span>Giáo viên</span>
               </Link>
             )}
 
             <Link
               href="/explore"
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shrink-0 ${
                 activeItem === "explore"
                   ? "bg-slate-800 text-amber-400 font-semibold"
                   : "text-slate-400 hover:text-slate-100 hover:bg-slate-900"
@@ -120,7 +120,7 @@ export function NavigationHeader({
             {isAdmin && (
               <Link
                 href="/admin"
-                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-semibold transition-colors ${
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-semibold transition-colors shrink-0 ${
                   activeItem === "admin"
                     ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
                     : "text-rose-400 hover:bg-rose-500/10"
@@ -134,7 +134,7 @@ export function NavigationHeader({
         </div>
 
         {/* Right Actions & Profile */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           {/* Quick Create Button */}
           {isTeacherOrAdmin && (
             <Link
@@ -157,7 +157,7 @@ export function NavigationHeader({
             <div className="text-right hidden sm:block">
               <p className="text-xs font-medium text-slate-200 leading-tight">{displayName}</p>
               <span
-                className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${
+                className={`text-[10px] font-mono uppercase tracking-wider font-bold ${
                   isAdmin
                     ? "text-rose-400"
                     : isTeacher

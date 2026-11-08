@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { createWorld } from "../actions";
 import { NavigationHeader } from "@/components/NavigationHeader";
+import { DUNGEON_RARE_ITEMS } from "@/game-modes/survival/items";
 import type { Profile } from "@/types/database";
 
 interface NewWorldClientProps {
@@ -39,6 +40,12 @@ export function NewWorldClient({ questionSets, profile = null }: NewWorldClientP
   const [selectedMode, setSelectedMode] = useState<"survival" | "peaceful">("survival");
   const [dailyLimit, setDailyLimit] = useState<number>(30);
   const [allowGuests, setAllowGuests] = useState<boolean>(true);
+  const [selectedDrops, setSelectedDrops] = useState<string[]>([
+    "golden_sword",
+    "magic_lantern",
+    "ancient_elixir",
+  ]);
+  const [dropRate, setDropRate] = useState<number>(25);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -249,7 +256,88 @@ export function NewWorldClient({ questionSets, profile = null }: NewWorldClientP
               </div>
             </div>
 
-            {/* 4. Cho phép khách chơi thử */}
+            {/* 4. Cấu hình Vật Phẩm Hiếm & Tỉ Lệ Rớt Trong Hầm Ngục */}
+            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-amber-400 font-mono">
+                    Báu vật & Trang bị hiếm rớt trong hầm ngục
+                  </label>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    Học sinh trả lời đúng hạ quái và trùm sẽ có cơ hội nhặt được các trang bị hiếm này.
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded-lg border border-amber-500/20">
+                    Tỉ lệ rớt: {dropRate}%
+                  </span>
+                </div>
+              </div>
+
+              {/* Slider / Nút chọn tỉ lệ */}
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs">
+                <span className="text-slate-400">Chọn xác suất rớt đồ hiếm:</span>
+                <div className="flex items-center gap-1.5">
+                  {[10, 25, 50, 100].map((rate) => (
+                    <button
+                      key={rate}
+                      type="button"
+                      onClick={() => setDropRate(rate)}
+                      className={`px-2.5 py-1 rounded-md text-[11px] font-mono font-bold cursor-pointer transition-colors ${
+                        dropRate === rate
+                          ? "bg-amber-500 text-slate-950"
+                          : "bg-slate-800 text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      {rate}%
+                    </button>
+                  ))}
+                </div>
+                <input type="hidden" name="dungeonDropRate" value={dropRate} />
+              </div>
+
+              {/* Grid các báu vật hiếm */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                {DUNGEON_RARE_ITEMS.map((item) => {
+                  const isChecked = selectedDrops.includes(item.id);
+                  return (
+                    <label
+                      key={item.id}
+                      className={`p-3 rounded-xl border flex items-center justify-between gap-3 cursor-pointer select-none transition-all ${
+                        isChecked
+                          ? "bg-amber-500/10 border-amber-500/50 text-white"
+                          : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="text-lg">{item.icon}</span>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-200 truncate">{item.name}</p>
+                          <p className="text-[10px] text-slate-400 truncate">{item.desc}</p>
+                        </div>
+                      </div>
+
+                      <input
+                        type="checkbox"
+                        name="dungeonDrops"
+                        value={item.id}
+                        checked={isChecked}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedDrops((prev) => [...prev, item.id]);
+                          } else {
+                            setSelectedDrops((prev) => prev.filter((id) => id !== item.id));
+                          }
+                        }}
+                        className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-0 cursor-pointer"
+                      />
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 5. Cho phép khách chơi thử */}
             <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex items-start gap-3">
               <input
                 type="checkbox"

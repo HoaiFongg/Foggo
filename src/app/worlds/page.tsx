@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Compass, Flame, Play, Plus, Settings, Crown, ShieldAlert } from "lucide-react";
+import { Compass, Flame, Play, Plus, Settings, Crown, ShieldAlert, Swords, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getOptionalUser } from "@/lib/auth";
 import { NavigationHeader } from "@/components/NavigationHeader";
+import { startHomeFarmSession } from "@/app/teacher/worlds/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -78,7 +79,7 @@ export default async function WorldsPage() {
             </p>
           </div>
 
-          {isTeacherOrAdmin && (
+          {isTeacherOrAdmin ? (
             <Link
               href="/teacher/worlds/new"
               className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all"
@@ -86,6 +87,16 @@ export default async function WorldsPage() {
               <Plus className="w-3.5 h-3.5" />
               <span>Mở hầm ngục mới</span>
             </Link>
+          ) : (
+            <form action={startHomeFarmSession}>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+              >
+                <Swords className="w-3.5 h-3.5" />
+                <span>Vào bãi farm quái tại nhà</span>
+              </button>
+            </form>
           )}
         </div>
 
@@ -233,11 +244,23 @@ export default async function WorldsPage() {
           </h2>
 
           {joinedWorlds.length === 0 ? (
-            <div className="p-8 rounded-2xl bg-slate-900/40 border border-slate-800 text-center max-w-sm mx-auto my-6">
-              <Compass className="w-6 h-6 text-slate-500 mx-auto mb-2" />
-              <p className="text-xs text-slate-400">
-                Chưa tham gia thế giới nào. Nhập link hoặc mở hầm ngục mới để chơi!
+            <div className="p-8 rounded-2xl bg-slate-900/40 border border-slate-800 text-center max-w-md mx-auto my-6 space-y-3">
+              <Compass className="w-8 h-8 text-amber-400 mx-auto" />
+              <h3 className="text-sm font-bold text-white">Chưa có hầm ngục nào được mở</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Giáo viên chưa mở hầm ngục lớp? Bạn có thể vào ngay <strong>Bãi Farm Quái Sinh Tồn Tại Nhà</strong> để cày Vàng, tích lũy Đom Đóm và ghé Thợ Rèn mua trang bị chuẩn bị cho trận chiến lớp học!
               </p>
+              {!isTeacherOrAdmin && (
+                <form action={startHomeFarmSession} className="pt-2">
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+                  >
+                    <Swords className="w-3.5 h-3.5" />
+                    <span>Vào bãi farm quái tại nhà ngay</span>
+                  </button>
+                </form>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

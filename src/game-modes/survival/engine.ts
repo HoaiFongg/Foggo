@@ -261,7 +261,10 @@ export function applyHunt(
   monsterId: string,
   answerScore: number, // 0.0 .. 1.0 từ hàm grade()
   isHotspotCritical: boolean = false,
-  timeUsedSec: number = 5
+  timeUsedSec: number = 5,
+  options?: {
+    dungeonDrops?: Array<{ itemId: string; dropRate: number }>;
+  }
 ): {
   state: SurvivalPlayerState;
   result: "hit" | "kill" | "hurt" | "death";
@@ -313,6 +316,17 @@ export function applyHunt(
       const coinsAwarded = Math.round(baseCoinRoll * nightCoinMult);
 
       const lootAwarded = resolveLoot(monster.lootTable);
+
+      // Rơi trang bị hiếm do giáo viên cấu hình trong hầm ngục
+      if (options?.dungeonDrops && options.dungeonDrops.length > 0) {
+        for (const drop of options.dungeonDrops) {
+          const roll = Math.random() * 100;
+          if (roll <= drop.dropRate) {
+            lootAwarded.push({ itemId: drop.itemId, qty: 1 });
+          }
+        }
+      }
+
       for (const loot of lootAwarded) {
         const { inventory } = addItemToInventory(nextState.inventory, loot.itemId, loot.qty);
         nextState.inventory = inventory;

@@ -1728,6 +1728,22 @@ Sự kiện ghi vào `survival_events`: `explore`, `fog_milestone`, `fog_cleared
 
 **MVP:** chỉ làm cơ chế này cho **Rừng Xanh** (mốc 70% / 30% / 0%), các khu sau tái sử dụng cùng code.
 
+### 5A.22. Chế Độ Hầm Ngục Lớp Học vs Bãi Farm Quái Tại Nhà (Class Dungeon & Home Solo Farm)
+
+> Cơ chế phân tách trải nghiệm học tập và chơi game linh hoạt theo bối cảnh: **Hầm Ngục Trên Lớp** và **Bãi Farm Quái Tại Nhà**.
+
+1. **Hầm ngục trên lớp (Class Dungeon Mode):**
+   - **Thời điểm kích hoạt:** Khi giáo viên mở phòng trên lớp (`kind = 'class'` hoặc link trực tiếp không cần PIN).
+   - **Cấu hình rớt đồ hiếm & tỉ lệ rớt:** Giáo viên khi khởi tạo hầm ngục được chọn danh sách trang bị hiếm đặc biệt (`DUNGEON_RARE_ITEMS` như *Thanh Kiếm Hoàng Kim, Đèn Lồng Cổ Ma Thuật, Long Giáp Thần Long, Thần Dược Phục Sinh, Khiên Băng Vĩnh Cửu, Nhẫn Bóng Đêm*) và tùy chỉnh tỉ lệ rơi đồ hiếm (10%, 25%, 50%, 100%).
+   - **Cơ chế rớt đồ:** Khi học sinh trả lời đúng câu hỏi và hạ gục quái vật hoặc trùm, hệ thống ở server (`applyHunt` trong `engine.ts`) sẽ tung xúc xắc theo tỉ lệ rơi đồ do giáo viên đặt. Rơi đồ thành công sẽ phát sự kiện feed realtime và đưa vật phẩm vào hành trang của học sinh.
+   - **Tương tác nhóm:** Cả lớp cùng nhìn thấy bảng xếp hạng realtime, thông báo đồng đội hạ quái và cùng bảo vệ khu trại về đêm.
+
+2. **Bãi farm quái tại nhà (Home Solo Farming Mode):**
+   - **Thời điểm kích hoạt:** Khi ở nhà hoặc khi giáo viên chưa mở hầm ngục trên lớp, học sinh đăng nhập vào hệ thống sẽ được tự động điều hướng / hiển thị bãi luyện solo (`kind = 'solo'`, khởi tạo qua Server Action `startHomeFarmSession`).
+   - **Vòng lặp chơi (Gameplay Loop):** Học sinh vào bãi luyện cá nhân, trả lời câu hỏi ôn bài để đi săn quái vật bóng tối, tích lũy Vàng và Đom Đóm.
+   - **Tiệm Cô Túi & Thợ Rèn Bác Búa:** Học sinh dùng số Vàng cày được để mua vũ khí (Kiếm Gỗ, Kiếm Sắt, Dao Găm), áo giáp và thuốc hồi phục.
+   - **Tính kế thừa liên tục (Persistence):** Toàn bộ số Vàng tích lũy và trang bị cày được từ bãi farm tại nhà được lưu trữ vĩnh viễn trên tài khoản học sinh. Khi giáo viên mở hầm ngục trên lớp, học sinh đem nguyên vẹn trang bị mạnh mẽ vào hầm ngục lớp để sẵn sàng nghênh chiến quái vật và trùm lớn.
+
 ---
 
 ## 5B. Vào chơi KHÔNG CẦN MÃ PIN: mô hình "Thế giới"
@@ -2420,6 +2436,10 @@ Dùng **Vercel Cron** hoặc **Supabase pg_cron** để chạy việc kiểm tra
 - [x] Tuần 21: Đủ 4 quái + **trùm Rừng** (nhiều giai đoạn); gắn **hotspot = đánh điểm yếu**; thêm **cơ chế Sương mù** (hành động Thám hiểm, mục 5A.21).
 - [x] Tuần 22: Gắn kéo thả vào **chế tạo**, `multi_select` vào **combo**; thêm khu vực **Hang Đá**.
 - [x] Tuần 23: Công cụ giáo viên: gán bộ câu hỏi/nhãn theo khu vực, độ khó, chế độ yên bình/khó, giới hạn phút chơi/ngày, hiển thị xếp hạng, tạo thế giới.
+- [x] Chế độ Hầm Ngục Trên Lớp (5A.22): Chọn báu vật & trang bị hiếm rớt (`dungeonDrops`), tùy chỉnh tỉ lệ rớt (10%, 25%, 50%, 100%).
+- [x] Chế độ Farm Quái Tại Nhà (5A.22): Tự động đưa học sinh vào bãi luyện solo cày Vàng mua trang bị tại Thợ Rèn & Tiệm Đồ khi không có hầm ngục lớp.
+- [x] Quản trị Admin: Phân quyền Quản lý Học sinh & Giáo viên riêng biệt, cấp lại mã khôi phục cho học sinh, thưởng Đom Đóm.
+- [x] Tối ưu Giao diện: Font hệ thống nhẹ nhàng phổ quát, bố cục dàn trải toàn màn hình, tinh gọn câu chữ.
 - [ ] (V2) **Sự kiện lớp** (trùm chung, bảng `class_events`, hàm `event_hit`).
 - [x] Tuần 24: Màn kết thúc, danh hiệu, XP/Đom Đóm, **script mô phỏng cân bằng (bot)**.
 - [x] Tuần 25: **Playtest với lớp thật + cân bằng số liệu**, âm thanh, hiệu ứng, tối ưu điện thoại yếu.
