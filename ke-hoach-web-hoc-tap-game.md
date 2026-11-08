@@ -2412,18 +2412,18 @@ Dùng **Vercel Cron** hoặc **Supabase pg_cron** để chạy việc kiểm tra
 
 ### Giai đoạn 5: Chế độ Sinh tồn tri thức (Tuần 16–25)
 > Chi tiết thiết kế ở **mục 5A**. Đây là giai đoạn dài và quan trọng nhất của game.
-- [ ] Tuần 16: `config.ts`, `clock.ts` (ngày/đêm), `engine.ts` (săn, đói, chết) + unit test, chưa cần giao diện.
-- [ ] Tuần 17: Migration (mục 5A.13), API `state` + `action/start` + `action/answer` cho **Đi săn**, giao diện chiến đấu cơ bản (1 quái).
-- [ ] Tuần 18: Túi đồ, loot table, đói, thức ăn, hồi sinh, độ bền.
-- [ ] Tuần 19: **Hái lượm** + **Thương nhân** (mua/bán) + **Thợ rèn (mua trang bị, sửa đồ, cường hóa bằng xu)** + **Chế tạo** (6 công thức), nâng cấp trại cấp 2.
-- [ ] Tuần 20: **Đợt tấn công đêm** + hàng rào; bảng xếp hạng và sự kiện nổi bật (broadcast 3s).
-- [ ] Tuần 21: Đủ 4 quái + **trùm Rừng** (nhiều giai đoạn); gắn **hotspot = đánh điểm yếu**; thêm **cơ chế Sương mù** (hành động Thám hiểm, mục 5A.21).
-- [ ] Tuần 22: Gắn kéo thả vào **chế tạo**, `multi_select` vào **combo**; thêm khu vực **Hang Đá**.
-- [ ] Tuần 23: Công cụ giáo viên: gán bộ câu hỏi/nhãn theo khu vực, độ khó, chế độ yên bình/khó, giới hạn phút chơi/ngày, hiển thị xếp hạng, tạo thế giới.
+- [x] Tuần 16: `config.ts`, `clock.ts` (ngày/đêm), `engine.ts` (săn, đói, chết) + unit test, chưa cần giao diện.
+- [x] Tuần 17: Migration (mục 5A.13), API `state` + `action/start` + `action/answer` cho **Đi săn**, giao diện chiến đấu cơ bản (1 quái).
+- [x] Tuần 18: Túi đồ, loot table, đói, thức ăn, hồi sinh, độ bền.
+- [x] Tuần 19: **Hái lượm** + **Thương nhân** (mua/bán) + **Thợ rèn (mua trang bị, sửa đồ, cường hóa bằng xu)** + **Chế tạo** (6 công thức), nâng cấp trại cấp 2.
+- [x] Tuần 20: **Đợt tấn công đêm** + hàng rào; bảng xếp hạng và sự kiện nổi bật (broadcast 3s).
+- [x] Tuần 21: Đủ 4 quái + **trùm Rừng** (nhiều giai đoạn); gắn **hotspot = đánh điểm yếu**; thêm **cơ chế Sương mù** (hành động Thám hiểm, mục 5A.21).
+- [x] Tuần 22: Gắn kéo thả vào **chế tạo**, `multi_select` vào **combo**; thêm khu vực **Hang Đá**.
+- [x] Tuần 23: Công cụ giáo viên: gán bộ câu hỏi/nhãn theo khu vực, độ khó, chế độ yên bình/khó, giới hạn phút chơi/ngày, hiển thị xếp hạng, tạo thế giới.
 - [ ] (V2) **Sự kiện lớp** (trùm chung, bảng `class_events`, hàm `event_hit`).
-- [ ] Tuần 24: Màn kết thúc, danh hiệu, XP/Đom Đóm, **script mô phỏng cân bằng (bot)**.
-- [ ] Tuần 25: **Playtest với lớp thật + cân bằng số liệu**, âm thanh, hiệu ứng, tối ưu điện thoại yếu.
-- [ ] Hệ thống Đom Đóm và cửa hàng skin (mua bằng Đom Đóm, không ảnh hưởng sức mạnh).
+- [x] Tuần 24: Màn kết thúc, danh hiệu, XP/Đom Đóm, **script mô phỏng cân bằng (bot)**.
+- [x] Tuần 25: **Playtest với lớp thật + cân bằng số liệu**, âm thanh, hiệu ứng, tối ưu điện thoại yếu.
+- [x] Hệ thống Đom Đóm và cửa hàng skin (mua bằng Đom Đóm, không ảnh hưởng sức mạnh).
 - [ ] (Sau) Bộ tộc, Đầm Lầy/Núi Lửa, thú cưng, thương mại lớp.
 
 ### Giai đoạn 6: Báo cáo và khám phá (Tuần 26–27)
