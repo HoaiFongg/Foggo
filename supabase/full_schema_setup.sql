@@ -15,11 +15,25 @@ create table if not exists public.schools (
   province text not null,
   district text,
   level text check (level in ('tieu_hoc','thcs','thpt','khac')),
-  name_search text generated always as (lower(unaccent(name))) stored,
+  name_search text,
   status text not null default 'pending' check (status in ('verified','pending','rejected')),
   created_by uuid,
   created_at timestamptz not null default now()
 );
+
+-- Trigger tự động chuẩn hóa name_search không dấu (tránh lỗi immutable của Postgres unaccent)
+create or replace function public.schools_set_name_search()
+returns trigger as $$
+begin
+  new.name_search := lower(unaccent(new.name));
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists trg_schools_name_search on public.schools;
+create trigger trg_schools_name_search
+  before insert or update on public.schools
+  for each row execute function public.schools_set_name_search();
 
 create unique index if not exists schools_unique on public.schools (name_search, province);
 create index if not exists schools_search on public.schools using gin (name_search gin_trgm_ops);
