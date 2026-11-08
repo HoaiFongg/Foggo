@@ -63,7 +63,7 @@ export async function createWorld(formData: FormData) {
  * Chế độ Farm Quái Tại Nhà (Home Solo Farming Mode)
  * Tự động đưa học sinh vào bãi luyện quái, cày xu mua trang bị khi không có hầm ngục trên lớp
  */
-export async function startHomeFarmSession() {
+export async function startHomeFarmSession(): Promise<void> {
   const { user, profile } = await requireUser(["student", "teacher", "admin"]);
   const supabase = await createClient();
 
@@ -115,7 +115,7 @@ export async function startHomeFarmSession() {
     .single();
 
   if (error || !session) {
-    return { error: "Không thể tạo bãi farm quái luyện tập" };
+    throw new Error("Không thể tạo bãi farm quái luyện tập");
   }
 
   // Khởi tạo người chơi với túi đồ cơ bản và 50 xu để ghé Thợ rèn & Tiệm đồ

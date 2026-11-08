@@ -387,6 +387,8 @@ export default async function DashboardPage() {
               )}
             </div>
           </div>
+        )}
+
         {/* GIAO DIỆN HỌC SINH: CHẾ ĐỘ HẦM NGỤC LỚP VS FARM QUÁI TẠI NHÀ */}
         {!isTeacherOrAdmin && (
           <div className="space-y-6">
