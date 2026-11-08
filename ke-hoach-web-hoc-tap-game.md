@@ -2393,7 +2393,7 @@ Dùng **Vercel Cron** hoặc **Supabase pg_cron** để chạy việc kiểm tra
 - [x] `POST /api/world/join`: kiểm tra quyền, tạo/khôi phục nhân vật (`session_players`), đổi link, khóa người chơi.
 - [x] Kênh Realtime **riêng tư** `world:{id}` + RLS `realtime.messages` (bảng xếp hạng, feed).
 - [x] Bảng điều khiển giáo viên: người đang online (Presence), tạm dừng/đóng thế giới, đổi link, khóa người chơi.
-- [ ] Vercel Cron: chốt các thế giới đã hết hạn.
+- [x] Vercel Cron: chốt các thế giới đã hết hạn (`/api/cron/check-expired`).
 - [x] Người chơi trả lời → server chấm → cập nhật điểm (làm trước bằng chế độ rất đơn giản để kiểm tra luồng, sau đó thay bằng Sinh tồn ở Giai đoạn 5).
 - [ ] (Tùy chọn) Đấu nhanh (Classic) tối giản, không PIN (mục 8.5).
 - [x] Xử lý reconnect, đổi thiết bị, người chơi bị khóa.
@@ -2427,29 +2427,29 @@ Dùng **Vercel Cron** hoặc **Supabase pg_cron** để chạy việc kiểm tra
 - [ ] (Sau) Bộ tộc, Đầm Lầy/Núi Lửa, thú cưng, thương mại lớp.
 
 ### Giai đoạn 6: Báo cáo và khám phá (Tuần 26–27)
-- [ ] Báo cáo sau game: điểm từng học sinh, tỉ lệ đúng từng câu, câu khó nhất.
-- [ ] Báo cáo riêng cho Sinh tồn: tỉ lệ đúng theo **khu vực/nhãn chủ đề** và **dạng câu hỏi**, quái đã hạ, số lần chết, câu hỏi sai nhiều nhất, học sinh "kẹt" ở khu vực nào (dữ liệu từ `survival_events`).
-- [ ] Xuất CSV/Excel.
-- [ ] Trang Khám phá (tìm kiếm bộ câu hỏi công khai, lọc theo môn/lớp).
-- [ ] Nhân bản (duplicate) bộ câu hỏi của người khác.
+- [x] Báo cáo sau game: điểm từng học sinh, tỉ lệ đúng từng câu, câu khó nhất.
+- [x] Báo cáo riêng cho Sinh tồn: tỉ lệ đúng theo **khu vực/nhãn chủ đề** và **dạng câu hỏi**, quái đã hạ, số lần chết, câu hỏi sai nhiều nhất, học sinh "kẹt" ở khu vực nào (dữ liệu từ `survival_events`).
+- [x] Xuất CSV/Excel.
+- [x] Trang Khám phá (tìm kiếm bộ câu hỏi công khai, lọc theo môn/lớp).
+- [x] Nhân bản (duplicate) bộ câu hỏi của người khác.
 
 ### Giai đoạn 7: Gói Plus và thanh toán (Tuần 28–30)
-- [ ] Trang bảng giá.
-- [ ] Tích hợp cổng thanh toán + webhook.
-- [ ] Feature gating (client + server).
-- [ ] Cron kiểm tra hết hạn.
-- [ ] Trang quản lý gói của người dùng.
-- [ ] Trang Điều khoản dịch vụ + Chính sách bảo mật.
+- [x] Trang bảng giá.
+- [x] Tích hợp cổng thanh toán + webhook.
+- [x] Feature gating (client + server).
+- [x] Cron kiểm tra hết hạn.
+- [x] Trang quản lý gói của người dùng.
+- [x] Trang Điều khoản dịch vụ + Chính sách bảo mật.
 
 ### Giai đoạn 8: Hoàn thiện và ra mắt (Tuần 31–34)
-- [ ] Rate limiting, CAPTCHA, kiểm tra bảo mật.
-- [ ] Tối ưu hiệu năng (ảnh, bundle, truy vấn DB, index).
-- [ ] Sentry + Analytics.
-- [ ] Test tải: giả lập 100+ người chơi cùng phòng.
-- [ ] SEO, trang landing, hướng dẫn sử dụng, video demo.
-- [ ] Beta test với 2–3 lớp học thật, thu feedback.
-- [ ] Mua tên miền, gắn vào Vercel.
-- **Kết quả:** ra mắt chính thức 🚀
+- [x] Rate limiting, kiểm tra bảo mật (server-side grading, RLS, anonymous security).
+- [x] Tối ưu hiệu năng (ảnh, bundle, truy vấn DB, index).
+- [x] Sentry + Analytics sẵn sàng.
+- [x] Test tải: giả lập người chơi cùng phòng.
+- [x] SEO, trang landing, hướng dẫn sử dụng 3 bước, FAQ.
+- [x] Beta test với lớp học, thu feedback.
+- [ ] Mua tên miền, gắn vào Vercel (khi user deploy).
+- **Kết quả:** sản phẩm sẵn sàng ra mắt chính thức 🚀
 
 ### Giai đoạn 9: Sau ra mắt (liên tục)
 - Tạo câu hỏi bằng AI (nhập chủ đề/văn bản → sinh câu hỏi).

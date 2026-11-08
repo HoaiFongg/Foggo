@@ -11,6 +11,8 @@ import {
   BookOpen,
   MapPin,
   CheckCircle2,
+  HelpCircle,
+  Zap,
 } from "lucide-react";
 
 export default function HomePage() {
@@ -37,10 +39,22 @@ export default function HomePage() {
             </div>
           </Link>
 
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-2 sm:gap-6 text-xs sm:text-sm font-semibold">
+            <Link
+              href="/explore"
+              className="text-slate-300 hover:text-white px-2 py-1 transition-colors hidden sm:inline"
+            >
+              Khám Phá
+            </Link>
+            <Link
+              href="/pricing"
+              className="text-slate-300 hover:text-white px-2 py-1 transition-colors hidden sm:inline"
+            >
+              Gói Plus
+            </Link>
             <Link
               href="/login"
-              className="text-xs sm:text-sm font-semibold text-slate-300 hover:text-white px-3 py-2 transition-colors"
+              className="text-slate-300 hover:text-white px-3 py-1.5 transition-colors"
             >
               Đăng nhập
             </Link>
@@ -48,7 +62,7 @@ export default function HomePage() {
               href="/register/student"
               className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-lg shadow-amber-500/20 transition-all hover:scale-105 active:scale-95 cursor-pointer"
             >
-              <span>Vào chơi ngay</span>
+              <span>Vào chơi</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </nav>
@@ -98,47 +112,39 @@ export default function HomePage() {
         <div className="mt-16 max-w-4xl mx-auto rounded-3xl p-1 bg-gradient-to-b from-amber-500/20 to-slate-800/20 shadow-2xl">
           <div className="bg-slate-950/90 rounded-[22px] p-6 sm:p-8 border border-slate-800/80 backdrop-blur-xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-rose-500/80" />
-                <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-                <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                <span className="ml-3 text-xs font-mono text-slate-400">Đảo Sương Mù · Khu Rừng Bí Ẩn</span>
+              <div className="flex items-center gap-2 text-xs font-mono text-amber-400 font-bold">
+                <SunMedium className="w-4 h-4" />
+                <span>ĐỒNG HỒ ĐẢO FOGGO · NGÀY 1 (BAN NGÀY)</span>
               </div>
-              <div className="flex items-center gap-3 font-mono text-xs">
-                <span className="text-amber-400 flex items-center gap-1">
-                  <SunMedium className="w-4 h-4" /> Ngày 1: Ban ngày
-                </span>
-                <span className="text-emerald-400 flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5" /> 100 HP
-                </span>
+              <div className="flex items-center gap-4 text-xs font-mono">
+                <span className="text-rose-400 font-bold">❤️ HP 100/100</span>
+                <span className="text-amber-300 font-bold">🍗 ĐÓI 100/100</span>
+                <span className="text-amber-400 font-bold">🪙 30 XU</span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-              <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-                <div className="text-xs font-bold text-amber-400 uppercase tracking-wider font-mono mb-1">
-                  1. Đi Săn & Hái Lượm
-                </div>
-                <p className="text-xs text-slate-300">
-                  Trả lời câu hỏi trắc nghiệm để gây sát thương lên quái rừng, thu thập gỗ, đá và thức ăn tích trữ cho trại.
+              <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800">
+                <span className="text-2xl mb-2 block">🌲</span>
+                <h4 className="font-bold text-white text-sm">Hái Lượm & Chế Tạo</h4>
+                <p className="text-xs text-slate-400 mt-1">
+                  Trả lời câu hỏi để chặt gỗ rừng, đẽo đá cuội và rèn kiếm săn quái vật.
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-                <div className="text-xs font-bold text-amber-400 uppercase tracking-wider font-mono mb-1">
-                  2. Chế Tạo & Rèn Đồ
-                </div>
-                <p className="text-xs text-slate-300">
-                  Gặp Bác Búa và Cô Túi để ghép vũ khí mới, dựng hàng rào, sửa chữa giáp trước khi màn đêm buông xuống.
+              <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800">
+                <span className="text-2xl mb-2 block">⚔️</span>
+                <h4 className="font-bold text-white text-sm">Săn Thú & Đánh Trùm</h4>
+                <p className="text-xs text-slate-400 mt-1">
+                  Đánh bại Heo Rừng Chúa, Golem Đá và Phù Thủy Đầm Lầy để đoạt kho báu.
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-                <div className="text-xs font-bold text-rose-400 uppercase tracking-wider font-mono mb-1 flex items-center gap-1">
-                  <Moon className="w-3.5 h-3.5" /> 3. Đợt Quái Đêm
-                </div>
-                <p className="text-xs text-slate-300">
-                  Đêm xuống, sương mù dày đặc! Giải nhanh các câu hỏi đặc biệt để thắp sáng đèn lồng đẩy lùi bầy quái vật.
+              <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800">
+                <span className="text-2xl mb-2 block">🌙</span>
+                <h4 className="font-bold text-white text-sm">Sống Sót Qua Đêm</h4>
+                <p className="text-xs text-slate-400 mt-1">
+                  Xây dựng hàng rào và giữ lửa trại rực sáng để đẩy lùi đợt quái đêm.
                 </p>
               </div>
             </div>
@@ -146,7 +152,51 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Feature Grid: 4 điểm khác biệt cốt lõi */}
+      {/* 3 BƯỚC DÀNH CHO GIÁO VIÊN */}
+      <section className="relative z-10 py-16 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-900">
+        <div className="text-center mb-12">
+          <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-widest block mb-2">
+            HƯỚNG DẪN 3 BƯỚC
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight">
+            DỄ DÀNG CHO GIÁO VIÊN TRONG 2 PHÚT
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 text-left space-y-3">
+            <span className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 font-mono font-bold flex items-center justify-center text-sm border border-amber-500/30">
+              1
+            </span>
+            <h3 className="font-bold text-white text-base">Tạo hoặc Nhân Bản Bộ Câu Hỏi</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Tự soạn với 8 dạng câu hỏi tương tác (Hotspot, Ghép cặp, Điền khuyết...) hoặc chọn ngay từ thư viện cộng đồng chỉ với 1 click.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 text-left space-y-3">
+            <span className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 font-mono font-bold flex items-center justify-center text-sm border border-amber-500/30">
+              2
+            </span>
+            <h3 className="font-bold text-white text-base">Mở Thế Giới Không Cần PIN</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Chiếu mã QR lên máy chiếu hoặc gửi link vào nhóm lớp. Học sinh chạm là vào ngay thế giới, tự động lưu nhân vật.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 text-left space-y-3">
+            <span className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 font-mono font-bold flex items-center justify-center text-sm border border-amber-500/30">
+              3
+            </span>
+            <h3 className="font-bold text-white text-base">Theo Dõi & Xuất Báo Cáo</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Xem bảng xếp hạng trực tiếp, thống kê câu hỏi học sinh hay làm sai nhất và xuất dữ liệu điểm số ra file CSV / Excel.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* TÍNH NĂNG NỔI BẬT */}
       <section className="relative z-10 py-16 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-900">
         <div className="text-center mb-14">
           <h2 className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight">
@@ -200,10 +250,72 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* CÂU HỎI THƯỜNG GẶP (FAQ) */}
+      <section className="relative z-10 py-16 px-4 sm:px-6 max-w-4xl mx-auto border-t border-slate-900">
+        <div className="text-center mb-10">
+          <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-widest block mb-2">
+            HỎI ĐÁP
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight">
+            CÂU HỎI THƯỜNG GẶP
+          </h2>
+        </div>
+
+        <div className="space-y-4">
+          <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 text-left">
+            <h4 className="font-bold text-white text-sm mb-1">
+              Học sinh có bắt buộc phải có tài khoản email không?
+            </h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Không. Foggo hỗ trợ đăng ký học sinh hoàn toàn không cần email (chỉ cần tên đăng nhập, mật khẩu, trường và lớp) hoặc tham gia ẩn danh dưới dạng khách.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 text-left">
+            <h4 className="font-bold text-white text-sm mb-1">
+              Học sinh dùng điện thoại chơi có thuận tiện không?
+            </h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Foggo được thiết kế theo tư duy Mobile-First. Tất cả thao tác chiến đấu, chạm điểm yếu trên ảnh (Hotspot) hay kéo thả đều được tối ưu cảm ứng mượt mà trên mọi kích cỡ màn hình.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 text-left">
+            <h4 className="font-bold text-white text-sm mb-1">
+              Tôi có thể tổ chức cho bao nhiêu học sinh cùng chơi một lúc?
+            </h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Gói miễn phí hỗ trợ tối đa 40 học sinh/thế giới. Gói Plus hỗ trợ lên tới 500 học sinh cùng lúc, phù hợp cho quy mô toàn khối hoặc toàn trường.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className="relative z-10 border-t border-slate-900 py-10 px-4 sm:px-6 max-w-6xl mx-auto text-center text-xs text-slate-500">
-        <p className="font-mono">FOGGO © 2026 · Nền tảng học tập qua trò chơi sinh tồn</p>
-        <p className="mt-1">Linh vật chú cáo Gô · "Tan sương, tiến lên!"</p>
+      <footer className="relative z-10 border-t border-slate-900 py-12 px-4 sm:px-6 max-w-6xl mx-auto">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+          <div>
+            <p className="font-mono font-bold text-slate-400">
+              FOGGO © 2026 · Nền tảng học tập qua trò chơi sinh tồn
+            </p>
+            <p className="mt-1">Linh vật chú cáo Gô · "Tan sương, tiến lên!"</p>
+          </div>
+
+          <div className="flex items-center gap-6 font-mono">
+            <Link href="/explore" className="hover:text-amber-400 transition-colors">
+              Khám Phá
+            </Link>
+            <Link href="/pricing" className="hover:text-amber-400 transition-colors">
+              Bảng Giá
+            </Link>
+            <Link href="/terms" className="hover:text-amber-400 transition-colors">
+              Điều Khoản
+            </Link>
+            <Link href="/privacy" className="hover:text-amber-400 transition-colors">
+              Bảo Mật
+            </Link>
+          </div>
+        </div>
       </footer>
     </div>
   );
