@@ -2400,14 +2400,14 @@ Dùng **Vercel Cron** hoặc **Supabase pg_cron** để chạy việc kiểm tra
 - **Kết quả:** học sinh vào thế giới của lớp (hoặc bằng link) và chơi, giáo viên theo dõi được tiến độ.
 
 ### Giai đoạn 4: Các dạng câu hỏi mới (Tuần 11–15) ⭐ *điểm khác biệt*
-- [ ] `multi_select` (và 3 kiểu chấm điểm).
-- [ ] `drag_order` với dnd-kit (hỗ trợ cảm ứng, bàn phím).
-- [ ] `drag_match`.
-- [ ] `drag_fill`.
-- [ ] `hotspot`: trình vẽ vùng cho giáo viên + giao diện click cho người chơi + thuật toán point-in-region.
-- [ ] `true_false_multi`.
-- [ ] Viết unit test cho **tất cả** hàm `grade()`.
-- [ ] Kiểm tra giao diện trên điện thoại (học sinh chủ yếu chơi bằng điện thoại).
+- [x] `multi_select` (và 3 kiểu chấm điểm).
+- [x] `drag_order` với dnd-kit (hỗ trợ cảm ứng, bàn phím).
+- [x] `drag_match`.
+- [x] `drag_fill`.
+- [x] `hotspot`: trình vẽ vùng cho giáo viên + giao diện click cho người chơi + thuật toán point-in-region.
+- [x] `true_false_multi`.
+- [x] Viết unit test cho **tất cả** hàm `grade()`.
+- [x] Kiểm tra giao diện trên điện thoại (học sinh chủ yếu chơi bằng điện thoại).
 - **Kết quả:** đủ các dạng câu hỏi.
 
 ### Giai đoạn 5: Chế độ Sinh tồn tri thức (Tuần 16–25)
