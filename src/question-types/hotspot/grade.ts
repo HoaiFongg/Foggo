@@ -51,3 +51,4 @@ export function gradeHotspot(
 
   return hit ? 1.0 : 0.0;
 }
+

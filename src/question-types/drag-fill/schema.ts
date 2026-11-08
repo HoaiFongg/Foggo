@@ -28,3 +28,4 @@ export type DragFillOption = z.infer<typeof dragFillOptionSchema>;
 export type DragFillContent = z.infer<typeof dragFillContentSchema>;
 export type DragFillAnswerKey = z.infer<typeof dragFillAnswerKeySchema>;
 export type DragFillUserAnswer = z.infer<typeof dragFillUserAnswerSchema>;
+

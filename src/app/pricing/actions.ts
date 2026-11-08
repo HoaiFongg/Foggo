@@ -55,3 +55,4 @@ export async function upgradeToPlus({
     expiresAt: expiresAt.toISOString(),
   };
 }
+

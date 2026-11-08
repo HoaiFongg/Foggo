@@ -66,3 +66,4 @@ export function getSurvivalClock(playSec: number): SurvivalClockInfo {
     formattedTime,
   };
 }
+

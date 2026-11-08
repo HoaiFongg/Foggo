@@ -756,3 +756,4 @@ export function applyRevive(state: SurvivalPlayerState): SurvivalPlayerState {
   nextState.streak = 0;
   return nextState;
 }
+

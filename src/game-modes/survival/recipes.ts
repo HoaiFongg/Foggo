@@ -156,3 +156,4 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
 export function getRecipe(id: string): CraftingRecipe | undefined {
   return CRAFTING_RECIPES.find((r) => r.id === id);
 }
+

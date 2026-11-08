@@ -46,3 +46,4 @@ create policy "Survival events insertable by session participants" on public.sur
 alter table public.profiles
   add column if not exists xp integer not null default 0,
   add column if not exists level integer not null default 1;
+

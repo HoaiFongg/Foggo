@@ -22,3 +22,4 @@ export type DragOrderItem = z.infer<typeof dragOrderItemSchema>;
 export type DragOrderContent = z.infer<typeof dragOrderContentSchema>;
 export type DragOrderAnswerKey = z.infer<typeof dragOrderAnswerKeySchema>;
 export type DragOrderUserAnswer = z.infer<typeof dragOrderUserAnswerSchema>;
+

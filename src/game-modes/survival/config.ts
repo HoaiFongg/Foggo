@@ -73,3 +73,4 @@ export const SURVIVAL_CONFIG = {
     },
   },
 } as const;
+

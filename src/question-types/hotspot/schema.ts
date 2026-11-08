@@ -38,3 +38,4 @@ export type HotspotRegion = z.infer<typeof hotspotRegionSchema>;
 export type HotspotContent = z.infer<typeof hotspotContentSchema>;
 export type HotspotAnswerKey = z.infer<typeof hotspotAnswerKeySchema>;
 export type HotspotUserAnswer = z.infer<typeof hotspotUserAnswerSchema>;
+

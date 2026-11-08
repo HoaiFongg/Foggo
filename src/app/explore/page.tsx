@@ -28,3 +28,4 @@ export default async function ExplorePage() {
 
   return <ExploreClient initialSets={publicSets || []} />;
 }
+

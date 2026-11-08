@@ -334,3 +334,4 @@ export const ITEM_REGISTRY: Record<string, SurvivalItemDef> = {
 export function getItemDef(id: string): SurvivalItemDef | undefined {
   return ITEM_REGISTRY[id];
 }
+

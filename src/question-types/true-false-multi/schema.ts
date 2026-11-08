@@ -27,3 +27,4 @@ export type Statement = z.infer<typeof statementSchema>;
 export type TrueFalseMultiContent = z.infer<typeof trueFalseMultiContentSchema>;
 export type TrueFalseMultiAnswerKey = z.infer<typeof trueFalseMultiAnswerKeySchema>;
 export type TrueFalseMultiUserAnswer = z.infer<typeof trueFalseMultiUserAnswerSchema>;
+

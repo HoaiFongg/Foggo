@@ -25,3 +25,4 @@ export type MatchPair = z.infer<typeof matchPairSchema>;
 export type DragMatchContent = z.infer<typeof dragMatchContentSchema>;
 export type DragMatchAnswerKey = z.infer<typeof dragMatchAnswerKeySchema>;
 export type DragMatchUserAnswer = z.infer<typeof dragMatchUserAnswerSchema>;
+

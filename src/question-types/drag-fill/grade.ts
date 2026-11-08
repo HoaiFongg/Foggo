@@ -25,3 +25,4 @@ export function gradeDragFill(
 
   return Number((correctCount / expectedEntries.length).toFixed(2));
 }
+
