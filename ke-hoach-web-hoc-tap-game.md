@@ -2388,15 +2388,15 @@ Dùng **Vercel Cron** hoặc **Supabase pg_cron** để chạy việc kiểm tra
 
 ### Giai đoạn 3: Thế giới của lớp + realtime (Tuần 7–10)
 > Không dùng mã PIN. Chi tiết ở **mục 5B** và **mục 8**.
-- [ ] API tạo Thế giới (`kind` = class / link / solo): đặt thời gian mở–đóng, luật, sinh `join_token` cho link/QR.
-- [ ] Trang `/j/[token]`, và danh sách "Thế giới của lớp" trên dashboard học sinh; anonymous sign-in cho khách (khi giáo viên cho phép).
-- [ ] `POST /api/world/join`: kiểm tra quyền, tạo/khôi phục nhân vật (`session_players`), đổi link, khóa người chơi.
-- [ ] Kênh Realtime **riêng tư** `world:{id}` + RLS `realtime.messages` (bảng xếp hạng, feed).
-- [ ] Bảng điều khiển giáo viên: người đang online (Presence), tạm dừng/đóng thế giới, đổi link, khóa người chơi.
+- [x] API tạo Thế giới (`kind` = class / link / solo): đặt thời gian mở–đóng, luật, sinh `join_token` cho link/QR.
+- [x] Trang `/j/[token]`, và danh sách "Thế giới của lớp" trên dashboard học sinh; anonymous sign-in cho khách (khi giáo viên cho phép).
+- [x] `POST /api/world/join`: kiểm tra quyền, tạo/khôi phục nhân vật (`session_players`), đổi link, khóa người chơi.
+- [x] Kênh Realtime **riêng tư** `world:{id}` + RLS `realtime.messages` (bảng xếp hạng, feed).
+- [x] Bảng điều khiển giáo viên: người đang online (Presence), tạm dừng/đóng thế giới, đổi link, khóa người chơi.
 - [ ] Vercel Cron: chốt các thế giới đã hết hạn.
-- [ ] Người chơi trả lời → server chấm → cập nhật điểm (làm trước bằng chế độ rất đơn giản để kiểm tra luồng, sau đó thay bằng Sinh tồn ở Giai đoạn 5).
+- [x] Người chơi trả lời → server chấm → cập nhật điểm (làm trước bằng chế độ rất đơn giản để kiểm tra luồng, sau đó thay bằng Sinh tồn ở Giai đoạn 5).
 - [ ] (Tùy chọn) Đấu nhanh (Classic) tối giản, không PIN (mục 8.5).
-- [ ] Xử lý reconnect, đổi thiết bị, người chơi bị khóa.
+- [x] Xử lý reconnect, đổi thiết bị, người chơi bị khóa.
 - **Kết quả:** học sinh vào thế giới của lớp (hoặc bằng link) và chơi, giáo viên theo dõi được tiến độ.
 
 ### Giai đoạn 4: Các dạng câu hỏi mới (Tuần 11–15) ⭐ *điểm khác biệt*
