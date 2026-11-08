@@ -134,7 +134,7 @@ export function ExploreClient({ initialSets, profile = null }: ExploreClientProp
       <NavigationHeader profile={profile} activeItem="explore" />
 
       {/* Main Content */}
-      <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
+      <main className="flex-1 w-full px-4 sm:px-8 lg:px-12 py-8 space-y-6">
         {/* Search & Filters */}
         <div className="space-y-3">
           <div className="relative">
@@ -144,20 +144,20 @@ export function ExploreClient({ initialSets, profile = null }: ExploreClientProp
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Tìm kiếm theo chủ đề, tên bài học, môn học..."
-              className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 font-sans text-sm"
+              className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 font-sans text-sm"
             />
           </div>
 
           {/* Subject Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto py-1 no-scrollbar text-xs font-mono font-bold">
+          <div className="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar text-xs font-mono">
             {SUBJECT_FILTERS.map((subj) => (
               <button
                 key={subj}
                 type="button"
                 onClick={() => setSelectedSubject(subj)}
-                className={`px-3 py-1.5 rounded-xl whitespace-nowrap transition-all cursor-pointer ${
+                className={`px-3 py-1 rounded-lg whitespace-nowrap transition-all cursor-pointer ${
                   selectedSubject === subj
-                    ? "bg-amber-500 text-slate-950 shadow-sm"
+                    ? "bg-amber-500 text-slate-950 font-bold"
                     : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"
                 }`}
               >
@@ -167,8 +167,8 @@ export function ExploreClient({ initialSets, profile = null }: ExploreClientProp
           </div>
         </div>
 
-        {/* Lưới danh sách bộ câu hỏi */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        {/* Lưới danh sách bộ câu hỏi dàn trải rộng rãi */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {displaySets.map((s) => (
             <div
               key={s.id}

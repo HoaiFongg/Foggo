@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Compass, Flame, Play, Trophy, Users, PlusCircle, Settings, Crown, ExternalLink, ShieldAlert } from "lucide-react";
+import { Compass, Flame, Play, Plus, Settings, Crown, ShieldAlert } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getOptionalUser } from "@/lib/auth";
 import { NavigationHeader } from "@/components/NavigationHeader";
@@ -20,7 +20,6 @@ export default async function WorldsPage() {
   let joinedWorlds: any[] = [];
 
   if (user) {
-    // 1. Nếu là Teacher hoặc Admin: Lấy danh sách thế giới do chính mình tạo
     if (isTeacherOrAdmin) {
       const { data: hosted } = await supabase
         .from("game_sessions")
@@ -31,7 +30,6 @@ export default async function WorldsPage() {
       myManagedWorlds = hosted || [];
     }
 
-    // 2. Nếu là Admin: Lấy danh sách toàn bộ các phòng trên hệ thống
     if (isAdmin) {
       const { data: allSessions } = await supabase
         .from("game_sessions")
@@ -42,7 +40,6 @@ export default async function WorldsPage() {
       allSystemWorlds = allSessions || [];
     }
 
-    // 3. Lấy các thế giới mà user này đã tham gia với tư cách người chơi
     const { data: players } = await supabase
       .from("session_players")
       .select("*, game_sessions(*)")
@@ -59,126 +56,116 @@ export default async function WorldsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-amber-500/30">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       <NavigationHeader profile={profile} activeItem="worlds" />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      {/* Main Container - Dàn trải đều toàn màn hình */}
+      <main className="flex-1 w-full px-4 sm:px-8 lg:px-12 py-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800/80 mb-8">
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-black text-white font-sans flex items-center gap-2.5">
-                <Compass className="w-6 h-6 text-amber-400" />
-                <span>Hầm Ngục & Thế Giới Sinh Tồn</span>
+            <div className="flex items-center gap-2 mb-1">
+              <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                Hầm ngục sinh tồn
               </h1>
               {isAdmin && (
-                <span className="px-2 py-0.5 rounded bg-rose-500/20 border border-rose-500/40 text-rose-300 font-mono text-[10px] font-bold">
-                  Quyền Quản Trị
+                <span className="px-2 py-0.5 rounded bg-rose-500/15 border border-rose-500/30 text-rose-300 font-mono text-[10px] font-semibold">
+                  Admin
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-400 mt-1">
-              Quản lý các phòng chơi thế giới, điều khiển sương mù và giám sát lớp học
+            <p className="text-xs text-slate-400">
+              Quản lý các phòng chơi, kiểm soát sương mù và giám sát tiến trình học sinh.
             </p>
           </div>
 
           {isTeacherOrAdmin && (
             <Link
               href="/teacher/worlds/new"
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-amber-500/20 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all"
             >
-              <PlusCircle className="w-4 h-4" />
-              <span>Mở Hầm Ngục Mới</span>
+              <Plus className="w-3.5 h-3.5" />
+              <span>Mở hầm ngục mới</span>
             </Link>
           )}
         </div>
 
-        {/* Section 1: Hầm Ngục Do Bạn Quản Lý (Giáo viên / Admin) */}
+        {/* Section 1: Hầm ngục do bạn quản lý */}
         {isTeacherOrAdmin && (
-          <div className="mb-12">
-            <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <span>Hầm ngục do bạn khởi tạo</span>
-              <span className="text-xs font-mono text-amber-400">({myManagedWorlds.length})</span>
+          <div className="mb-10">
+            <h2 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4">
+              Hầm ngục của bạn ({myManagedWorlds.length})
             </h2>
 
             {myManagedWorlds.length === 0 ? (
-              <div className="p-8 rounded-3xl bg-slate-900/40 border border-dashed border-slate-800 text-center max-w-md mx-auto my-6">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mx-auto mb-3">
-                  <Flame className="w-6 h-6" />
-                </div>
-                <h3 className="text-sm font-bold text-white mb-1">Chưa mở hầm ngục nào</h3>
+              <div className="p-8 rounded-2xl bg-slate-900/40 border border-slate-800 text-center max-w-sm mx-auto my-6">
+                <Flame className="w-6 h-6 text-slate-500 mx-auto mb-2" />
+                <h3 className="text-sm font-semibold text-white mb-1">Chưa có hầm ngục nào</h3>
                 <p className="text-xs text-slate-400 mb-4">
-                  Bấm nút bên dưới để chọn một bộ câu hỏi và khởi tạo thế giới cho học sinh vào chơi!
+                  Bấm nút bên dưới để chọn bộ đề và mở phòng cho học sinh vào chơi.
                 </p>
                 <Link
                   href="/teacher/worlds/new"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition-all hover:scale-105"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs"
                 >
-                  <PlusCircle className="w-4 h-4" />
-                  <span>Khởi tạo hầm ngục đầu tiên</span>
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Mở phòng</span>
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {myManagedWorlds.map((w) => {
                   const playerCount = w.session_players?.[0]?.count ?? 0;
-                  const setName = w.question_sets?.title || "Không chọn bộ đề";
+                  const setName = w.question_sets?.title || "Tổng hợp";
 
                   return (
                     <div
                       key={w.id}
-                      className="bg-slate-900/80 border border-slate-800 hover:border-amber-500/40 rounded-3xl p-6 transition-all shadow-xl flex flex-col justify-between group"
+                      className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between group"
                     >
                       <div>
-                        <div className="flex items-center justify-between gap-2 mb-3">
+                        <div className="flex items-center justify-between gap-2 mb-2.5">
                           <span
-                            className={`text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-md border ${
+                            className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded ${
                               w.status === "open"
-                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                                : w.status === "paused"
-                                ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                                : "bg-slate-800 text-slate-400 border-slate-700"
+                                ? "bg-emerald-500/10 text-emerald-400"
+                                : "bg-slate-800 text-slate-400"
                             }`}
                           >
-                            {w.status === "open"
-                              ? "Đang Mở"
-                              : w.status === "paused"
-                              ? "Tạm Dừng"
-                              : "Đã Đóng"}
+                            {w.status === "open" ? "Đang mở" : "Đã đóng"}
                           </span>
-
-                          <span className="text-xs font-mono text-slate-400">
+                          <span className="text-[11px] font-mono text-slate-500">
                             {w.mode === "survival" ? "Sinh tồn" : "Tự do"}
                           </span>
                         </div>
 
-                        <h3 className="text-base font-bold text-white mb-1 group-hover:text-amber-300 transition-colors">
+                        <h3 className="text-sm font-bold text-white mb-1 line-clamp-1 group-hover:text-amber-400 transition-colors">
                           {w.title}
                         </h3>
 
                         <p className="text-xs text-slate-400 mb-3 line-clamp-1">
-                          Bộ đề: <strong className="text-slate-300">{setName}</strong>
+                          Đề: <span className="text-slate-300">{setName}</span>
                         </p>
 
-                        <div className="flex items-center gap-3 text-xs font-mono text-slate-400 mb-4">
+                        <div className="text-[11px] font-mono text-slate-400 mb-4">
                           <span>{playerCount} người chơi</span>
-                          <span>·</span>
-                          <span>Mã Token: <code className="text-amber-400 font-bold">{w.join_token || "Không có"}</code></span>
+                          <span> · Mã: </span>
+                          <span className="text-amber-400 font-bold">{w.join_token || "—"}</span>
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t border-slate-800 flex items-center gap-2">
+                      <div className="pt-3 border-t border-slate-800 flex items-center gap-2">
                         <Link
                           href={`/teacher/worlds/${w.id}`}
-                          className="flex-1 py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-colors"
+                          className="flex-1 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
                         >
                           <Settings className="w-3.5 h-3.5" />
-                          <span>Bảng Điều Khiển</span>
+                          <span>Điều khiển</span>
                         </Link>
 
                         <Link
                           href={`/world/${w.id}`}
-                          title="Chơi thử giao diện học sinh"
-                          className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center transition-colors"
+                          title="Chơi thử"
+                          className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
                         >
                           <Play className="w-3.5 h-3.5" />
                         </Link>
@@ -191,16 +178,15 @@ export default async function WorldsPage() {
           </div>
         )}
 
-        {/* Section 2: Toàn Bộ Hầm Ngục Hệ Thống (Dành Riêng Cho Admin) */}
+        {/* Section 2: Hầm ngục hệ thống (Chỉ Admin) */}
         {isAdmin && allSystemWorlds.length > 0 && (
-          <div className="mb-12 pt-8 border-t border-slate-800">
-            <h2 className="text-sm font-bold text-rose-300 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <Crown className="w-4 h-4 text-amber-400" />
-              <span>Tất cả hầm ngục của giáo viên khác (Quyền Quản Trị Tối Cao)</span>
-              <span className="text-xs font-mono text-rose-400">({allSystemWorlds.length})</span>
+          <div className="mb-10 pt-8 border-t border-slate-800/80">
+            <h2 className="text-xs font-bold text-rose-300 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+              <Crown className="w-3.5 h-3.5" />
+              <span>Hầm ngục của giáo viên khác ({allSystemWorlds.length})</span>
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {allSystemWorlds.map((w) => {
                 const playerCount = w.session_players?.[0]?.count ?? 0;
                 const hostName = w.profiles?.display_name || "Giáo viên";
@@ -208,32 +194,29 @@ export default async function WorldsPage() {
                 return (
                   <div
                     key={w.id}
-                    className="bg-slate-900/40 border border-slate-800/80 hover:border-rose-500/30 rounded-3xl p-6 transition-all flex flex-col justify-between"
+                    className="p-5 rounded-2xl bg-slate-900/30 border border-slate-800/80 hover:border-rose-500/30 transition-all flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between gap-2 mb-3">
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-rose-300">
-                          Chủ phòng: {hostName}
+                      <div className="flex items-center justify-between gap-2 mb-2.5">
+                        <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-rose-300 truncate max-w-[120px]">
+                          {hostName}
                         </span>
-                        <span className="text-xs font-mono text-slate-400">
+                        <span className="text-[10px] font-mono text-slate-500">
                           {w.status}
                         </span>
                       </div>
 
-                      <h3 className="text-base font-bold text-white mb-2">{w.title}</h3>
-
-                      <div className="text-xs font-mono text-slate-400 mb-4">
-                        <span>{playerCount} học sinh đang kết nối</span>
-                      </div>
+                      <h3 className="text-sm font-bold text-white mb-2 line-clamp-1">{w.title}</h3>
+                      <p className="text-xs text-slate-400 font-mono mb-4">{playerCount} học sinh</p>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-800">
+                    <div className="pt-3 border-t border-slate-800">
                       <Link
                         href={`/teacher/worlds/${w.id}`}
-                        className="w-full py-2 px-3 rounded-xl bg-rose-500/15 hover:bg-rose-500 text-rose-300 hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors border border-rose-500/30"
+                        className="w-full py-1.5 px-3 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors border border-rose-500/20"
                       >
                         <ShieldAlert className="w-3.5 h-3.5" />
-                        <span>Quản Trị Phòng Này</span>
+                        <span>Quản trị phòng</span>
                       </Link>
                     </div>
                   </div>
@@ -243,25 +226,21 @@ export default async function WorldsPage() {
           </div>
         )}
 
-        {/* Section 3: Thế Giới Đã Tham Gia (Chơi dưới dạng Nhân Vật / Học Sinh) */}
+        {/* Section 3: Thế giới đã tham gia */}
         <div>
-          <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span>Hòn đảo sinh tồn bạn đang chơi</span>
-            <span className="text-xs font-mono text-emerald-400">({joinedWorlds.length})</span>
+          <h2 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4">
+            Đảo bạn đang chơi ({joinedWorlds.length})
           </h2>
 
           {joinedWorlds.length === 0 ? (
-            <div className="p-8 rounded-3xl bg-slate-900/40 border border-dashed border-slate-800 text-center max-w-md mx-auto my-6">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mx-auto mb-3">
-                <Compass className="w-6 h-6" />
-              </div>
-              <h3 className="text-sm font-bold text-white mb-1">Chưa tham gia thế giới nào</h3>
+            <div className="p-8 rounded-2xl bg-slate-900/40 border border-slate-800 text-center max-w-sm mx-auto my-6">
+              <Compass className="w-6 h-6 text-slate-500 mx-auto mb-2" />
               <p className="text-xs text-slate-400">
-                Hãy mở một hầm ngục mới hoặc nhập mã liên kết từ giáo viên để vào đảo sinh tồn!
+                Chưa tham gia thế giới nào. Nhập link hoặc mở hầm ngục mới để chơi!
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {joinedWorlds.map((w) => {
                 const session = w.session;
                 if (!session) return null;
@@ -269,36 +248,29 @@ export default async function WorldsPage() {
                 return (
                   <div
                     key={w.playerId}
-                    className="bg-slate-900/80 border border-slate-800 hover:border-emerald-500/40 rounded-3xl p-6 transition-all shadow-xl flex flex-col justify-between"
+                    className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between gap-2 mb-3">
-                        <span className="text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          {session.status === "open" ? "Đang mở" : "Đã đóng"}
+                      <div className="flex items-center justify-between gap-2 mb-2.5">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">
+                          {session.status === "open" ? "Mở" : "Đóng"}
                         </span>
                         <span className="text-xs font-mono text-slate-400">
-                          {session.mode === "survival" ? "Sinh tồn" : "Tự do"}
+                          {w.hp} HP · {w.gold} xu
                         </span>
                       </div>
 
-                      <h3 className="text-lg font-bold text-white mb-2">{session.title}</h3>
-
-                      <div className="flex items-center gap-4 text-xs font-mono text-slate-400 mb-4">
-                        <span>Máu: <strong className="text-rose-400">{w.hp} HP</strong></span>
-                        <span>·</span>
-                        <span>Xu: <strong className="text-amber-400">{w.gold}</strong></span>
-                        <span>·</span>
-                        <span>Điểm: <strong className="text-emerald-400">{w.score}</strong></span>
-                      </div>
+                      <h3 className="text-sm font-bold text-white mb-2 line-clamp-1">{session.title}</h3>
+                      <p className="text-xs font-mono text-emerald-400 mb-4">{w.score} điểm</p>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-800">
+                    <div className="pt-3 border-t border-slate-800">
                       <Link
                         href={`/world/${session.id}`}
-                        className="w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95"
+                        className="w-full py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
                       >
-                        <Play className="w-4 h-4 fill-slate-950" />
-                        <span>Tiếp tục cuộc hành trình trên Đảo</span>
+                        <Play className="w-3.5 h-3.5 fill-slate-950" />
+                        <span>Vào chơi</span>
                       </Link>
                     </div>
                   </div>

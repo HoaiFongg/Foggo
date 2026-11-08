@@ -120,21 +120,20 @@ export function AdminClient({
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-16">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 lg:px-12 py-3">
+        <div className="w-full flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href="/dashboard"
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
-                <Crown className="w-3.5 h-3.5" />
-                FOGGO ADMIN PORTAL
-              </span>
-              <h1 className="text-base font-black text-white">Quản Trị Hệ Thống</h1>
+              <div className="flex items-center gap-1.5">
+                <Crown className="w-3.5 h-3.5 text-rose-400" />
+                <h1 className="text-sm font-bold text-white">Quản Trị Hệ Thống</h1>
+              </div>
             </div>
           </div>
 
@@ -146,8 +145,8 @@ export function AdminClient({
         </div>
       </header>
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-8">
+      {/* Main Container - Dàn trải đều */}
+      <main className="flex-1 w-full px-4 sm:px-8 lg:px-12 py-6 space-y-6">
         {/* Metrics Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-1">
