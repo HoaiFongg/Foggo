@@ -1,5 +1,5 @@
 export const INTERNAL_EMAIL_DOMAIN =
-  process.env.INTERNAL_EMAIL_DOMAIN || "accounts.foggo.local";
+  process.env.INTERNAL_EMAIL_DOMAIN || "student.foggo.vn";
 
 export function toInternalEmail(username: string): string {
   return `${username.trim().toLowerCase()}@${INTERNAL_EMAIL_DOMAIN}`;

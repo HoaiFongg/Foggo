@@ -124,6 +124,11 @@ export async function registerStudent(input: {
   });
 
   if (createError || !authData.user) {
+    if (createError?.message?.includes("Bearer") || createError?.message?.includes("token")) {
+      return {
+        error: "Chức năng đăng ký học sinh không cần email yêu cầu SUPABASE_SERVICE_ROLE_KEY (secret key) trong .env.local. Vui lòng lấy mã service_role trong Supabase Dashboard > Project Settings > API.",
+      };
+    }
     return { error: createError?.message || "Không thể khởi tạo tài khoản" };
   }
 
