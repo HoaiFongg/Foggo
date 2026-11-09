@@ -74,39 +74,44 @@ export function WorldClient({
   // Bộ lọc cửa hàng / Thợ rèn
   const [shopTab, setShopTab] = useState<"all" | "weapons" | "defense" | "consumables">("all");
 
-  // State người chơi
-  const [playerState, setPlayerState] = useState<SurvivalPlayerState>(
-    initialPlayer.state && Object.keys(initialPlayer.state).length > 3
-      ? initialPlayer.state
-      : {
-          hp: 100,
-          maxHp: 100,
-          hunger: 100,
-          maxHunger: 100,
-          coins: initialPlayer.gold || 30,
-          score: initialPlayer.score || 0,
-          playSec: 0,
-          lastTickTimestamp: Math.floor(Date.now() / 1000),
-          streak: 0,
-          currentZone: "forest",
-          fog: { forest: 100, cave: 100, swamp: 100 },
-          revealedPoints: [],
-          camp: { level: 1, hp: 100, maxHp: 100, hasCampfire: false, barricades: 0 },
-          equipped: {
-            weapon: { itemId: "wooden_club", durability: 40, enhancedLevel: 0 },
-          },
-          inventory: [
-            { slotIndex: 0, itemId: "apple", qty: 3 },
-            { slotIndex: 1, itemId: "wood", qty: 5 },
+  // State người chơi - Đảm bảo luôn khởi tạo an toàn, không bao giờ crash nếu DB cũ thiếu trường
+  const [playerState, setPlayerState] = useState<SurvivalPlayerState>(() => {
+    const raw =
+      initialPlayer.state && typeof initialPlayer.state === "object" ? initialPlayer.state : {};
+    return {
+      hp: typeof raw.hp === "number" ? raw.hp : 100,
+      maxHp: typeof raw.maxHp === "number" ? raw.maxHp : 100,
+      hunger: typeof raw.hunger === "number" ? raw.hunger : 100,
+      maxHunger: typeof raw.maxHunger === "number" ? raw.maxHunger : 100,
+      coins: typeof raw.coins === "number" ? raw.coins : initialPlayer.gold || 30,
+      score: typeof raw.score === "number" ? raw.score : initialPlayer.score || 0,
+      playSec: raw.playSec ?? 0,
+      lastTickTimestamp: raw.lastTickTimestamp ?? Math.floor(Date.now() / 1000),
+      streak: raw.streak ?? 0,
+      currentZone: raw.currentZone ?? "forest",
+      fog: raw.fog ?? { forest: 100, cave: 100, swamp: 100 },
+      revealedPoints: Array.isArray(raw.revealedPoints) ? raw.revealedPoints : [],
+      camp: raw.camp ?? { level: 1, hp: 100, maxHp: 100, hasCampfire: false, barricades: 0 },
+      equipped:
+        raw.equipped && typeof raw.equipped === "object"
+          ? raw.equipped
+          : {
+              weapon: { itemId: "wooden_club", durability: 35, enhancedLevel: 0 },
+            },
+      inventory: Array.isArray(raw.inventory)
+        ? raw.inventory
+        : [
+            { slotIndex: 0, itemId: "wooden_club", qty: 1, durability: 35 },
+            { slotIndex: 1, itemId: "apple", qty: 3 },
             { slotIndex: 2, itemId: "bandage", qty: 1 },
           ],
-          monstersKilled: 0,
-          bossesKilled: 0,
-          deaths: 0,
-          nightWavesSurvived: 0,
-          currentBattle: null,
-        }
-  );
+      monstersKilled: raw.monstersKilled ?? 0,
+      bossesKilled: raw.bossesKilled ?? 0,
+      deaths: raw.deaths ?? 0,
+      nightWavesSurvived: raw.nightWavesSurvived ?? 0,
+      currentBattle: raw.currentBattle ?? null,
+    };
+  });
 
   // Câu hỏi hiện tại
   const [currentQIndex, setCurrentQIndex] = useState(0);
@@ -772,14 +777,14 @@ export function WorldClient({
                     <div>
                       <span className="text-[9px] font-mono uppercase text-slate-400 block">Vũ khí</span>
                       <h4 className="font-bold text-xs text-white truncate max-w-[140px]">
-                        {playerState.equipped.weapon
+                        {playerState.equipped?.weapon
                           ? getItemDef(playerState.equipped.weapon.itemId)?.name
                           : "Chưa trang bị"}
-                        {playerState.equipped.weapon?.enhancedLevel
+                        {playerState.equipped?.weapon?.enhancedLevel
                           ? ` +${playerState.equipped.weapon.enhancedLevel}`
                           : ""}
                       </h4>
-                      {playerState.equipped.weapon && (
+                      {playerState.equipped?.weapon && (
                         <span className="text-[10px] font-mono text-amber-300 block">
                           +
                           {(getItemDef(playerState.equipped.weapon.itemId)?.atk || 0) +
@@ -789,18 +794,18 @@ export function WorldClient({
                       )}
                     </div>
                   </div>
-                  {playerState.equipped.weapon && (
+                  {playerState.equipped?.weapon && (
                     <div className="flex items-center gap-1.5 mt-3 pt-2 border-t border-slate-900">
                       <button
                         type="button"
-                        onClick={() => handleBlacksmith("repair", playerState.equipped.weapon!.itemId)}
+                        onClick={() => handleBlacksmith("repair", playerState.equipped!.weapon!.itemId)}
                         className="flex-1 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-all cursor-pointer"
                       >
                         Sửa
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleBlacksmith("enhance", playerState.equipped.weapon!.itemId)}
+                        onClick={() => handleBlacksmith("enhance", playerState.equipped!.weapon!.itemId)}
                         className="flex-1 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-[10px] font-mono font-bold text-slate-950 transition-all cursor-pointer"
                       >
                         Cường hóa (+4)
@@ -816,11 +821,11 @@ export function WorldClient({
                     <div>
                       <span className="text-[9px] font-mono uppercase text-slate-400 block">Mũ bảo hộ</span>
                       <h4 className="font-bold text-xs text-white truncate max-w-[140px]">
-                        {playerState.equipped.helmet
+                        {playerState.equipped?.helmet
                           ? getItemDef(playerState.equipped.helmet.itemId)?.name
                           : "Chưa trang bị"}
                       </h4>
-                      {playerState.equipped.helmet && (
+                      {playerState.equipped?.helmet && (
                         <span className="text-[10px] font-mono text-emerald-300 block">
                           -
                           {Math.round(
@@ -831,11 +836,11 @@ export function WorldClient({
                       )}
                     </div>
                   </div>
-                  {playerState.equipped.helmet && (
+                  {playerState.equipped?.helmet && (
                     <div className="mt-3 pt-2 border-t border-slate-900">
                       <button
                         type="button"
-                        onClick={() => handleBlacksmith("repair", playerState.equipped.helmet!.itemId)}
+                        onClick={() => handleBlacksmith("repair", playerState.equipped!.helmet!.itemId)}
                         className="w-full py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-all cursor-pointer"
                       >
                         Sửa chữa
@@ -851,11 +856,11 @@ export function WorldClient({
                     <div>
                       <span className="text-[9px] font-mono uppercase text-slate-400 block">Áo giáp</span>
                       <h4 className="font-bold text-xs text-white truncate max-w-[140px]">
-                        {playerState.equipped.armor
+                        {playerState.equipped?.armor
                           ? getItemDef(playerState.equipped.armor.itemId)?.name
                           : "Chưa trang bị"}
                       </h4>
-                      {playerState.equipped.armor && (
+                      {playerState.equipped?.armor && (
                         <span className="text-[10px] font-mono text-emerald-300 block">
                           -
                           {Math.round(
@@ -866,11 +871,11 @@ export function WorldClient({
                       )}
                     </div>
                   </div>
-                  {playerState.equipped.armor && (
+                  {playerState.equipped?.armor && (
                     <div className="mt-3 pt-2 border-t border-slate-900">
                       <button
                         type="button"
-                        onClick={() => handleBlacksmith("repair", playerState.equipped.armor!.itemId)}
+                        onClick={() => handleBlacksmith("repair", playerState.equipped!.armor!.itemId)}
                         className="w-full py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-all cursor-pointer"
                       >
                         Sửa chữa
@@ -886,11 +891,11 @@ export function WorldClient({
                     <div>
                       <span className="text-[9px] font-mono uppercase text-slate-400 block">Khiên chắn</span>
                       <h4 className="font-bold text-xs text-white truncate max-w-[140px]">
-                        {playerState.equipped.shield
+                        {playerState.equipped?.shield
                           ? getItemDef(playerState.equipped.shield.itemId)?.name
                           : "Chưa trang bị"}
                       </h4>
-                      {playerState.equipped.shield && (
+                      {playerState.equipped?.shield && (
                         <span className="text-[10px] font-mono text-emerald-300 block">
                           -
                           {Math.round(
@@ -901,11 +906,11 @@ export function WorldClient({
                       )}
                     </div>
                   </div>
-                  {playerState.equipped.shield && (
+                  {playerState.equipped?.shield && (
                     <div className="mt-3 pt-2 border-t border-slate-900">
                       <button
                         type="button"
-                        onClick={() => handleBlacksmith("repair", playerState.equipped.shield!.itemId)}
+                        onClick={() => handleBlacksmith("repair", playerState.equipped!.shield!.itemId)}
                         className="w-full py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-all cursor-pointer"
                       >
                         Sửa chữa

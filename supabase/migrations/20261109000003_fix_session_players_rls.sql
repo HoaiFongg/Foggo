@@ -18,3 +18,4 @@ create policy "Players can update own session" on public.session_players
 drop policy if exists "Players can delete own session" on public.session_players;
 create policy "Players can delete own session" on public.session_players
   for delete using (true);
+

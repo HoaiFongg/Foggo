@@ -290,10 +290,11 @@ export function applyHunt(
 
   if (isSuccess) {
     // === TẤN CÔNG THÀNH CÔNG ===
-    const weaponAtk = nextState.equipped.weapon?.durability && nextState.equipped.weapon.durability > 0
-      ? (ITEM_REGISTRY[nextState.equipped.weapon.itemId]?.atk || 0) +
-      (nextState.equipped.weapon.enhancedLevel || 0) * 4
-      : 0;
+    const weaponAtk =
+      nextState.equipped?.weapon?.durability && nextState.equipped.weapon.durability > 0
+        ? (ITEM_REGISTRY[nextState.equipped.weapon.itemId]?.atk || 0) +
+          (nextState.equipped.weapon.enhancedLevel || 0) * 4
+        : 0;
 
     const baseAtk = SURVIVAL_CONFIG.BASE_ATK + weaponAtk;
     const streakBonus = 1 + Math.min(10, nextState.streak) * 0.08;
@@ -303,16 +304,17 @@ export function applyHunt(
     currentHp = Math.max(0, currentHp - damageDealt);
 
     // Hao mòn vũ khí
-    if (nextState.equipped.weapon && nextState.equipped.weapon.durability > 0) {
+    if (nextState.equipped?.weapon && nextState.equipped.weapon.durability > 0) {
       nextState.equipped.weapon.durability = Math.max(0, nextState.equipped.weapon.durability - 1);
     }
 
     nextState.streak += 1;
 
     if (currentHp <= 0) {
-      // Quái vật bị tiêu diệt!
-      const nightCoinMult = !clock.isDay ? (1 + SURVIVAL_CONFIG.NIGHT_REWARD_BONUS_RATIO) : 1.0;
-      const baseCoinRoll = Math.floor(Math.random() * (monster.maxCoins - monster.minCoins + 1)) + monster.minCoins;
+      // Quái vật bị tiêu diệt! (Người chơi kết liễu thành công)
+      const nightCoinMult = !clock.isDay ? 1 + SURVIVAL_CONFIG.NIGHT_REWARD_BONUS_RATIO : 1.0;
+      const baseCoinRoll =
+        Math.floor(Math.random() * (monster.maxCoins - monster.minCoins + 1)) + monster.minCoins;
       const coinsAwarded = Math.round(baseCoinRoll * nightCoinMult);
 
       const lootAwarded = resolveLoot(monster.lootTable);
@@ -351,7 +353,52 @@ export function applyHunt(
         scoreAwarded,
       };
     } else {
-      // Quái còn sống, tiếp tục trận đấu
+      // === QUÁI CÒN SỐNG: ĐẾN LƯỢT QUÁI TẤN CÔNG PHẢN ĐÒN ===
+      const armorDef =
+        nextState.equipped?.armor?.durability && nextState.equipped.armor.durability > 0
+          ? (ITEM_REGISTRY[nextState.equipped.armor.itemId]?.defensePct || 0)
+          : 0;
+      const helmetDef =
+        nextState.equipped?.helmet?.durability && nextState.equipped.helmet.durability > 0
+          ? (ITEM_REGISTRY[nextState.equipped.helmet.itemId]?.defensePct || 0)
+          : 0;
+      const shieldDef =
+        nextState.equipped?.shield?.durability && nextState.equipped.shield.durability > 0
+          ? (ITEM_REGISTRY[nextState.equipped.shield.itemId]?.defensePct || 0)
+          : 0;
+
+      const totalDefPct = Math.min(0.60, armorDef + helmetDef + shieldDef);
+      const damageTaken = Math.max(1, Math.round(monster.atk * (1 - totalDefPct)));
+      nextState.hp = Math.max(0, nextState.hp - damageTaken);
+
+      // Hao mòn trang bị phòng thủ khi bị quái đánh trả
+      if (nextState.equipped?.armor && nextState.equipped.armor.durability > 0) {
+        nextState.equipped.armor.durability = Math.max(0, nextState.equipped.armor.durability - 1);
+      }
+      if (nextState.equipped?.helmet && nextState.equipped.helmet.durability > 0) {
+        nextState.equipped.helmet.durability = Math.max(0, nextState.equipped.helmet.durability - 1);
+      }
+      if (nextState.equipped?.shield && nextState.equipped.shield.durability > 0) {
+        nextState.equipped.shield.durability = Math.max(0, nextState.equipped.shield.durability - 1);
+      }
+
+      if (nextState.hp <= 0) {
+        nextState.hp = 0;
+        nextState.deaths += 1;
+        nextState.currentBattle = null;
+
+        return {
+          state: nextState,
+          result: "death",
+          damageDealt,
+          damageTaken,
+          lootAwarded: [],
+          coinsAwarded: 0,
+          scoreAwarded: 0,
+        };
+      }
+
+      // Quái còn sống, tiếp tục hiệp đấu tiếp theo
       nextState.currentBattle = {
         monsterId,
         monsterHp: currentHp,
@@ -363,7 +410,7 @@ export function applyHunt(
         state: nextState,
         result: "hit",
         damageDealt,
-        damageTaken: 0,
+        damageTaken,
         lootAwarded: [],
         coinsAwarded: 0,
         scoreAwarded: 100,
@@ -375,15 +422,15 @@ export function applyHunt(
 
     // Tính tổng chỉ số phòng thủ từ Giáp, Mũ và Khiên (cân bằng, tối đa 60% giảm sát thương)
     const armorDef =
-      nextState.equipped.armor?.durability && nextState.equipped.armor.durability > 0
+      nextState.equipped?.armor?.durability && nextState.equipped.armor.durability > 0
         ? (ITEM_REGISTRY[nextState.equipped.armor.itemId]?.defensePct || 0)
         : 0;
     const helmetDef =
-      nextState.equipped.helmet?.durability && nextState.equipped.helmet.durability > 0
+      nextState.equipped?.helmet?.durability && nextState.equipped.helmet.durability > 0
         ? (ITEM_REGISTRY[nextState.equipped.helmet.itemId]?.defensePct || 0)
         : 0;
     const shieldDef =
-      nextState.equipped.shield?.durability && nextState.equipped.shield.durability > 0
+      nextState.equipped?.shield?.durability && nextState.equipped.shield.durability > 0
         ? (ITEM_REGISTRY[nextState.equipped.shield.itemId]?.defensePct || 0)
         : 0;
 
@@ -392,13 +439,13 @@ export function applyHunt(
     nextState.hp = Math.max(0, nextState.hp - damageTaken);
 
     // Hao mòn trang bị phòng thủ khi bị đánh
-    if (nextState.equipped.armor && nextState.equipped.armor.durability > 0) {
+    if (nextState.equipped?.armor && nextState.equipped.armor.durability > 0) {
       nextState.equipped.armor.durability = Math.max(0, nextState.equipped.armor.durability - 1);
     }
-    if (nextState.equipped.helmet && nextState.equipped.helmet.durability > 0) {
+    if (nextState.equipped?.helmet && nextState.equipped.helmet.durability > 0) {
       nextState.equipped.helmet.durability = Math.max(0, nextState.equipped.helmet.durability - 1);
     }
-    if (nextState.equipped.shield && nextState.equipped.shield.durability > 0) {
+    if (nextState.equipped?.shield && nextState.equipped.shield.durability > 0) {
       nextState.equipped.shield.durability = Math.max(0, nextState.equipped.shield.durability - 1);
     }
 

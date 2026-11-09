@@ -50,7 +50,8 @@ export async function submitSurvivalAction({
   }
 
   // 1. Tải câu hỏi từ database (đáp án đúng answer_key CHỈ nằm ở server)
-  const { data: question } = await supabase
+  const adminClient = createAdminClient();
+  const { data: question } = await adminClient
     .from("questions")
     .select("id, type, answer_key, points, explanation")
     .eq("id", questionId)
@@ -96,9 +97,12 @@ export async function submitSurvivalAction({
     huntResult = applyHunt(state, targetId, scoreRatio, isHotspotCritical, timeUsedSec);
     state = huntResult.state;
     if (huntResult.result === "kill") {
-      message = `Hạ gục quái vật! Nhận được ${huntResult.coinsAwarded} xu và ${huntResult.scoreAwarded} điểm.`;
+      message = `Hạ gục quái vật! Bạn ra đòn gây ${huntResult.damageDealt} sát thương kết liễu. Nhận được ${huntResult.coinsAwarded} xu và ${huntResult.scoreAwarded} điểm.`;
     } else if (huntResult.result === "hit") {
-      message = `Tấn công trúng! Gây ${huntResult.damageDealt} sát thương.`;
+      message =
+        huntResult.damageTaken > 0
+          ? `Tấn công trúng! Bạn gây ${huntResult.damageDealt} sát thương. Đến lượt quái phản công gây ${huntResult.damageTaken} sát thương!`
+          : `Tấn công trúng! Gây ${huntResult.damageDealt} sát thương.`;
     } else if (huntResult.result === "death") {
       message = "Bạn đã bị quái vật đánh gục! Hãy hồi sinh tại lửa trại.";
     } else {
@@ -127,7 +131,6 @@ export async function submitSurvivalAction({
   }
 
   // 4. Lưu lượt trả lời vào session_answers bằng adminClient
-  const adminClient = createAdminClient();
   await adminClient.from("session_answers").upsert(
     {
       session_id: sessionId,

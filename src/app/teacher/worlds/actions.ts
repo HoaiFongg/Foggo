@@ -86,13 +86,33 @@ export async function startHomeFarmSession(): Promise<void> {
     redirect(`/world/${existingPlayer.session_id}`);
   }
 
-  // Lấy bộ câu hỏi công khai đầu tiên để làm ngân hàng câu hỏi
-  const { data: sampleSet } = await adminClient
-    .from("question_sets")
-    .select("id")
-    .eq("visibility", "public")
-    .limit(1)
-    .single();
+  // 1. Tìm bộ câu hỏi từ giáo viên của lớp hoặc trường học sinh đang học
+  let targetSetId: string | null = null;
+  if (profile.class_id) {
+    const { data: classRow } = await adminClient
+      .from("classes")
+      .select("teacher_id")
+      .eq("id", profile.class_id)
+      .maybeSingle();
+    if (classRow?.teacher_id) {
+      const { data: teacherSet } = await adminClient
+        .from("question_sets")
+        .select("id")
+        .eq("owner_id", classRow.teacher_id)
+        .limit(1)
+        .maybeSingle();
+      if (teacherSet) targetSetId = teacherSet.id;
+    }
+  }
+
+  if (!targetSetId) {
+    const { data: sampleSet } = await adminClient
+      .from("question_sets")
+      .select("id")
+      .limit(1)
+      .maybeSingle();
+    targetSetId = sampleSet?.id || null;
+  }
 
   const token = generateJoinToken();
   const { data: session, error } = await adminClient
@@ -100,7 +120,7 @@ export async function startHomeFarmSession(): Promise<void> {
     .insert({
       host_id: user.id,
       title: `Bãi Farm Quái Của ${profile.display_name || "Nhà Thám Hiểm"}`,
-      set_id: sampleSet?.id || null,
+      set_id: targetSetId,
       mode: "survival",
       kind: "solo",
       join_token: token,

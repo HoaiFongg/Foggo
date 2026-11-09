@@ -23,8 +23,8 @@
 | `/register` | `src/app/(auth)/register/page.tsx` | Công khai | Đăng ký tài khoản Giáo viên (cần email) |
 | `/register/student` | `src/app/(auth)/register/student/page.tsx` | Công khai | Đăng ký Học sinh KHÔNG CẦN EMAIL (User + Pass + Mã khôi phục) |
 | `/register/recovery-code` | `src/app/(auth)/register/recovery-code/page.tsx` | Công khai | Hiển thị mã khôi phục bí mật sau khi học sinh đăng ký |
-| `/dashboard` | `src/app/dashboard/page.tsx` | User đã đăng nhập | Trung tâm điều khiển chính: Banner Admin/GV/Học sinh, Bãi farm tại nhà |
-| `/dashboard/sets` | `src/app/dashboard/sets/page.tsx` | Teacher, Admin | Danh sách bộ câu hỏi, Import/Export Excel, Xóa bộ đề |
+| `/dashboard` | `src/app/dashboard/page.tsx` | User đã đăng nhập | Phân quyền 2 giao diện riêng biệt: Giáo viên quản trị bộ đề & phòng chơi; Học sinh có Hub Thám Hiểm (Trường, Lớp, Tài nguyên, Bãi Farm Solo 24/7, Đấu trường Lớp, Trang bị & Lịch sử) |
+| `/dashboard/sets` | `src/app/dashboard/sets/page.tsx` | Teacher, Admin | Danh sách bộ câu hỏi, Import/Export Excel, Xóa bộ đề (Học sinh bị ẩn) |
 | `/dashboard/sets/new` | `src/app/dashboard/sets/new/page.tsx` | Teacher, Admin | Khởi tạo nhanh bộ đề mới (tiêu đề, môn, lớp) |
 | `/dashboard/sets/[id]/edit` | `src/app/dashboard/sets/[id]/edit/page.tsx` | Owner, Admin | Trình soạn thảo 8 dạng câu hỏi, Import Excel vào bộ đề, Tải file mẫu |
 | `/dashboard/reports/[id]` | `src/app/dashboard/reports/[id]/page.tsx` | Teacher, Admin | Báo cáo chi tiết phòng chơi: xếp hạng, câu hay sai, xuất CSV |
@@ -150,7 +150,9 @@ erDiagram
    - Săn quái rớt đồ hiếm theo xác suất do GV định trước.
    - Bảng xếp hạng và sự kiện chung toàn lớp.
 2. **Farm quái tại nhà (`isHomeFarm = true`, `kind = 'solo'`):**
-   - Học sinh vào bãi luyện solo cày Vàng và Đom Đóm khi GV chưa mở phòng lớp.
+   - Tự động lấy ngẫu nhiên câu hỏi từ Giáo viên của Lớp và Trường học sinh đang theo học (`profiles.class_id`, `profiles.school_id`).
+   - Săn quái theo lượt (Turn-based RPG): Trả lời đúng -> Tấn công quái. Nếu quái chưa chết -> Quái phản công học sinh (sát thương được giảm nhờ Mũ, Giáp, Khiên tối đa 60%).
+   - Học sinh cày Vàng và Đom Đóm khi GV chưa mở phòng lớp.
    - Tiêu Vàng tại Thợ Rèn & Tiệm Đồ để sắm Kiếm, Mũ, Giáp Sắt, Khiên và Nhu yếu phẩm/Thuốc.
    - Vàng và Trang bị lưu vĩnh viễn mang vào Hầm ngục lớp học.
 
