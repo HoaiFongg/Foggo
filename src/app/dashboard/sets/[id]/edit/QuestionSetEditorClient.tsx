@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -74,6 +74,15 @@ export function QuestionSetEditorClient({
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const questionsScrollRef = useRef<HTMLDivElement>(null);
+
+  // Tự động cuộn đến câu hỏi đang chọn trong thanh danh sách
+  useEffect(() => {
+    const activeEl = document.getElementById(`q_item_${activeIndex}`);
+    if (activeEl) {
+      activeEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, [activeIndex]);
 
   const currentQ = questions[activeIndex] || questions[0];
   const typeDef = getQuestionType(currentQ.type) || getQuestionType("single_choice")!;
@@ -202,9 +211,9 @@ export function QuestionSetEditorClient({
   const PlayerComponent = typeDef.Player;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-amber-500/30">
+    <div className="h-screen max-h-screen bg-slate-950 text-slate-100 flex flex-col overflow-hidden selection:bg-amber-500/30">
       {/* Top Navbar */}
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50 px-4 h-16 flex items-center justify-between">
+      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md shrink-0 z-50 px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
             href="/dashboard/sets"
@@ -325,19 +334,24 @@ export function QuestionSetEditorClient({
       </header>
 
       {/* Main Workspace Layout */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar: Danh sách các câu hỏi */}
-        <aside className="w-64 sm:w-72 border-r border-slate-800 bg-slate-950/70 p-4 flex flex-col justify-between overflow-y-auto">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800/80">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
-                Các câu hỏi
-              </span>
-              <span className="text-xs font-mono text-amber-400 font-semibold">
-                {activeIndex + 1}/{questions.length}
-              </span>
-            </div>
+      <div className="flex-1 min-h-0 flex overflow-hidden">
+        {/* Left Sidebar: Danh sách các câu hỏi (Cố định chiều cao, cuộn mượt mà không làm vỡ trang) */}
+        <aside className="w-72 sm:w-80 border-r border-slate-800 bg-slate-950/80 flex flex-col h-full min-h-0 overflow-hidden shrink-0">
+          {/* Header của thanh danh sách câu hỏi */}
+          <div className="p-3.5 pb-2.5 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-950">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
+              Danh sách câu hỏi
+            </span>
+            <span className="text-xs font-mono text-amber-400 font-semibold bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+              {activeIndex + 1}/{questions.length}
+            </span>
+          </div>
 
+          {/* VÙNG CUỘN ĐỘC LẬP CHO CÁC CÂU HỎI (CÓ THANH CUỘN SCROLLBAR MƯỢT MÀ, TỰ ĐỘNG CUỘN ĐẾN CÂU ĐANG CHỌN) */}
+          <div
+            ref={questionsScrollRef}
+            className="flex-1 min-h-0 overflow-y-auto p-3 space-y-2.5 [scrollbar-gutter:stable]"
+          >
             {questions.map((q, idx) => {
               const isActive = idx === activeIndex;
               const def = getQuestionType(q.type);
@@ -346,14 +360,15 @@ export function QuestionSetEditorClient({
               return (
                 <div
                   key={q.id}
+                  id={`q_item_${idx}`}
                   onClick={() => {
                     setActiveIndex(idx);
                     setPreviewAnswer(null);
                   }}
                   className={`p-3 rounded-2xl border text-left cursor-pointer transition-all group relative ${
                     isActive
-                      ? "bg-amber-500/10 border-amber-500/80 shadow-[0_0_15px_rgba(245,158,11,0.15)]"
-                      : "bg-slate-900/50 border-slate-800 hover:border-slate-700"
+                      ? "bg-amber-500/10 border-amber-500/80 shadow-[0_0_15px_rgba(245,158,11,0.15)] ring-1 ring-amber-500/40"
+                      : "bg-slate-900/50 border-slate-800 hover:border-slate-700 hover:bg-slate-900/80"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-1 mb-1.5">
@@ -422,18 +437,18 @@ export function QuestionSetEditorClient({
             })}
           </div>
 
-          {/* Menu thêm câu hỏi */}
-          <div className="pt-4 border-t border-slate-800 space-y-2">
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 block px-1">
+          {/* Menu thêm câu hỏi (CỐ ĐỊNH Ở ĐÁY SIDEBAR, KHÔNG BỊ TRÔI THEO DANH SÁCH) */}
+          <div className="p-3 border-t border-slate-800 shrink-0 bg-slate-950/95 space-y-2">
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 block px-0.5">
               + Thêm dạng câu hỏi:
             </span>
-            <div className="grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto pr-1">
+            <div className="grid grid-cols-1 gap-1.5 max-h-36 overflow-y-auto pr-1">
               {getAllQuestionTypes().map((def) => (
                 <button
                   key={def.type}
                   type="button"
                   onClick={() => handleAddQuestion(def.type)}
-                  className="w-full py-2 px-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/50 text-slate-200 text-xs font-medium flex items-center justify-between gap-1.5 transition-colors cursor-pointer text-left"
+                  className="w-full py-1.5 px-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/50 text-slate-200 text-xs font-medium flex items-center justify-between gap-1.5 transition-colors cursor-pointer text-left"
                 >
                   <span className="truncate">{def.name}</span>
                   {def.isPlus && (
@@ -448,7 +463,7 @@ export function QuestionSetEditorClient({
         </aside>
 
         {/* Right Editor / Preview Body */}
-        <main className="flex-1 p-6 sm:p-10 overflow-y-auto">
+        <main className="flex-1 p-6 sm:p-10 overflow-y-auto h-full min-h-0 [scrollbar-gutter:stable]">
           {isPreview ? (
             /* Chế độ Xem trước: Render Player Component y hệt người chơi */
             <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-200">
