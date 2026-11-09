@@ -46,17 +46,17 @@ export function DragOrderPlayer({
   const itemMap = new Map(originalItems.map((it) => [it.id, it]));
 
   return (
-    <div className="w-full max-w-xl mx-auto space-y-6">
-      <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 text-center shadow-xl">
-        <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block mb-3">
+    <div className="w-full max-w-2xl mx-auto space-y-2.5 sm:space-y-3">
+      <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg">
+        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 inline-block mb-1">
           Sắp xếp theo thứ tự đúng
         </span>
-        <h2 className="text-lg sm:text-2xl font-black text-white leading-relaxed">
+        <h2 className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug">
           {content?.prompt || "..."}
         </h2>
       </div>
 
-      <div className="space-y-2.5">
+      <div className="space-y-2 max-h-[36vh] overflow-y-auto pr-1">
         {orderedIds.map((id, idx) => {
           const item = itemMap.get(id);
           if (!item) return null;

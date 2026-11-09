@@ -90,28 +90,28 @@ export function DragMatchPlayer({
   }, [pairs]);
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-6">
+    <div className="w-full max-w-4xl mx-auto space-y-2.5 sm:space-y-3">
       {/* Tiêu đề câu hỏi */}
-      <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 text-center shadow-xl">
-        <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block mb-3">
-          Ghép cặp tương ứng (Match Pairs)
+      <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg">
+        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 inline-block mb-1">
+          Ghép cặp tương ứng
         </span>
-        <h2 className="text-lg sm:text-2xl font-black text-white leading-relaxed font-sans">
+        <h2 className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug font-sans">
           {content?.prompt || "..."}
         </h2>
-        <p className="text-xs text-slate-400 mt-2 font-mono">
+        <p className="text-[11px] text-slate-400 mt-1 font-mono">
           {selectedLeft
             ? "Đã chọn vế A. Hãy chạm vào vế B tương ứng bên phải để nối!"
             : "Chạm vào một mục ở Cột A, sau đó chạm vào mục tương ứng ở Cột B."}
         </p>
 
         {content?.image_url && (
-          <div className="mt-4 max-w-sm mx-auto rounded-2xl overflow-hidden border border-slate-800 bg-slate-950">
+          <div className="mt-2 max-w-xs mx-auto rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={content.image_url}
               alt="Minh họa"
-              className="w-full h-auto max-h-56 object-contain mx-auto"
+              className="w-full h-auto max-h-36 object-contain mx-auto"
             />
           </div>
         )}

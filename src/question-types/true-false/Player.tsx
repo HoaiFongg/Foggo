@@ -43,30 +43,30 @@ export function TrueFalsePlayer({
   const answeredCount = Object.keys(currentAnswers).length;
 
   return (
-    <div className="w-full mx-auto space-y-5 sm:space-y-6">
+    <div className="w-full max-w-5xl mx-auto space-y-2.5 sm:space-y-3">
       {/* 1. Phần đề bài / Câu dẫn */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 text-center shadow-xl space-y-3">
-        <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20 inline-block">
+      <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg space-y-1.5">
+        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20 inline-block">
           Câu hỏi Đúng / Sai
         </span>
 
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white leading-relaxed font-sans">
+        <h2 className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug font-sans">
           {content?.prompt || "Đọc các nhận định sau đây và chọn Đúng hoặc Sai:"}
         </h2>
 
         {!isSingle && (
-          <p className="text-xs text-slate-400 font-mono">
+          <p className="text-[11px] text-slate-400 font-mono">
             Tiến độ: <span className="text-cyan-400 font-bold">{answeredCount}</span>/{statements.length} nhận định đã trả lời
           </p>
         )}
 
         {content?.image_url && (
-          <div className="mt-3 max-w-sm mx-auto rounded-2xl overflow-hidden border border-slate-800 bg-slate-950">
+          <div className="mt-2 max-w-xs mx-auto rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={content.image_url}
               alt="Minh họa"
-              className="w-full h-auto max-h-52 object-contain mx-auto"
+              className="w-full h-auto max-h-36 object-contain mx-auto"
             />
           </div>
         )}
@@ -75,35 +75,35 @@ export function TrueFalsePlayer({
       {/* 2. Danh sách nhận định và các nút chọn ĐÚNG / SAI */}
       {isSingle ? (
         /* Trường hợp 1 nhận định đơn lẻ: Hiển thị 2 nút ĐÚNG / SAI to nổi bật */
-        <div className="space-y-4">
-          <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 text-center">
-            <p className="text-sm sm:text-base font-semibold text-slate-200">
+        <div className="space-y-2.5">
+          <div className="py-2 px-3 rounded-xl bg-slate-900/60 border border-slate-800 text-center">
+            <p className="text-xs sm:text-sm font-semibold text-slate-200">
               {statements[0].text}
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {/* Nút ĐÚNG */}
             <button
               type="button"
               disabled={disabled}
               onClick={() => handleSelect(statements[0].id, true)}
-              className={`p-5 sm:p-7 rounded-3xl border-2 flex flex-col items-center justify-center gap-2.5 transition-all duration-150 active:scale-95 cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 ${
+              className={`p-3 sm:p-4 rounded-2xl border-2 flex flex-col items-center justify-center gap-1.5 transition-all duration-150 active:scale-95 cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 ${
                 currentAnswers[statements[0].id] === true
-                  ? "bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_25px_rgba(6,182,212,0.35)] scale-[1.02]"
+                  ? "bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.35)] scale-[1.01]"
                   : "bg-slate-900/80 border-slate-800 text-slate-300 hover:border-cyan-500/50 hover:bg-cyan-500/10"
               }`}
             >
               <div
-                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
+                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
                   currentAnswers[statements[0].id] === true
-                    ? "bg-cyan-500 text-slate-950 shadow-md scale-110"
+                    ? "bg-cyan-500 text-slate-950 shadow-md scale-105"
                     : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
                 }`}
               >
-                <Check className="w-7 h-7 stroke-[3]" />
+                <Check className="w-5 h-5 stroke-[3]" />
               </div>
-              <span className="text-base sm:text-lg font-black tracking-wider font-mono">
+              <span className="text-xs sm:text-sm font-black tracking-wider font-mono">
                 ĐÚNG
               </span>
             </button>
@@ -113,22 +113,22 @@ export function TrueFalsePlayer({
               type="button"
               disabled={disabled}
               onClick={() => handleSelect(statements[0].id, false)}
-              className={`p-5 sm:p-7 rounded-3xl border-2 flex flex-col items-center justify-center gap-2.5 transition-all duration-150 active:scale-95 cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 ${
+              className={`p-3 sm:p-4 rounded-2xl border-2 flex flex-col items-center justify-center gap-1.5 transition-all duration-150 active:scale-95 cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 ${
                 currentAnswers[statements[0].id] === false
-                  ? "bg-blue-500/20 border-blue-400 text-white shadow-[0_0_25px_rgba(59,130,246,0.35)] scale-[1.02]"
+                  ? "bg-blue-500/20 border-blue-400 text-white shadow-[0_0_15px_rgba(59,130,246,0.35)] scale-[1.01]"
                   : "bg-slate-900/80 border-slate-800 text-slate-300 hover:border-blue-500/50 hover:bg-blue-500/10"
               }`}
             >
               <div
-                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
+                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
                   currentAnswers[statements[0].id] === false
-                    ? "bg-blue-500 text-slate-950 shadow-md scale-110"
+                    ? "bg-blue-500 text-slate-950 shadow-md scale-105"
                     : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
                 }`}
               >
-                <X className="w-7 h-7 stroke-[3]" />
+                <X className="w-5 h-5 stroke-[3]" />
               </div>
-              <span className="text-base sm:text-lg font-black tracking-wider font-mono">
+              <span className="text-xs sm:text-sm font-black tracking-wider font-mono">
                 SAI
               </span>
             </button>
@@ -136,7 +136,7 @@ export function TrueFalsePlayer({
         </div>
       ) : (
         /* Trường hợp nhiều nhận định: Hiển thị từng nhận định kèm nút Đúng / Sai tương ứng */
-        <div className="space-y-3">
+        <div className="space-y-2 max-h-[36vh] overflow-y-auto pr-1">
           {statements.map((s, idx) => {
             const isTrue = currentAnswers[s.id] === true;
             const isFalse = currentAnswers[s.id] === false;
@@ -144,14 +144,14 @@ export function TrueFalsePlayer({
             return (
               <div
                 key={s.id}
-                className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm hover:border-slate-700 transition-colors"
+                className="p-2.5 sm:p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-sm hover:border-slate-700 transition-colors"
               >
                 {/* Nội dung nhận định */}
-                <div className="flex items-start gap-3 flex-1">
-                  <span className="w-6 h-6 rounded-lg bg-slate-950 border border-slate-800 font-mono text-xs font-bold text-cyan-400 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="flex items-start gap-2.5 flex-1">
+                  <span className="w-5 h-5 rounded-md bg-slate-950 border border-slate-800 font-mono text-[10px] font-bold text-cyan-400 flex items-center justify-center shrink-0 mt-0.5">
                     {idx + 1}
                   </span>
-                  <p className="text-xs sm:text-sm font-medium text-slate-200 leading-relaxed">
+                  <p className="text-xs sm:text-sm font-medium text-slate-200 leading-snug">
                     {s.text || <span className="text-slate-600 italic">(Nhận định chưa có nội dung)</span>}
                   </p>
                 </div>
@@ -162,13 +162,13 @@ export function TrueFalsePlayer({
                     type="button"
                     disabled={disabled}
                     onClick={() => handleSelect(s.id, true)}
-                    className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 disabled:cursor-not-allowed ${
+                    className={`px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1 transition-all cursor-pointer active:scale-95 disabled:cursor-not-allowed ${
                       isTrue
-                        ? "bg-cyan-600 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)] ring-2 ring-cyan-400"
+                        ? "bg-cyan-600 text-white shadow-[0_0_12px_rgba(6,182,212,0.4)] ring-2 ring-cyan-400"
                         : "bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800"
                     }`}
                   >
-                    <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    <Check className="w-3 h-3 stroke-[3]" />
                     <span>ĐÚNG</span>
                   </button>
 
@@ -176,13 +176,13 @@ export function TrueFalsePlayer({
                     type="button"
                     disabled={disabled}
                     onClick={() => handleSelect(s.id, false)}
-                    className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 disabled:cursor-not-allowed ${
+                    className={`px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1 transition-all cursor-pointer active:scale-95 disabled:cursor-not-allowed ${
                       isFalse
-                        ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] ring-2 ring-blue-400"
+                        ? "bg-blue-600 text-white shadow-[0_0_12px_rgba(59,130,246,0.4)] ring-2 ring-blue-400"
                         : "bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800"
                     }`}
                   >
-                    <X className="w-3.5 h-3.5 stroke-[3]" />
+                    <X className="w-3 h-3 stroke-[3]" />
                     <span>SAI</span>
                   </button>
                 </div>

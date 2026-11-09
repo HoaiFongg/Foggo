@@ -206,3 +206,4 @@ export async function claimDailyLoginReward() {
     message: `Điểm danh Ngày ${nextDay} thành công! Bạn nhận được ${reward.coins} Vàng 🪙 và ${reward.fireflies} Đom Đóm 🪲!`,
   };
 }
+

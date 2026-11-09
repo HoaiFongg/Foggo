@@ -51,36 +51,36 @@ export function DropdownListPlayer({
   ).length;
 
   return (
-    <div className="w-full mx-auto space-y-5 sm:space-y-6">
+    <div className="w-full max-w-5xl mx-auto space-y-2.5 sm:space-y-3">
       {/* 1. KHỐI CÂU HỎI / ĐỀ BÀI (Ở PHÍA TRÊN) */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 text-center shadow-xl space-y-3">
-        <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20 inline-block">
+      <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg space-y-1.5">
+        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/20 inline-block">
           Câu hỏi lựa chọn theo danh sách
         </span>
 
         {/* Câu hỏi ở phía trên */}
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white leading-relaxed font-sans px-2">
+        <h2 className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug font-sans px-2">
           {effectivePrompt || "Đọc các nhận định dưới đây và chọn đáp án thích hợp từ danh sách sổ xuống:"}
         </h2>
 
-        <p className="text-xs text-slate-400 font-mono">
+        <p className="text-[11px] text-slate-400 font-mono">
           Tiến độ: <span className="text-blue-400 font-bold">{answeredCount}</span>/{dropdowns.length} vị trí đã chọn
         </p>
 
         {content?.image_url && (
-          <div className="mt-3 max-w-sm mx-auto rounded-2xl overflow-hidden border border-slate-800 bg-slate-950">
+          <div className="mt-2 max-w-xs mx-auto rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={content.image_url}
               alt="Minh họa"
-              className="w-full h-auto max-h-52 object-contain mx-auto"
+              className="w-full h-auto max-h-36 object-contain mx-auto"
             />
           </div>
         )}
       </div>
 
       {/* 2. KHỐI NHẬN ĐỊNH BÊN DƯỚI (CÓ DANH SÁCH SỔ XUỐNG KHI NHẤN VÀO) */}
-      <div className="p-5 sm:p-7 rounded-3xl bg-slate-950 border border-slate-800 text-slate-100 text-sm sm:text-base leading-loose shadow-2xl relative">
+      <div className="p-3 sm:p-4 rounded-2xl bg-slate-950 border border-slate-800 text-slate-100 text-xs sm:text-sm leading-relaxed shadow-lg relative max-h-[36vh] overflow-y-auto">
         {(() => {
           let slotCounter = 0;
 

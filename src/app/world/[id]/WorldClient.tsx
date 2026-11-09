@@ -79,13 +79,24 @@ export function WorldClient({
   const [playerState, setPlayerState] = useState<SurvivalPlayerState>(() => {
     const raw =
       initialPlayer.state && typeof initialPlayer.state === "object" ? initialPlayer.state : {};
+    const safeCoins = Number.isFinite(raw.coins)
+      ? raw.coins
+      : (Number.isFinite(initialPlayer.gold) ? initialPlayer.gold : 30);
+    const safeScore = Number.isFinite(raw.score)
+      ? raw.score
+      : (Number.isFinite(initialPlayer.score) ? initialPlayer.score : 0);
+    const safeHp = Number.isFinite(raw.hp) ? raw.hp : 100;
+    const safeMaxHp = Number.isFinite(raw.maxHp) ? raw.maxHp : 100;
+    const safeHunger = Number.isFinite(raw.hunger) ? raw.hunger : 100;
+    const safeMaxHunger = Number.isFinite(raw.maxHunger) ? raw.maxHunger : 100;
+
     return {
-      hp: typeof raw.hp === "number" ? raw.hp : 100,
-      maxHp: typeof raw.maxHp === "number" ? raw.maxHp : 100,
-      hunger: typeof raw.hunger === "number" ? raw.hunger : 100,
-      maxHunger: typeof raw.maxHunger === "number" ? raw.maxHunger : 100,
-      coins: typeof raw.coins === "number" ? raw.coins : initialPlayer.gold || 30,
-      score: typeof raw.score === "number" ? raw.score : initialPlayer.score || 0,
+      hp: safeHp,
+      maxHp: safeMaxHp,
+      hunger: safeHunger,
+      maxHunger: safeMaxHunger,
+      coins: safeCoins,
+      score: safeScore,
       playSec: raw.playSec ?? 0,
       lastTickTimestamp: raw.lastTickTimestamp ?? Math.floor(Date.now() / 1000),
       streak: raw.streak ?? 0,
@@ -113,6 +124,25 @@ export function WorldClient({
       currentBattle: raw.currentBattle ?? null,
     };
   });
+
+  const handleUpdatePlayerState = (st: any) => {
+    if (!st || typeof st !== "object") return;
+    const coins = Number.isFinite(st.coins) ? st.coins : (Number.isFinite(st.gold) ? st.gold : 0);
+    const score = Number.isFinite(st.score) ? st.score : 0;
+    const hp = Number.isFinite(st.hp) ? st.hp : 0;
+    const maxHp = Number.isFinite(st.maxHp) ? st.maxHp : 100;
+    const hunger = Number.isFinite(st.hunger) ? st.hunger : 0;
+    const maxHunger = Number.isFinite(st.maxHunger) ? st.maxHunger : 100;
+    setPlayerState({
+      ...st,
+      coins,
+      score,
+      hp,
+      maxHp,
+      hunger,
+      maxHunger,
+    });
+  };
 
   // Câu hỏi hiện tại
   const [currentQIndex, setCurrentQIndex] = useState(0);
@@ -189,7 +219,7 @@ export function WorldClient({
     });
 
     if (res.state) {
-      setPlayerState(res.state);
+      handleUpdatePlayerState(res.state);
     }
 
     // Chuyển sang câu hỏi tiếp theo cho lần sau
@@ -204,7 +234,7 @@ export function WorldClient({
       itemId,
     });
     if (res.state) {
-      setPlayerState(res.state);
+      handleUpdatePlayerState(res.state);
       showToast(res.message);
     }
   }
@@ -217,7 +247,7 @@ export function WorldClient({
       slotIndex,
     });
     if (res.state) {
-      setPlayerState(res.state);
+      handleUpdatePlayerState(res.state);
       showToast(res.message);
     } else {
       alert(res.error || res.message);
@@ -232,7 +262,7 @@ export function WorldClient({
       itemId,
     });
     if (res.state) {
-      setPlayerState(res.state);
+      handleUpdatePlayerState(res.state);
       showToast(res.message);
     } else {
       alert(res.error || res.message);
@@ -246,7 +276,7 @@ export function WorldClient({
       action: "revive",
     });
     if (res.state) {
-      setPlayerState(res.state);
+      handleUpdatePlayerState(res.state);
       showToast("Bạn đã hồi sinh an toàn tại Trại! Toàn bộ Xu được giữ nguyên.");
     }
   }
@@ -259,7 +289,7 @@ export function WorldClient({
       itemId,
     });
     if (res.state) {
-      setPlayerState(res.state);
+      handleUpdatePlayerState(res.state);
       showToast(res.message);
     } else {
       alert(res.error || res.message);
@@ -349,15 +379,15 @@ export function WorldClient({
             </div>
 
             {/* Xu */}
-            <div className="flex items-center gap-1 bg-amber-500/10 px-2.5 py-1.5 rounded-xl border border-amber-500/20 text-amber-300 text-xs font-mono font-bold">
+            <div className="flex items-center gap-1.5 bg-amber-500/15 px-3 py-1.5 rounded-xl border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
               <Coins className="w-3.5 h-3.5 text-amber-400" />
-              <span>{playerState.coins}</span>
+              <span>{Number.isFinite(playerState?.coins) ? playerState.coins : 0} Xu</span>
             </div>
 
             {/* Điểm */}
             <div className="hidden sm:flex items-center gap-1 bg-slate-950/80 px-2.5 py-1.5 rounded-xl border border-slate-800 text-slate-300 text-xs font-mono font-bold">
               <Trophy className="w-3.5 h-3.5 text-amber-400" />
-              <span>{playerState.score}</span>
+              <span>{Number.isFinite(playerState?.score) ? playerState.score : 0}</span>
             </div>
           </div>
         </div>
@@ -378,7 +408,7 @@ export function WorldClient({
               {/* Mua bình máu cấp cứu 10 xu */}
               <button
                 type="button"
-                disabled={playerState.coins < 10}
+                disabled={(Number.isFinite(playerState?.coins) ? playerState.coins : 0) < 10}
                 onClick={() => handleEmergencyHealClient("buy_potion")}
                 className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs font-mono transition-all shadow-md cursor-pointer disabled:opacity-50"
               >
@@ -1027,7 +1057,7 @@ export function WorldClient({
               ].map((itemId) => {
                 const item = getItemDef(itemId);
                 if (!item) return null;
-                const canAfford = playerState.coins >= item.buyPrice;
+                const canAfford = (Number.isFinite(playerState?.coins) ? playerState.coins : 0) >= item.buyPrice;
 
                 return (
                   <div
@@ -1254,7 +1284,7 @@ export function WorldClient({
           playerState={playerState}
           questions={questions}
           currentQIndex={currentQIndex}
-          onStateUpdate={(st) => setPlayerState(st)}
+          onStateUpdate={handleUpdatePlayerState}
           onNextQuestion={() => setCurrentQIndex((prev) => prev + 1)}
           onClose={() => {
             setActiveAction(null);

@@ -33,16 +33,16 @@ export function HotspotPlayer({
   const hasSelected = value && typeof value.x === "number" && typeof value.y === "number";
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-6">
+    <div className="w-full max-w-2xl mx-auto space-y-2.5 sm:space-y-3">
       {/* Tiêu đề câu hỏi */}
-      <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 text-center shadow-xl">
-        <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block mb-3">
+      <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg">
+        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 inline-block mb-1">
           Chạm vào điểm yếu (Hotspot)
         </span>
-        <h2 className="text-lg sm:text-2xl font-black text-white leading-relaxed font-sans">
+        <h2 className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug font-sans">
           {content?.prompt || "Chạm vào vị trí chính xác trên ảnh:"}
         </h2>
-        <p className="text-xs text-slate-400 mt-2 font-mono">
+        <p className="text-[11px] text-slate-400 mt-1 font-mono">
           {hasSelected
             ? "Đã đánh dấu tọa độ! Nhấn nộp câu trả lời để tấn công."
             : "Chạm hoặc click lên ảnh để chọn vị trí mục tiêu."}
@@ -50,12 +50,12 @@ export function HotspotPlayer({
       </div>
 
       {/* Vùng ảnh tương tác */}
-      <div className="p-4 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-xl flex flex-col items-center">
+      <div className="p-2 sm:p-3 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-lg flex flex-col items-center max-h-[36vh] overflow-y-auto">
         {content?.image_url ? (
           <div
             ref={containerRef}
             onClick={handleImageClick}
-            className={`relative max-w-full rounded-2xl overflow-hidden border-2 select-none touch-none ${
+            className={`relative max-w-full rounded-xl overflow-hidden border-2 select-none touch-none ${
               disabled
                 ? "cursor-not-allowed opacity-80 border-slate-800"
                 : "cursor-crosshair border-amber-500/40 hover:border-amber-400"
@@ -65,7 +65,7 @@ export function HotspotPlayer({
             <img
               src={content.image_url}
               alt="Mục tiêu Hotspot"
-              className="w-full h-auto max-h-[420px] object-contain pointer-events-none block"
+              className="w-full h-auto max-h-[220px] object-contain pointer-events-none block"
             />
 
             {/* Điểm ngắm mục tiêu */}

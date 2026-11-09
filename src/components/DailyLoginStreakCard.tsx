@@ -163,3 +163,4 @@ export function DailyLoginStreakCard({ initialStreakData }: DailyLoginStreakCard
     </div>
   );
 }
+

@@ -23,40 +23,40 @@ export function TrueFalseMultiPlayer({
   const answeredCount = Object.keys(currentAnswers).length;
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-5">
+    <div className="w-full max-w-4xl mx-auto space-y-2.5 sm:space-y-3">
       {/* Khối đề bài / Đề dẫn */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-slate-900/90 border border-slate-800 text-center shadow-xl space-y-2">
-        <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20 inline-block">
+      <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg space-y-1">
+        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20 inline-block">
           Bảng Nhận Định (Chuẩn IC3 GS6)
         </span>
-        <h2 className="text-base sm:text-xl font-bold text-white leading-relaxed font-sans">
+        <h2 className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug font-sans">
           {content?.prompt || "Đọc các phát biểu sau đây và cho biết phát biểu nào Đúng (Yes), phát biểu nào Sai (No):"}
         </h2>
-        <p className="text-xs text-slate-400 font-mono">
+        <p className="text-[11px] text-slate-400 font-mono">
           Tiến độ: <span className="text-cyan-400 font-bold">{answeredCount}</span>/{statements.length} nhận định đã trả lời
         </p>
 
         {content?.image_url && (
-          <div className="mt-3 max-w-sm mx-auto rounded-2xl overflow-hidden border border-slate-800 bg-slate-950">
+          <div className="mt-2 max-w-xs mx-auto rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={content.image_url}
               alt="Minh họa"
-              className="w-full h-auto max-h-52 object-contain mx-auto"
+              className="w-full h-auto max-h-36 object-contain mx-auto"
             />
           </div>
         )}
       </div>
 
       {/* Bảng nhận định dạng bảng IC3 GS6 */}
-      <div className="rounded-2xl border border-slate-800 overflow-hidden bg-slate-950 shadow-xl">
+      <div className="rounded-xl border border-slate-800 overflow-hidden bg-slate-950 shadow-lg max-h-[36vh] overflow-y-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-slate-800 text-xs font-bold text-white">
-              <th className="py-3.5 px-4 bg-slate-900/90 text-slate-200">
+            <tr className="border-b border-slate-800 text-[11px] sm:text-xs font-bold text-white">
+              <th className="py-2.5 px-3 bg-slate-900/90 text-slate-200">
                 Câu phát biểu / Nhận định
               </th>
-              <th className="py-3.5 px-3 sm:px-6 bg-[#0284c7] text-center w-28 sm:w-36 text-white font-bold tracking-wide">
+              <th className="py-2.5 px-2 sm:px-4 bg-[#0284c7] text-center w-24 sm:w-32 text-white font-bold tracking-wide">
                 Đúng (Yes)
               </th>
               <th className="py-3.5 px-3 sm:px-6 bg-[#2563eb] text-center w-28 sm:w-36 text-white font-bold tracking-wide">

@@ -198,6 +198,7 @@ erDiagram
 4. **Sửa trang Dashboard:** vào thẳng [`src/app/dashboard/page.tsx`](file:///d:/Project/Foggo/src/app/dashboard/page.tsx).
 5. **Thêm vật phẩm hoặc chỉnh tỉ lệ rơi:** vào [`src/game-modes/survival/items.ts`](file:///d:/Project/Foggo/src/game-modes/survival/items.ts) và [`engine.ts`](file:///d:/Project/Foggo/src/game-modes/survival/engine.ts).
 6. **Bảo mật cơ sở dữ liệu & RLS:** Khi thao tác server actions liên quan đến `session_players`, `game_sessions`, sử dụng `createAdminClient()` từ `@/lib/supabase/admin` để tránh lỗi `new row violates row-level security policy for table "session_players"`.
-7. **Kiểm thử logic:** chạy lệnh `npm test` (kiểm tra 51 bài unit test của game engine và chấm điểm).
+7. **Kiểm thử logic:** chạy lệnh `npm test` (kiểm tra 52 bài unit test của game engine và chấm điểm).
 8. **Kiểm tra biên dịch:** chạy lệnh `npm run build` (kiểm tra toàn bộ 21 trang và TypeScript).
+9. **Đấu trường săn quái 2D & Bố cục Single-screen:** Xem [`src/app/world/[id]/MonsterBattleArena.tsx`](file:///d:/Project/Foggo/src/app/world/[id]/MonsterBattleArena.tsx) - gom trọn sân đấu quái và bảng câu hỏi trong `h-screen overflow-hidden`, hiển thị Xu an toàn bằng `Number.isFinite(...)` không gây lỗi `NaN`.
 

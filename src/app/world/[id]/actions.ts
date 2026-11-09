@@ -19,6 +19,7 @@ import {
   applyFlee,
   type SurvivalPlayerState,
 } from "@/game-modes/survival/engine";
+import { SURVIVAL_CONFIG } from "@/game-modes/survival/config";
 
 /**
  * Trả lời câu hỏi và thực hiện hành động sinh tồn
@@ -80,8 +81,20 @@ export async function submitSurvivalAction({
   }
 
   const nowSec = Math.floor(Date.now() / 1000);
+  const rawCoins = Number.isFinite(player.state?.coins)
+    ? player.state.coins
+    : (Number.isFinite(player.gold) ? player.gold : SURVIVAL_CONFIG.INITIAL_GOLD);
+  const rawScore = Number.isFinite(player.state?.score)
+    ? player.state.score
+    : (Number.isFinite(player.score) ? player.score : 0);
+
   let state: SurvivalPlayerState = player.state && Object.keys(player.state).length > 3
-    ? player.state
+    ? {
+        ...initSurvivalState(nowSec),
+        ...player.state,
+        coins: rawCoins,
+        score: rawScore,
+      }
     : initSurvivalState(nowSec);
 
   // Chạy tick() cập nhật đói / đồng hồ trước khi xử lý
@@ -148,8 +161,8 @@ export async function submitSurvivalAction({
   await adminClient
     .from("session_players")
     .update({
-      score: state.score,
-      gold: state.coins,
+      score: Number.isFinite(state.score) ? state.score : 0,
+      gold: Number.isFinite(state.coins) ? state.coins : 0,
       state,
       state_version: (player.state_version || 0) + 1,
       updated_at: new Date().toISOString(),
@@ -219,8 +232,20 @@ export async function performSurvivalItemAction({
   }
 
   const nowSec = Math.floor(Date.now() / 1000);
+  const rawCoins = Number.isFinite(player.state?.coins)
+    ? player.state.coins
+    : (Number.isFinite(player.gold) ? player.gold : SURVIVAL_CONFIG.INITIAL_GOLD);
+  const rawScore = Number.isFinite(player.state?.score)
+    ? player.state.score
+    : (Number.isFinite(player.score) ? player.score : 0);
+
   let state: SurvivalPlayerState = player.state && Object.keys(player.state).length > 3
-    ? player.state
+    ? {
+        ...initSurvivalState(nowSec),
+        ...player.state,
+        coins: rawCoins,
+        score: rawScore,
+      }
     : initSurvivalState(nowSec);
 
   state = tick(state, nowSec);
@@ -247,8 +272,8 @@ export async function performSurvivalItemAction({
   await adminClient
     .from("session_players")
     .update({
-      score: state.score,
-      gold: state.coins,
+      score: Number.isFinite(state.score) ? state.score : 0,
+      gold: Number.isFinite(state.coins) ? state.coins : 0,
       state,
       state_version: (player.state_version || 0) + 1,
       updated_at: new Date().toISOString(),
@@ -295,9 +320,21 @@ export async function emergencyHealOrRevive({
   }
 
   const nowSec = Math.floor(Date.now() / 1000);
+  const rawCoins = Number.isFinite(player.state?.coins)
+    ? player.state.coins
+    : (Number.isFinite(player.gold) ? player.gold : SURVIVAL_CONFIG.INITIAL_GOLD);
+  const rawScore = Number.isFinite(player.state?.score)
+    ? player.state.score
+    : (Number.isFinite(player.score) ? player.score : 0);
+
   let state: SurvivalPlayerState =
     player.state && Object.keys(player.state).length > 3
-      ? player.state
+      ? {
+          ...initSurvivalState(nowSec),
+          ...player.state,
+          coins: rawCoins,
+          score: rawScore,
+        }
       : initSurvivalState(nowSec);
 
   let message = "";
@@ -325,8 +362,8 @@ export async function emergencyHealOrRevive({
   await adminClient
     .from("session_players")
     .update({
-      score: state.score,
-      gold: state.coins,
+      score: Number.isFinite(state.score) ? state.score : 0,
+      gold: Number.isFinite(state.coins) ? state.coins : 0,
       state,
       state_version: (player.state_version || 0) + 1,
       updated_at: new Date().toISOString(),
@@ -373,9 +410,21 @@ export async function fleeSurvivalBattle({
   }
 
   const nowSec = Math.floor(Date.now() / 1000);
+  const rawCoins = Number.isFinite(player.state?.coins)
+    ? player.state.coins
+    : (Number.isFinite(player.gold) ? player.gold : SURVIVAL_CONFIG.INITIAL_GOLD);
+  const rawScore = Number.isFinite(player.state?.score)
+    ? player.state.score
+    : (Number.isFinite(player.score) ? player.score : 0);
+
   let state: SurvivalPlayerState =
     player.state && Object.keys(player.state).length > 3
-      ? player.state
+      ? {
+          ...initSurvivalState(nowSec),
+          ...player.state,
+          coins: rawCoins,
+          score: rawScore,
+        }
       : initSurvivalState(nowSec);
 
   state = tick(state, nowSec);
@@ -385,8 +434,8 @@ export async function fleeSurvivalBattle({
   await adminClient
     .from("session_players")
     .update({
-      score: fleeRes.state.score,
-      gold: fleeRes.state.coins,
+      score: Number.isFinite(fleeRes.state.score) ? fleeRes.state.score : 0,
+      gold: Number.isFinite(fleeRes.state.coins) ? fleeRes.state.coins : 0,
       state: fleeRes.state,
       state_version: (player.state_version || 0) + 1,
       updated_at: new Date().toISOString(),

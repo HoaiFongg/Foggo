@@ -1839,10 +1839,18 @@ Sự kiện ghi vào `survival_events`: `explore`, `fog_milestone`, `fog_cleared
   - **Ngày 7:** +500 Vàng 🪙 + 60 Đom Đóm 🪲 + Rương Báu Hoàng Gia 👑
 - Tự động cộng Vàng và Đom Đóm vào tài khoản, thêm vật phẩm vào hành trang solo farm của học sinh.
 
-### 5A.26. Giao Diện Câu Hỏi Dàn Trải Đều & Tự Co Dãn Mượt Mà (Fluid Widescreen UI)
+### 5A.26. Giao Diện Đấu Trường Trọn Vẹn 1 Màn Hình (Single-Screen Viewport - Không Cần Cuộn) & Hiển Thị Xu Nổi Bật
 
-- Loại bỏ hoàn toàn các khung giới hạn kích thước hẹp cố định (`max-w-2xl`, `max-w-3xl`) gây tình trạng câu hỏi bị dồn cụm vào giữa màn hình.
-- Chuyển sang bố cục dàn trải toàn màn hình (`w-full max-w-6xl / 7xl`), font chữ tiêu đề lớn (`text-xl sm:text-2xl md:text-3xl`), các thẻ phương án bấm chọn rộng rãi (`p-5 sm:p-6 md:p-7`), hỗ trợ tự động co dãn (responsive) mượt mà khi phóng to, thu nhỏ hoặc chơi trên các độ phân giải màn hình máy tính khác nhau.
+1. **Khắc phục triệt để lỗi NaN thuộc tính `children`:**
+   - Chuẩn hóa toàn bộ truy xuất và hiển thị Xu (`coins` / `gold`) qua cơ chế phòng vệ `Number.isFinite(...) ? coins : 0`. Loại bỏ dứt điểm lỗi crash React console: `Received NaN for the children attribute`.
+   - Bổ sung huy hiệu **"Số Xu Hiện Có: X Xu (Bảo lưu 100%)"** nổi bật trên thanh tiêu đề đầu của Đấu Trường Săn Quái và thanh trạng thái nhân vật.
+2. **Thiết kế Single-Screen Viewport (Không cần cuộn dọc để làm bài):**
+   - Loại bỏ tình trạng câu hỏi chiếm trọn chiều cao đẩy sàn đấu quái vật lên trên khiến người chơi phải cuộn trang liên tục.
+   - Toàn bộ giao diện đấu trường được gom trọn vẹn trong `100vh` (`h-screen max-h-screen overflow-hidden`):
+     - **Thanh Header (44px):** Nút Rút lui, số Xu hiện có, Chuỗi Streak, Đồng hồ ngày/đêm.
+     - **Sàn đấu 2D RPG (180px - 210px):** Hai thanh máu mini sắc nét của Người chơi và Quái vật, hoạt họa nhân vật vung kiếm và quái bật nhảy / chịu đòn, chữ nổi sát thương trực quan.
+     - **Bảng Câu Hỏi & Các Lựa Chọn:** Chiếm phần chiều cao còn lại (`flex-1 min-h-0`), đề bài gọn gàng vừa vặn (`text-sm sm:text-base font-bold`), các phương án được dàn trải đều theo lưới 2 cột (`grid-cols-2`), tự động co dãn khi phóng to/thu nhỏ màn hình máy tính.
+     - **Nút Vung Kiếm Tấn Công:** Đính cố định ở đáy màn hình, tích hợp phím tắt nhanh **Enter** giúp học sinh trả lời và ra đòn mượt mà ngay trên bàn phím.
 
 ---
 

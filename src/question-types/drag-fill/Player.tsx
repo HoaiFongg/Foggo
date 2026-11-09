@@ -59,16 +59,16 @@ export function DragFillPlayer({
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-6">
+    <div className="w-full max-w-4xl mx-auto space-y-2.5 sm:space-y-3">
       {/* Tiêu đề câu hỏi */}
-      <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 text-center shadow-xl">
-        <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block mb-3">
-          Điền từ vào chỗ trống (Fill in the blanks)
+      <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg">
+        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 inline-block mb-1">
+          Điền từ vào chỗ trống
         </span>
-        <h2 className="text-lg sm:text-2xl font-black text-white leading-relaxed font-sans">
+        <h2 className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug font-sans">
           {content?.prompt || "Điền từ thích hợp vào các vị trí trống:"}
         </h2>
-        <p className="text-xs text-slate-400 mt-2 font-mono">
+        <p className="text-[11px] text-slate-400 mt-1 font-mono">
           {selectedOptId
             ? "Đã chọn từ khóa! Hãy chạm vào ô trống cần điền ở trên."
             : "Chạm vào từ khóa bên dưới rồi chạm vào ô trống tương ứng."}
@@ -76,7 +76,7 @@ export function DragFillPlayer({
       </div>
 
       {/* Vùng đoạn văn tương tác */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-xl leading-loose text-base sm:text-lg text-slate-200">
+      <div className="p-3 sm:p-4 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-lg leading-relaxed text-xs sm:text-sm text-slate-200 max-h-[30vh] overflow-y-auto">
         {segments.map((segment, idx) => {
           const match = segment.match(/^\{\{(\d+)\}\}$/);
           if (!match) {

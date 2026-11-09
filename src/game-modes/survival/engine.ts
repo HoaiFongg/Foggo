@@ -285,6 +285,8 @@ export function applyHunt(
     ...state,
     equipped: { ...state.equipped },
   };
+  nextState.coins = Number.isFinite(nextState.coins) ? nextState.coins : 0;
+  nextState.score = Number.isFinite(nextState.score) ? nextState.score : 0;
 
   const isSuccess = answerScore >= 0.5;
 
@@ -506,6 +508,8 @@ export function applyFlee(
     ...state,
     equipped: { ...state.equipped },
   };
+  nextState.coins = Number.isFinite(nextState.coins) ? nextState.coins : 0;
+  nextState.score = Number.isFinite(nextState.score) ? nextState.score : 0;
 
   // Tính giảm sát thương theo giáp/mũ/khiên
   const armorDef =
@@ -1000,7 +1004,8 @@ export function applyRevive(state: SurvivalPlayerState): SurvivalPlayerState {
   nextState.hp = SURVIVAL_CONFIG.MAX_HP;
   nextState.hunger = 100;
   // Xu được bảo lưu 100%, không bị mất khi ngất xỉu
-  nextState.coins = state.coins;
+  nextState.coins = Number.isFinite(state.coins) ? state.coins : 0;
+  nextState.score = Number.isFinite(state.score) ? state.score : 0;
   nextState.currentBattle = null;
   nextState.streak = 0;
   return nextState;
