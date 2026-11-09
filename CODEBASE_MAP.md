@@ -117,20 +117,21 @@ erDiagram
 
 ---
 
-## 5. BẢN ĐỒ 8 DẠNG CÂU HỎI (QUESTION TYPES REGISTRY)
+## 5. BẢN ĐỒ 9 DẠNG CÂU HỎI (QUESTION TYPES REGISTRY)
 - **Thư mục gốc:** `src/question-types/`
 - **Tệp đăng ký tổng:** `src/question-types/registry.ts`
 
 | Loại (`type`) | Tên hiển thị | Thư mục định nghĩa | Cấu trúc `content` | Cấu trúc `answer_key` |
 |---|---|---|---|---|
 | `single_choice` | Trắc nghiệm 1 đáp án | `src/question-types/single-choice/` | `{ prompt, options: [{id, text}] }` | `{ correct: "opt_id" }` |
-| `true_false` | Đúng / Sai | `src/question-types/true-false/` | `{ prompt }` | `{ correct: true / false }` |
+| `true_false` | Đúng / Sai | `src/question-types/true-false/` | `{ prompt, statements: [{id, text}] }` | `{ answers: { s1: true } }` |
 | `multi_select` | Chọn nhiều đáp án đúng | `src/question-types/multi-select/` | `{ prompt, options: [{id, text}] }` | `{ correct: ["opt_1", "opt_3"] }` |
+| `dropdown_list` | Lựa chọn từ danh sách | `src/question-types/dropdown-list/` | `{ prompt: "...{D}...", dropdowns: [{id, options}] }` | `{ answers: { d1: "Có" } }` |
 | `drag_order` | Kéo thả sắp xếp thứ tự | `src/question-types/drag-order/` | `{ prompt, items: [{id, text}] }` | `{ order: ["id_1", "id_2", ...] }` |
 | `drag_match` | Ghép cặp tương ứng | `src/question-types/drag-match/` | `{ prompt, pairs: [{left, right}] }` | `{ pairs: [...] }` |
 | `drag_fill` | Kéo từ điền vào chỗ trống | `src/question-types/drag-fill/` | `{ template, words: [] }` | `{ blanks: { b1: "từ" } }` |
 | `hotspot` | Điểm nóng trên hình ảnh | `src/question-types/hotspot/` | `{ image_url, regions: [] }` | `{ correct_region_id }` |
-| `true_false_multi` | Nhiều mệnh đề Đúng/Sai | `src/question-types/true-false-multi/` | `{ statements: [{id, text}] }` | `{ answers: { s1: true } }` |
+| `true_false_multi` | Nhiều mệnh đề Đúng/Sai | `src/question-types/true-false/` (alias) | `{ prompt, statements }` | `{ answers: { s1: true } }` |
 
 ---
 

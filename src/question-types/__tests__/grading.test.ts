@@ -8,6 +8,7 @@ import { gradeHotspot } from "../hotspot/grade";
 import { gradeDragMatch } from "../drag-match/grade";
 import { gradeDragFill } from "../drag-fill/grade";
 import { gradeTrueFalseMulti } from "../true-false-multi/grade";
+import { gradeDropdownList } from "../dropdown-list/grade";
 import { gradeQuestion } from "../registry";
 
 describe("Question Types Grading Unit Tests", () => {
@@ -176,10 +177,40 @@ describe("Question Types Grading Unit Tests", () => {
     });
   });
 
+  describe("dropdown_list", () => {
+    const key = {
+      answers: { d1: "Có", d2: "Có", d3: "Không" },
+    };
+
+    test("chấm 1.0 khi chọn đúng toàn bộ các vị trí danh sách", () => {
+      assert.equal(
+        gradeDropdownList({ d1: "Có", d2: "Có", d3: "Không" }, key),
+        1.0
+      );
+    });
+
+    test("chấm theo tỷ lệ khi đúng 2/3 vị trí", () => {
+      const score = gradeDropdownList({ d1: "Có", d2: "Có", d3: "Có" }, key);
+      assert.ok(Math.abs(score - 2 / 3) < 0.001);
+    });
+
+    test("chấm 0 khi người chơi chưa trả lời hoặc sai toàn bộ", () => {
+      assert.equal(gradeDropdownList({} as any, key), 0.0);
+      assert.equal(
+        gradeDropdownList({ d1: "Sai", d2: "Sai", d3: "Sai" }, key),
+        0.0
+      );
+    });
+  });
+
   describe("registry gradeQuestion", () => {
     test("điều phối đúng theo mọi type", () => {
       assert.equal(gradeQuestion("single_choice", "a", { correct: "a" }), 1.0);
       assert.equal(gradeQuestion("true_false", true, { correct: true }), 1.0);
+      assert.equal(
+        gradeQuestion("dropdown_list", { d1: "Có" }, { answers: { d1: "Có" } }),
+        1.0
+      );
       assert.equal(
         gradeQuestion("multi_select", ["a"], { correct: ["a"], scoring: "partial" }),
         1.0

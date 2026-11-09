@@ -168,6 +168,13 @@ export function parseQuestionsFromExcel(fileBuffer: ArrayBuffer | Uint8Array): P
       let displayTypeName = "Trắc nghiệm 1 đáp án";
 
       if (
+        prompt.includes("{D}") ||
+        normType.includes("danh sach") ||
+        normType.includes("dropdown")
+      ) {
+        qType = "dropdown_list";
+        displayTypeName = "Lựa chọn từ danh sách";
+      } else if (
         normType.includes("dung sai") ||
         normType.includes("true") ||
         normType.includes("false") ||
@@ -192,7 +199,50 @@ export function parseQuestionsFromExcel(fileBuffer: ArrayBuffer | Uint8Array): P
       let content: any = null;
       let answerKey: any = null;
 
-      if (qType === "true_false") {
+      if (qType === "dropdown_list") {
+        const matches = prompt.match(/\{D\}/gi) || [];
+        const slotCount = Math.max(1, matches.length);
+        const dropdowns: any[] = [];
+        const answers: Record<string, string> = {};
+
+        // Phân tách đáp án từ rawCorrect (ví dụ: "Có, Có, Không" hoặc "1: Có, 2: Không")
+        const answerTokens = rawCorrect
+          .split(/[,;\n]+/)
+          .map((t) => t.replace(/^(#?\d+|[A-D])\s*[:.-]\s*/i, "").trim())
+          .filter(Boolean);
+
+        for (let i = 0; i < slotCount; i++) {
+          const slotId = `d${i + 1}`;
+          const colOpt = [rawOptA, rawOptB, rawOptC, rawOptD][i];
+          let options = ["Có", "Không"];
+          if (colOpt && colOpt.includes("/")) {
+            options = colOpt.split("/").map((o) => o.trim()).filter(Boolean);
+          } else if (colOpt && colOpt.includes(",")) {
+            options = colOpt.split(",").map((o) => o.trim()).filter(Boolean);
+          }
+
+          const ans = answerTokens[i] || options[0];
+          if (!options.includes(ans)) {
+            options.push(ans);
+          }
+
+          dropdowns.push({
+            id: slotId,
+            label: `Vị trí #${i + 1}`,
+            options,
+          });
+          answers[slotId] = ans;
+        }
+
+        content = {
+          prompt,
+          image_url: null,
+          dropdowns,
+        };
+        answerKey = {
+          answers,
+        };
+      } else if (qType === "true_false") {
         const rawStatementsList = [rawOptA, rawOptB, rawOptC, rawOptD].filter(
           (text) => text && text.trim() !== ""
         );

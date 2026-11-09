@@ -57,7 +57,8 @@ export type QuestionType =
   | "drag_match"
   | "drag_fill"
   | "hotspot"
-  | "true_false_multi";
+  | "true_false_multi"
+  | "dropdown_list";
 
 export interface QuestionSet {
   id: string;

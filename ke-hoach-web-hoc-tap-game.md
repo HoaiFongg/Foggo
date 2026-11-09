@@ -939,13 +939,13 @@ Tất cả dạng câu hỏi lưu chung trong bảng `questions`, với cột `t
 | # | Mã `type` | Tên | Gói |
 |---|---|---|---|
 | 1 | `single_choice` | Trắc nghiệm 1 đáp án | Free |
-| 2 | `true_false` | Đúng / Sai (Đơn lẻ 1 phát biểu) | Free |
-| 3 | `multi_select` | Chọn nhiều đáp án | Plus |
-| 4 | `drag_order` | Kéo thả: sắp xếp thứ tự | Plus |
-| 5 | `drag_match` | Kéo thả: ghép cặp | Plus |
-| 6 | `drag_fill` | Kéo thả: điền chỗ trống | Plus |
-| 7 | `hotspot` | Chọn vùng đúng trên ảnh | Plus |
-| 8 | `true_false_multi` | Đúng / Sai (Bảng nhận định chuẩn IC3 GS6 & GDPT 2018) | Free |
+| 2 | `true_false` | Đúng / Sai (Hỗ trợ 1 hoặc nhiều nhận định) | Free |
+| 3 | `multi_select` | Chọn nhiều đáp án | Free |
+| 4 | `dropdown_list` | Lựa chọn từ danh sách (Dropdown thả xuống) | Free |
+| 5 | `drag_order` | Kéo thả: sắp xếp thứ tự | Plus |
+| 6 | `drag_match` | Kéo thả: ghép cặp | Plus |
+| 7 | `drag_fill` | Kéo thả: điền chỗ trống | Plus |
+| 8 | `hotspot` | Chọn vùng đúng trên ảnh | Plus |
 | 9 | `typing` (mở rộng sau) | Gõ đáp án | Free |
 
 > Bạn có thể tự quyết dạng nào Free, dạng nào Plus. Gợi ý trên chỉ để tham khảo.
@@ -1085,6 +1085,35 @@ Tất cả dạng câu hỏi lưu chung trong bảng `questions`, với cột `t
 { "answers": { "s1": false, "s2": true, "s3": false } }
 ```
 **Chấm điểm:** Tỷ lệ phần trăm theo số nhận định đúng (ví dụ đúng 2/3 câu = 0.67 điểm).
+
+#### (9) `dropdown_list` — Lựa chọn theo dạng danh sách (Dropdown thả xuống)
+Được thiết kế theo cấu trúc bài thi Tin học và chứng chỉ quốc tế (IC3 GS6, MOS, Azota):
+- **Cú pháp soạn thảo tiện lợi:**
+  - Thêm ký tự `{D}` để chèn vị trí danh sách lựa chọn thả xuống trực tiếp trong văn bản.
+  - Thêm ký tự `<br>` để xuống dòng.
+  - Phím tắt **Ctrl + Enter** để chèn nhanh `{D}`.
+- **Tùy biến danh sách lựa chọn:**
+  - Giáo viên có thể tự do định nghĩa các phương án trong menu thả xuống cho từng `{D}` (ví dụ: `["Có", "Không"]`, `["Nên", "Không nên"]`, `["Đúng", "Sai"]` hoặc các từ vựng/thuật ngữ chuyên môn).
+  - Có các nút mẫu áp dụng nhanh (Preset) cho một vị trí hoặc cho toàn bộ các vị trí `{D}` chỉ với 1 click.
+- **Giao diện làm bài (Player):**
+  - Hiển thị nút bấm dropdown màu xanh dương `[ ▼ ]` với hiệu ứng mở menu thả xuống mượt mà.
+  - Học sinh nhấp chọn phương án phù hợp cho từng vị trí `{D}`.
+
+```json
+// content (gửi cho người chơi)
+{
+  "prompt": "{D} Bạn nên tắt tính năng tự động chạy (Autorun)...<br>{D} Bạn nên lưu trữ các công việc...",
+  "dropdowns": [
+    { "id": "d1", "label": "Vị trí #1", "options": ["Có", "Không"] },
+    { "id": "d2", "label": "Vị trí #2", "options": ["Có", "Không"] }
+  ]
+}
+// answer_key (chỉ lưu trữ và chấm điểm ở Server)
+{
+  "answers": { "d1": "Có", "d2": "Có" }
+}
+```
+**Chấm điểm:** Tỷ lệ số vị trí lựa chọn chính xác (ví dụ đúng 2/3 vị trí = 0.67 điểm).
 
 ### 4.4. Tính năng Sao lưu (Backup) & Nhập đề thi từ file Excel (.xlsx)
 Hỗ trợ giáo viên nhập liệu hàng loạt và sao lưu dữ liệu an toàn, không phụ thuộc vào nhập thủ công từng câu:

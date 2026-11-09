@@ -12,6 +12,7 @@ export const PLAN_LIMITS = {
       "single_choice",
       "true_false",
       "multi_select",
+      "dropdown_list",
     ] as QuestionType[],
   },
   plus: {
@@ -30,6 +31,7 @@ export const PLAN_LIMITS = {
       "drag_fill",
       "hotspot",
       "true_false_multi",
+      "dropdown_list",
     ] as QuestionType[],
   },
 } as const;

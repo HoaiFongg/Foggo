@@ -6,11 +6,13 @@ import { dragOrderQuestionType } from "./drag-order";
 import { hotspotQuestionType } from "./hotspot";
 import { dragMatchQuestionType } from "./drag-match";
 import { dragFillQuestionType } from "./drag-fill";
+import { dropdownListDefinition } from "./dropdown-list";
 
 export const QUESTION_TYPES: Record<string, QuestionTypeDefinition<any, any, any>> = {
   single_choice: singleChoiceDefinition,
   true_false: trueFalseDefinition,
   multi_select: multiSelectQuestionType,
+  dropdown_list: dropdownListDefinition,
   drag_order: dragOrderQuestionType,
   hotspot: hotspotQuestionType,
   drag_match: dragMatchQuestionType,
@@ -32,6 +34,7 @@ export function getAllQuestionTypes(): QuestionTypeDefinition<any, any, any>[] {
     singleChoiceDefinition,
     trueFalseDefinition,
     multiSelectQuestionType,
+    dropdownListDefinition,
     dragOrderQuestionType,
     hotspotQuestionType,
     dragMatchQuestionType,

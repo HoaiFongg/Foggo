@@ -63,6 +63,18 @@ export function exportQuestionSetToExcel(
         correctStr =
           answerKey.correct === true || answerKey.answers?.s1 === true ? "Đúng" : "Sai";
       }
+    } else if (q.type === "dropdown_list") {
+      typeName = "Danh sách lựa chọn";
+      const dropdowns = content.dropdowns || [];
+      optA = dropdowns[0]?.options ? dropdowns[0].options.join(" / ") : "";
+      optB = dropdowns[1]?.options ? dropdowns[1].options.join(" / ") : "";
+      optC = dropdowns[2]?.options ? dropdowns[2].options.join(" / ") : "";
+      optD = dropdowns[3]?.options ? dropdowns[3].options.join(" / ") : "";
+
+      const answersMap = answerKey.answers || {};
+      correctStr = Object.entries(answersMap)
+        .map(([k, v], idx) => `#${idx + 1}: ${v}`)
+        .join(", ");
     } else if (q.type === "multi_select") {
       typeName = "Nhiều đáp án";
       const options = content.options || [];
