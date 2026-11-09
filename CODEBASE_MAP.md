@@ -31,7 +31,7 @@
 | `/worlds` | `src/app/worlds/page.tsx` | All (phân quyền) | Danh sách hầm ngục đang quản lý & đảo đang tham gia, nút Solo Farm |
 | `/teacher/worlds/new` | `src/app/teacher/worlds/new/page.tsx` | Teacher, Admin | Mở hầm ngục mới: chọn bộ đề, chọn đồ hiếm & tỉ lệ rớt (10-100%) |
 | `/teacher/worlds/[id]` | `src/app/teacher/worlds/[id]/page.tsx` | Host, Admin | Bảng điều khiển thời gian thực: sương mù, khóa học sinh, bảng điểm |
-| `/world/[id]` | `src/app/world/[id]/page.tsx` | Player | Màn hình sinh tồn chính: Đi săn, Hái lượm, Khám phá sương, Thợ rèn, Đêm |
+| `/world/[id]` | `src/app/world/[id]/page.tsx`, `WorldClient.tsx`, `MonsterBattleArena.tsx` | Player | Màn hình sinh tồn chính: Đấu trường Săn Quái Bất Tận (hoạt họa nhân vật & quái Slime 8 frames, rút lui trừ máu/rank), Hái lượm, Sương mù, Thợ rèn, Đêm |
 | `/explore` | `src/app/explore/page.tsx` | User đã đăng nhập | Khám phá kho đề cộng đồng, sao chép 1 chạm vào kho cá nhân |
 | `/admin` | `src/app/admin/page.tsx` | Admin | Quản lý Học sinh & Giáo viên: đổi role, cấp mã khôi phục, tặng Đom Đóm |
 | `/pricing` | `src/app/pricing/page.tsx` | Công khai | Bảng giá gói Foggo Plus giáo viên / trường học |
@@ -138,11 +138,12 @@ erDiagram
 ## 6. BẢN ĐỒ GAME ENGINE SINH TỒN (SURVIVAL ENGINE)
 - **Thư mục:** `src/game-modes/survival/`
 - **Tệp cốt lõi:**
-  - `engine.ts`: Các hàm thuần cập nhật trạng thái game (`tick`, `applyHunt`, `applyGather`, `applyExplore`, `applyCraft`, `applyBlacksmithBuy`, `applyNightDefense`, `applyRespawn`).
+  - `engine.ts`: Các hàm thuần cập nhật trạng thái game (`tick`, `applyHunt`, `applyFlee`, `applyGather`, `applyExplore`, `applyCraft`, `applyBlacksmithBuy`, `applyNightDefense`, `applyRespawn`).
   - `items.ts`: Toàn bộ từ điển vật phẩm (`ITEM_REGISTRY`), vũ khí, giáp, thuốc, và danh sách báu vật hiếm hầm ngục (`DUNGEON_RARE_ITEMS`).
   - `config.ts`: Cân bằng chỉ số đói, máu, sát thương quái, chu kỳ ngày/đêm (ngày 150s, đêm 90s).
   - `clock.ts`: Tính toán pha ngày/đêm và ngày thứ mấy dựa trên thời gian thực.
-  - `monsters.ts`: Từ điển quái vật theo khu vực (Heo Rừng, Nhện Đêm, Sói Sương Mù, Chúa Rừng Xanh).
+  - `monsters.ts`: Từ điển quái vật theo khu vực (Heo Rừng, Nhện Đêm, Sói Sương Mù, Chúa Rừng Xanh), hàm `getRandomFarmMonster()` xuất hiện quái ngẫu nhiên liên hoàn.
+  - `src/app/world/[id]/MonsterBattleArena.tsx`: Sàn đấu 2D RPG tương tác thật — hoạt họa nhân vật lao lên chém quái khi đúng, quái phản công khi sai, bộ Sprite Slime 8-frame (`/sprites/slime_*_clean.png`), chữ nổi sát thương và nút "Rút lui" (trừ máu + rank).
 
 ### Quy luật 2 chế độ (Class Dungeon vs Home Farm):
 1. **Hầm ngục lớp (`isClassDungeon = true`):**

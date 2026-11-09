@@ -16,6 +16,7 @@ import {
   applyEquipGear,
   applyNightDefense,
   applyRevive,
+  applyFlee,
   type SurvivalPlayerState,
 } from "@/game-modes/survival/engine";
 
@@ -260,3 +261,77 @@ export async function performSurvivalItemAction({
     state,
   };
 }
+
+/**
+ * Rút lui khỏi trận chiến (Flee)
+ * Bị trừ máu và trừ điểm rank
+ */
+export async function fleeSurvivalBattle({
+  sessionId,
+  monsterId,
+}: {
+  sessionId: string;
+  monsterId?: string;
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Phiên đăng nhập đã hết hạn" };
+  }
+
+  const { data: player } = await supabase
+    .from("session_players")
+    .select("*")
+    .eq("session_id", sessionId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (!player) {
+    return { error: "Không tìm thấy người chơi trong thế giới này" };
+  }
+
+  const nowSec = Math.floor(Date.now() / 1000);
+  let state: SurvivalPlayerState =
+    player.state && Object.keys(player.state).length > 3
+      ? player.state
+      : initSurvivalState(nowSec);
+
+  state = tick(state, nowSec);
+  const fleeRes = applyFlee(state, monsterId);
+
+  const adminClient = createAdminClient();
+  await adminClient
+    .from("session_players")
+    .update({
+      score: fleeRes.state.score,
+      gold: fleeRes.state.coins,
+      state: fleeRes.state,
+      state_version: (player.state_version || 0) + 1,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", player.id);
+
+  await adminClient.from("survival_events").insert({
+    session_id: sessionId,
+    player_id: player.id,
+    type: "flee",
+    payload: {
+      monsterId,
+      damageTaken: fleeRes.damageTaken,
+      scoreLost: fleeRes.scoreLost,
+      message: fleeRes.message,
+    },
+  });
+
+  return {
+    success: true,
+    state: fleeRes.state,
+    damageTaken: fleeRes.damageTaken,
+    scoreLost: fleeRes.scoreLost,
+    message: fleeRes.message,
+  };
+}
+

@@ -486,6 +486,66 @@ export function applyHunt(
 }
 
 /**
+ * Xử lý hành động Rút lui / Tháo chạy khỏi trận chiến (Flee)
+ * Rút lui sẽ khiến người chơi bị quái đuổi theo cào trúng (trừ máu) và bị trừ điểm rank.
+ */
+export function applyFlee(
+  state: SurvivalPlayerState,
+  monsterId?: string
+): {
+  state: SurvivalPlayerState;
+  damageTaken: number;
+  scoreLost: number;
+  message: string;
+} {
+  const targetId = monsterId || state.currentBattle?.monsterId || "slime";
+  const clock = getSurvivalClock(state.playSec);
+  const monster = getScaledMonster(targetId, clock.dayNumber, !clock.isDay);
+
+  const nextState: SurvivalPlayerState = {
+    ...state,
+    equipped: { ...state.equipped },
+  };
+
+  // Tính giảm sát thương theo giáp/mũ/khiên
+  const armorDef =
+    nextState.equipped?.armor?.durability && nextState.equipped.armor.durability > 0
+      ? (ITEM_REGISTRY[nextState.equipped.armor.itemId]?.defensePct || 0)
+      : 0;
+  const helmetDef =
+    nextState.equipped?.helmet?.durability && nextState.equipped.helmet.durability > 0
+      ? (ITEM_REGISTRY[nextState.equipped.helmet.itemId]?.defensePct || 0)
+      : 0;
+  const shieldDef =
+    nextState.equipped?.shield?.durability && nextState.equipped.shield.durability > 0
+      ? (ITEM_REGISTRY[nextState.equipped.shield.itemId]?.defensePct || 0)
+      : 0;
+
+  const totalDefPct = Math.min(0.60, armorDef + helmetDef + shieldDef);
+  const rawDamage = Math.max(10, Math.round(monster.atk * 1.5));
+  const damageTaken = Math.max(5, Math.round(rawDamage * (1 - totalDefPct)));
+  const scoreLost = 50; // Trừ 50 điểm rank vì tháo chạy
+
+  nextState.hp = Math.max(0, nextState.hp - damageTaken);
+  nextState.score = Math.max(0, nextState.score - scoreLost);
+  nextState.streak = 0; // Hủy chuỗi combo khi bỏ chạy
+  nextState.currentBattle = null; // Thoát khỏi trạng thái giao chiến
+
+  if (nextState.hp <= 0) {
+    nextState.hp = 0;
+    nextState.deaths += 1;
+  }
+
+  return {
+    state: nextState,
+    damageTaken,
+    scoreLost,
+    message: `Bạn đã rút lui khỏi trận chiến! Trong lúc tháo chạy, ${monster.name} đã đuổi theo cào trúng lưng bạn mất ${damageTaken} HP và bạn bị trừ ${scoreLost} điểm rank!`,
+  };
+}
+
+
+/**
  * Xử lý hành động Hái lượm (Gather)
  */
 export function applyGather(

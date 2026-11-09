@@ -241,3 +241,17 @@ export function getScaledMonster(
   };
 }
 
+/**
+ * Lấy ngẫu nhiên một quái vật xuất hiện trong bãi farm
+ */
+export function getRandomFarmMonster(excludeBoss: boolean = true): MonsterDef {
+  const candidates = Object.values(MONSTER_REGISTRY).filter((m) => {
+    if (excludeBoss && m.isBoss) return false;
+    return m.zoneId === "forest";
+  });
+  if (candidates.length === 0) return MONSTER_REGISTRY.slime;
+  const idx = Math.floor(Math.random() * candidates.length);
+  return candidates[idx];
+}
+
+

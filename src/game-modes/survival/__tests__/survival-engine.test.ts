@@ -12,6 +12,7 @@ import {
   applyBlacksmith,
   applyNightDefense,
   applyRevive,
+  applyFlee,
   addItemToInventory,
   removeItemFromInventory,
   countItemInInventory,
@@ -111,6 +112,20 @@ describe("Survival Game Engine Unit Tests", () => {
       assert.ok(res.damageTaken > 0);
       assert.equal(res.state.hp, initialHp - res.damageTaken);
       assert.equal(res.state.streak, 0);
+    });
+
+    test("rút lui khỏi trận chiến bị trừ máu và trừ điểm rank", () => {
+      const state = initSurvivalState(1000);
+      state.score = 200;
+      state.streak = 3;
+      const initialHp = state.hp;
+      const res = applyFlee(state, "slime");
+      assert.ok(res.damageTaken > 0);
+      assert.equal(res.scoreLost, 50);
+      assert.equal(res.state.score, 150);
+      assert.equal(res.state.hp, initialHp - res.damageTaken);
+      assert.equal(res.state.streak, 0);
+      assert.equal(res.state.currentBattle, null);
     });
   });
 

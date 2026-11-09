@@ -33,6 +33,7 @@ import { getItemDef, ITEM_REGISTRY } from "@/game-modes/survival/items";
 import { MONSTER_REGISTRY, getScaledMonster } from "@/game-modes/survival/monsters";
 import { CRAFTING_RECIPES } from "@/game-modes/survival/recipes";
 import { submitSurvivalAction, performSurvivalItemAction } from "./actions";
+import { MonsterBattleArena } from "./MonsterBattleArena";
 import type { SurvivalPlayerState } from "@/game-modes/survival/engine";
 
 interface WorldClientProps {
@@ -484,6 +485,32 @@ export function WorldClient({
                   <span>Chuỗi x{playerState.streak} (+{playerState.streak * 8}%)</span>
                 </div>
               )}
+            </div>
+
+            {/* Banner Vào Đấu Trường Săn Quái Bất Tận (Gauntlet Arena) */}
+            <div className="p-6 rounded-3xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-amber-950/30 border border-emerald-500/40 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-mono text-[10px] font-bold uppercase tracking-wider">
+                    Săn Quái RPG Theo Lượt · Quái Xuất Hiện Bất Tận
+                  </span>
+                </div>
+                <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                  <span>⚔️ Đấu Trường Săn Quái Bất Tận</span>
+                </h3>
+                <p className="text-xs text-slate-300 max-w-xl leading-relaxed mt-1">
+                  Đánh bại con này quái khác sẽ lập tức xuất hiện! Nhân vật lao lên chém khi bạn trả lời đúng, quái phản công khi sai. Có quyền rút lui (bị cào -15 HP &amp; trừ 50 điểm rank).
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => startAction("hunt", "slime", "Đấu Trường Săn Quái Bất Tận")}
+                className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-amber-400 to-emerald-500 hover:from-emerald-400 hover:to-amber-300 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
+              >
+                <Swords className="w-4 h-4" />
+                <span>BƯỚC VÀO SÀN ĐẤU NGAY</span>
+              </button>
             </div>
 
             {/* Lưới danh sách quái vật trong khu vực */}
@@ -1189,8 +1216,23 @@ export function WorldClient({
         )}
       </main>
 
-      {/* MODAL ĐẤU TRƯỜNG CÂU HỎI (QUESTION ARENA) */}
-      {activeAction && question && (
+      {/* ĐẤU TRƯỜNG SĂN QUÁI RPG (BATTLE ARENA) */}
+      {activeAction && activeAction.actionType === "hunt" ? (
+        <MonsterBattleArena
+          sessionId={sessionId}
+          initialMonsterId={activeAction.targetId}
+          clock={clock}
+          playerState={playerState}
+          questions={questions}
+          currentQIndex={currentQIndex}
+          onStateUpdate={(st) => setPlayerState(st)}
+          onNextQuestion={() => setCurrentQIndex((prev) => prev + 1)}
+          onClose={() => {
+            setActiveAction(null);
+            setFeedback(null);
+          }}
+        />
+      ) : activeAction && question && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
           <div className="bg-slate-900 border border-slate-800 max-w-2xl w-full rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative my-auto">
             {/* Nút đóng */}

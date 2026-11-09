@@ -1796,6 +1796,24 @@ Sự kiện ghi vào `survival_events`: `explore`, `fog_milestone`, `fog_cleared
    - **Tiệm Cô Túi & Thợ Rèn Bác Búa:** Học sinh dùng số Vàng cày được để mua vũ khí (Kiếm Gỗ, Kiếm Sắt, Dao Găm), áo giáp và thuốc hồi phục.
    - **Tính kế thừa liên tục (Persistence):** Toàn bộ số Vàng tích lũy và trang bị cày được từ bãi farm tại nhà được lưu trữ vĩnh viễn trên tài khoản học sinh. Khi giáo viên mở hầm ngục trên lớp, học sinh đem nguyên vẹn trang bị mạnh mẽ vào hầm ngục lớp để sẵn sàng nghênh chiến quái vật và trùm lớn.
 
+### 5A.23. Đấu Trường Săn Quái Bất Tận & Hoạt Họa Đối Kháng Theo Lượt (Gauntlet Arena & Combat Animation)
+
+> Đấu trường săn quái RPG trực quan, nơi câu trả lời biến thành đòn đánh vật lý thực tế giữa **Nhà Thám Hiểm** và **Quái Vật**.
+
+1. **Xuất hiện quái vật ngẫu nhiên liên hoàn (Continuous Monster Gauntlet):**
+   - Thay vì phải chọn từng con quái thủ công, học sinh bước vào đấu trường liên hoàn (`MonsterBattleArena`).
+   - Khi một con quái bị tiêu diệt ($HP \le 0$), quái sẽ gục ngã (mắt `x x`, nát tan), bắn ra Vàng và Điểm số.
+   - Ngay sau 1.2s ăn mừng, hệ thống **tự động bốc ngẫu nhiên quái vật tiếp theo** (`getRandomFarmMonster`: Slime, Sói con, Sói xám, Nhện sương mù, Heo rừng, Goblin...) xuất hiện với hiệu ứng rơi xuống đất. Trận đấu diễn ra liên tục không bị đứt đoạn.
+
+2. **Hoạt họa tương tác thật theo lượt (Turn-based RPG Combat):**
+   - **Khi học sinh trả lời đúng:** Nhân vật lao vút về phía trước (`dash forward`), vung kiếm chém đường kiếm khí hình bán nguyệt (`sword slash`), quái vật bị giật lùi và nhấp nháy đỏ rực (`hit`), số sát thương nổi lên màn hình (`💥 -X HP!`).
+   - **Khi quái vật phản công (hoặc khi trả lời sai):** Quái vật nhún người bật nhảy lao tới tấn công nhân vật, nhân vật bị giật lùi, nhấp nháy đỏ, hiển thị hào quang khiên chắn (`🛡️ Giảm -X%`) và số sát thương nhận vào (`💔 -Y HP`).
+   - **Bộ Sprite Slime 8 frames:** Khối Slime xanh có nhịp thở nhấp nhô `idle 1-2`, co dãn chuẩn bị `prep`, bật nhảy lao tới cắn `jump attack`, tiếp đất `land`, trúng đòn méo người `hit > <`, và gục ngã dẹp lép `dead x x`.
+
+3. **Quyền Rút lui (Flee / Run away) có chế tài phạt:**
+   - Nút **"🏃 Rút Lui"** cho phép học sinh rời khỏi sàn đấu khi hết máu hoặc quái quá mạnh.
+   - **Hình phạt tháo chạy (`applyFlee`):** Trong lúc quay lưng bỏ chạy, quái vật đuổi theo cào trúng lưng gây mất 15-20 HP (được giảm trừ nhờ giáp/mũ/khiên) và bị **trừ 50 Điểm Rank**, đồng thời ngắt chuỗi combo Streak.
+
 ---
 
 ## 5B. Vào chơi KHÔNG CẦN MÃ PIN: mô hình "Thế giới"
