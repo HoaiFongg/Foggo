@@ -75,7 +75,9 @@ export default async function WorldsPage() {
               )}
             </div>
             <p className="text-xs text-slate-400">
-              Quản lý các phòng chơi, kiểm soát sương mù và giám sát tiến trình học sinh.
+              {isTeacherOrAdmin
+                ? "Quản lý các phòng chơi, kiểm soát sương mù và giám sát tiến trình học sinh."
+                : "Tham gia các hầm ngục lớp học hoặc tiếp tục chuyến thám hiểm săn quái của bạn."}
             </p>
           </div>
 

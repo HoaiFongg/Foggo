@@ -500,12 +500,12 @@ export default async function DashboardPage() {
                 </div>
 
                 <div className="px-3 py-2 text-center border-x border-slate-800">
-                  <div className="flex items-center justify-center gap-1 text-yellow-300 text-xs font-bold mb-0.5">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>{profile?.fireflies ?? 120}</span>
+                  <div className="flex items-center justify-center gap-1 text-amber-400 text-xs font-bold mb-0.5">
+                    <Trophy className="w-3.5 h-3.5" />
+                    <span>{totalScore}</span>
                   </div>
                   <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
-                    Đom đóm soi sương
+                    Điểm Thành Tích
                   </p>
                 </div>
 

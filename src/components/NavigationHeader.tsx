@@ -105,17 +105,19 @@ export function NavigationHeader({
               </Link>
             )}
 
-            <Link
-              href="/explore"
-              className={`px-2.5 sm:px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shrink-0 ${
-                activeItem === "explore"
-                  ? "bg-slate-800 text-amber-400 font-semibold"
-                  : "text-slate-400 hover:text-slate-100 hover:bg-slate-900"
-              }`}
-            >
-              <Compass className="w-3.5 h-3.5" />
-              <span>Khám phá</span>
-            </Link>
+            {isTeacherOrAdmin && (
+              <Link
+                href="/explore"
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shrink-0 ${
+                  activeItem === "explore"
+                    ? "bg-slate-800 text-amber-400 font-semibold"
+                    : "text-slate-400 hover:text-slate-100 hover:bg-slate-900"
+                }`}
+              >
+                <Compass className="w-3.5 h-3.5" />
+                <span>Khám phá</span>
+              </Link>
+            )}
 
             {isAdmin && (
               <Link

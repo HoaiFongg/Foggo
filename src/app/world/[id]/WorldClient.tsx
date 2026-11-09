@@ -10,28 +10,18 @@ import {
   Swords,
   Shield,
   Backpack,
-  ArrowRight,
   SunMedium,
   Moon,
   Sparkles,
-  TreePine,
-  Gem,
-  Hammer,
-  Eye,
-  Crosshair,
-  RefreshCw,
+  ShoppingBag,
   X,
-  AlertTriangle,
   CheckCircle2,
   XCircle,
-  ShoppingBag,
-  Footprints,
 } from "lucide-react";
 import { getQuestionType } from "@/question-types/registry";
 import { getSurvivalClock } from "@/game-modes/survival/clock";
-import { getItemDef, ITEM_REGISTRY } from "@/game-modes/survival/items";
-import { MONSTER_REGISTRY, getScaledMonster } from "@/game-modes/survival/monsters";
-import { CRAFTING_RECIPES } from "@/game-modes/survival/recipes";
+import { getItemDef } from "@/game-modes/survival/items";
+import { getScaledMonster } from "@/game-modes/survival/monsters";
 import { submitSurvivalAction, performSurvivalItemAction, emergencyHealOrRevive } from "./actions";
 import { MonsterBattleArena } from "./MonsterBattleArena";
 import type { SurvivalPlayerState } from "@/game-modes/survival/engine";
@@ -67,9 +57,9 @@ export function WorldClient({
   questions,
   leaderboard: initialLeaderboard,
 }: WorldClientProps) {
-  // Tabs: hunt | gather | explore | craft | blacksmith | backpack | leaderboard
+  // Tabs: hunt | blacksmith | backpack | leaderboard
   const [activeTab, setActiveTab] = useState<
-    "hunt" | "gather" | "explore" | "craft" | "blacksmith" | "backpack" | "leaderboard"
+    "hunt" | "blacksmith" | "backpack" | "leaderboard"
   >("hunt");
 
   // Bộ lọc cửa hàng / Thợ rèn
@@ -301,7 +291,6 @@ export function WorldClient({
     setTimeout(() => setToastMessage(null), 3000);
   }
 
-  const forestFog = playerState.fog?.forest ?? 100;
   const isDead = playerState.hp <= 0;
 
   return (
@@ -428,15 +417,15 @@ export function WorldClient({
         </div>
       )}
 
-      {/* THANH TAB ĐIỀU HƯỚNG SINH TỒN */}
+      {/* THANH TAB ĐIỀU HƯỚNG TỐI GIẢN CHO HỌC SINH */}
       <nav className="bg-slate-900 border-b border-slate-800 px-4">
-        <div className="max-w-5xl mx-auto flex items-center gap-1.5 overflow-x-auto py-2 no-scrollbar text-xs font-bold font-mono">
+        <div className="max-w-5xl mx-auto flex items-center justify-start gap-2 overflow-x-auto py-2 no-scrollbar text-xs font-bold font-mono">
           <button
             type="button"
             onClick={() => setActiveTab("hunt")}
-            className={`px-3 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "hunt"
-                ? "bg-amber-500 text-slate-950 shadow-md"
+                ? "bg-amber-500 text-slate-950 shadow-md font-black"
                 : "text-slate-400 hover:text-white hover:bg-slate-800"
             }`}
           >
@@ -446,49 +435,10 @@ export function WorldClient({
 
           <button
             type="button"
-            onClick={() => setActiveTab("gather")}
-            className={`px-3 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "gather"
-                ? "bg-amber-500 text-slate-950 shadow-md"
-                : "text-slate-400 hover:text-white hover:bg-slate-800"
-            }`}
-          >
-            <TreePine className="w-3.5 h-3.5" />
-            <span>Hái Lượm</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("explore")}
-            className={`px-3 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "explore"
-                ? "bg-amber-500 text-slate-950 shadow-md"
-                : "text-slate-400 hover:text-white hover:bg-slate-800"
-            }`}
-          >
-            <Footprints className="w-3.5 h-3.5" />
-            <span>Sương Mù ({forestFog}%)</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("craft")}
-            className={`px-3 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === "craft"
-                ? "bg-amber-500 text-slate-950 shadow-md"
-                : "text-slate-400 hover:text-white hover:bg-slate-800"
-            }`}
-          >
-            <Hammer className="w-3.5 h-3.5" />
-            <span>Chế Tạo</span>
-          </button>
-
-          <button
-            type="button"
             onClick={() => setActiveTab("blacksmith")}
-            className={`px-3 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "blacksmith"
-                ? "bg-amber-500 text-slate-950 shadow-md"
+                ? "bg-amber-500 text-slate-950 shadow-md font-black"
                 : "text-slate-400 hover:text-white hover:bg-slate-800"
             }`}
           >
@@ -499,9 +449,9 @@ export function WorldClient({
           <button
             type="button"
             onClick={() => setActiveTab("backpack")}
-            className={`px-3 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "backpack"
-                ? "bg-amber-500 text-slate-950 shadow-md"
+                ? "bg-amber-500 text-slate-950 shadow-md font-black"
                 : "text-slate-400 hover:text-white hover:bg-slate-800"
             }`}
           >
@@ -512,14 +462,14 @@ export function WorldClient({
           <button
             type="button"
             onClick={() => setActiveTab("leaderboard")}
-            className={`px-3 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
               activeTab === "leaderboard"
-                ? "bg-amber-500 text-slate-950 shadow-md"
+                ? "bg-amber-500 text-slate-950 shadow-md font-black"
                 : "text-slate-400 hover:text-white hover:bg-slate-800"
             }`}
           >
             <Trophy className="w-3.5 h-3.5" />
-            <span>Xếp Hạng</span>
+            <span>Bảng Xếp Hạng</span>
           </button>
         </div>
       </nav>
@@ -576,7 +526,8 @@ export function WorldClient({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {["slime", "wolf", "wild_boar", "boar_king"].map((mId) => {
                 const m = getScaledMonster(mId, clock.dayNumber, !clock.isDay);
-                const isBossLairLocked = m.isBoss && forestFog > 30;
+                const monstersKilled = playerState.monstersKilled ?? 0;
+                const isBossLairLocked = m.isBoss && monstersKilled < 5;
 
                 return (
                   <div
@@ -616,7 +567,7 @@ export function WorldClient({
 
                       {isBossLairLocked ? (
                         <div className="p-2 rounded-xl bg-slate-950/80 border border-slate-800 text-center text-[11px] text-slate-500 font-mono">
-                          Khóa! Cần xua sương mù ≤ 30% để mở hang trùm.
+                          Khóa! Cần hạ 5 quái để mở hang trùm ({monstersKilled}/5).
                         </div>
                       ) : (
                         <button
@@ -640,205 +591,7 @@ export function WorldClient({
           </div>
         )}
 
-        {/* TAB 2: HÁI LƯỢM (GATHER) */}
-        {activeTab === "gather" && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
-                <span>🌲 Thu Thập Tài Nguyên Rừng</span>
-              </h2>
-              <p className="text-xs text-slate-400">
-                Trả lời đúng để chặt củi, đẽo đá và hái thảo dược chế tạo công cụ.
-                {forestFog <= 70 && (
-                  <span className="text-amber-400 font-bold ml-1">
-                    ⭐ Đã mở Bãi tài nguyên giàu (+100% sản lượng)!
-                  </span>
-                )}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
-                <span className="text-4xl block">🪵</span>
-                <div>
-                  <h3 className="font-bold text-white text-base">Cây Gỗ Rừng</h3>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Cung cấp gỗ để nhóm lửa và chế tạo gậy, hàng rào.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => startAction("gather", "wood", "Chặt gỗ rừng")}
-                  className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-xs font-mono font-bold transition-all cursor-pointer"
-                >
-                  Chặt Cây Lấy Gỗ
-                </button>
-              </div>
-
-              <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
-                <span className="text-4xl block">🪨</span>
-                <div>
-                  <h3 className="font-bold text-white text-base">Mỏ Đá Cuội</h3>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Khai thác đá cứng để làm rìu, kiếm đá và gia cố trại.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => startAction("gather", "stone", "Khai thác đá")}
-                  className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-xs font-mono font-bold transition-all cursor-pointer"
-                >
-                  Đào Đá Cuội
-                </button>
-              </div>
-
-              <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
-                <span className="text-4xl block">🌿</span>
-                <div>
-                  <h3 className="font-bold text-white text-base">Thảo Dược Xanh</h3>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Hái lá thuốc để chế tạo băng gạc và bình máu phục hồi.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => startAction("gather", "herb", "Hái thảo dược")}
-                  className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-xs font-mono font-bold transition-all cursor-pointer"
-                >
-                  Hái Thảo Dược
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: THÁM HIỂM SƯƠNG MÙ (EXPLORE) */}
-        {activeTab === "explore" && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
-                <span>🌫️ Khám Phá Màn Sương Foggo</span>
-              </h2>
-              <p className="text-xs text-slate-400">
-                Mỗi câu trả lời đúng xua tan màn sương che khuất hòn đảo. Giải mã bí mật để lộ kho báu và hang trùm!
-              </p>
-            </div>
-
-            {/* Tiến độ tan sương */}
-            <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400">
-                  Mức độ bao phủ sương mù Rừng Xanh
-                </span>
-                <span className="text-sm font-mono font-black text-white">
-                  {forestFog}%
-                </span>
-              </div>
-
-              <div className="w-full bg-slate-950 h-4 rounded-full overflow-hidden border border-slate-800 p-0.5">
-                <div
-                  className="bg-gradient-to-r from-amber-500 to-indigo-500 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${100 - forestFog}%` }}
-                />
-              </div>
-
-              {/* Các mốc lộ diện */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs font-mono">
-                <div className={`p-3 rounded-xl border ${forestFog <= 70 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300" : "bg-slate-950 border-slate-800 text-slate-500"}`}>
-                  <span className="font-bold block">≤ 70% Sương:</span>
-                  <span>Bãi tài nguyên giàu (x2 thu hoạch)</span>
-                </div>
-                <div className={`p-3 rounded-xl border ${forestFog <= 50 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300" : "bg-slate-950 border-slate-800 text-slate-500"}`}>
-                  <span className="font-bold block">≤ 50% Sương:</span>
-                  <span>Rương kho báu bí ẩn (+50 xu)</span>
-                </div>
-                <div className={`p-3 rounded-xl border ${forestFog <= 30 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300" : "bg-slate-950 border-slate-800 text-slate-500"}`}>
-                  <span className="font-bold block">≤ 30% Sương:</span>
-                  <span>Lộ diện Hang Heo Rừng Chúa</span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => startAction("explore", "forest", "Thám hiểm sương mù Rừng Xanh")}
-                className="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black font-mono text-sm transition-all shadow-lg shadow-amber-500/20 cursor-pointer flex items-center justify-center gap-2"
-              >
-                <Footprints className="w-4 h-4" />
-                <span>Tiến Vào Màn Sương (Thám Hiểm)</span>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 4: CHẾ TẠO (CRAFT) */}
-        {activeTab === "craft" && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
-                <span>🔨 Bàn Chế Tạo Sinh Tồn</span>
-              </h2>
-              <p className="text-xs text-slate-400">
-                Kết hợp nguyên liệu đã thu thập và trả lời câu hỏi để rèn vũ khí, nấu thức ăn và gia cố trại.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {CRAFTING_RECIPES.map((recipe) => (
-                <div
-                  key={recipe.id}
-                  className="p-5 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col justify-between"
-                >
-                  <div>
-                    <h3 className="font-bold text-white text-base mb-1">
-                      {recipe.name}
-                    </h3>
-                    <p className="text-xs text-slate-400 leading-snug mb-3">
-                      {recipe.description}
-                    </p>
-
-                    {/* Danh sách nguyên liệu cần */}
-                    <div className="space-y-1 py-2 border-t border-slate-800 text-xs font-mono">
-                      <span className="text-[10px] text-slate-500 uppercase tracking-wider block">
-                        Nguyên liệu yêu cầu:
-                      </span>
-                      {recipe.ingredients.map((ing) => {
-                        const itemDef = getItemDef(ing.itemId);
-                        const currentQty = playerState.inventory
-                          .filter((s) => s.itemId === ing.itemId)
-                          .reduce((sum, s) => sum + s.qty, 0);
-                        const hasEnough = currentQty >= ing.qty;
-
-                        return (
-                          <div
-                            key={ing.itemId}
-                            className={`flex items-center justify-between ${
-                              hasEnough ? "text-slate-300" : "text-rose-400"
-                            }`}
-                          >
-                            <span>{itemDef?.name || ing.itemId}:</span>
-                            <span className="font-bold">
-                              {currentQty}/{ing.qty}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => startAction("craft", recipe.id, recipe.name)}
-                    className="w-full mt-4 py-2.5 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-xs font-mono font-bold transition-all cursor-pointer"
-                  >
-                    Bắt Đầu Chế Tạo
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 5: TIỆM ĐỒ & THỢ RÈN (SHOP & BLACKSMITH) */}
+        {/* TAB 2: TIỆM ĐỒ & THỢ RÈN (SHOP & BLACKSMITH) */}
         {activeTab === "blacksmith" && (
           <div className="space-y-6">
             <div>

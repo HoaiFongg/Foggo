@@ -31,7 +31,7 @@
 | `/worlds` | `src/app/worlds/page.tsx` | All (phân quyền) | Danh sách hầm ngục đang quản lý & đảo đang tham gia, nút Solo Farm |
 | `/teacher/worlds/new` | `src/app/teacher/worlds/new/page.tsx` | Teacher, Admin | Mở hầm ngục mới: chọn bộ đề, chọn đồ hiếm & tỉ lệ rớt (10-100%) |
 | `/teacher/worlds/[id]` | `src/app/teacher/worlds/[id]/page.tsx` | Host, Admin | Bảng điều khiển thời gian thực: sương mù, khóa học sinh, bảng điểm |
-| `/world/[id]` | `src/app/world/[id]/page.tsx`, `WorldClient.tsx`, `MonsterBattleArena.tsx` | Player | Màn hình sinh tồn chính: Đấu trường Săn Quái Bất Tận (hoạt họa nhân vật & quái Slime 8 frames, rút lui trừ máu/rank), Hái lượm, Sương mù, Thợ rèn, Đêm |
+| `/world/[id]` | `src/app/world/[id]/page.tsx`, `WorldClient.tsx`, `MonsterBattleArena.tsx` | Player | Màn hình sinh tồn tối giản cho học sinh: 4 tab trực quan (Săn Quái, Thợ Rèn & Tiệm Đồ, Túi Đồ & Trang Bị, Bảng Xếp Hạng); lược bỏ rườm rà hái củi/đá/ghép lửa; Đấu trường Săn Quái Bất Tận (hoạt họa nhân vật & quái Slime 8 frames, rút lui trừ máu/rank, boss mở khóa sau 5 mạng quái) |
 | `/explore` | `src/app/explore/page.tsx` | User đã đăng nhập | Khám phá kho đề cộng đồng, sao chép 1 chạm vào kho cá nhân |
 | `/admin` | `src/app/admin/page.tsx` | Admin | Quản lý Học sinh & Giáo viên: đổi role, cấp mã khôi phục, tặng Đom Đóm |
 | `/pricing` | `src/app/pricing/page.tsx` | Công khai | Bảng giá gói Foggo Plus giáo viên / trường học |
@@ -202,4 +202,5 @@ erDiagram
 8. **Kiểm tra biên dịch:** chạy lệnh `npm run build` (kiểm tra toàn bộ 21 trang và TypeScript).
 9. **Đấu trường săn quái 2D & Bố cục Single-screen:** Xem [`src/app/world/[id]/MonsterBattleArena.tsx`](file:///d:/Project/Foggo/src/app/world/[id]/MonsterBattleArena.tsx) - gom trọn sân đấu quái và bảng câu hỏi trong `h-screen overflow-hidden`, hiển thị Xu an toàn bằng `Number.isFinite(...)` không gây lỗi `NaN`.
 10. **Cấu hình Đăng nhập 7 ngày nhận quà:** Đặt tại [`src/lib/daily-rewards-config.ts`](file:///d:/Project/Foggo/src/lib/daily-rewards-config.ts) (không để trong file `"use server"` để tránh lỗi Turbopack `DAILY_REWARDS_CONFIG.map is not a function`).
+11. **Tối giản trải nghiệm học sinh (UX Streamlining):** Toàn bộ giao diện học sinh được tinh gọn: thanh Header chỉ hiện 2 tab cần thiết (Tổng quan, Hầm ngục); Dashboard hiển thị ngay Trường/Lớp, Vàng, Điểm Thành Tích, Điểm danh 7 ngày và 2 nút chơi lớn; Màn chơi thế giới chỉ giữ 4 tab RPG quan trọng (Săn Quái, Thợ Rèn, Túi Đồ, Bảng Xếp Hạng), lược bỏ toàn bộ cơ chế hái lượm cành cây và chế lửa rườm rà.
 
