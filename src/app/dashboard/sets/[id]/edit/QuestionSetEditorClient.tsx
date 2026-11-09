@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -16,9 +16,18 @@ import {
   CheckCircle2,
   Flame,
   HelpCircle,
+  FileSpreadsheet,
+  Upload,
+  Download,
 } from "lucide-react";
 import { QUESTION_TYPES, getQuestionType, getAllQuestionTypes } from "@/question-types/registry";
 import { saveQuestionsBatch } from "@/app/dashboard/sets/actions";
+import {
+  downloadSampleTemplateExcel,
+  parseQuestionsFromExcel,
+  exportQuestionSetToExcel,
+  exportQuestionSetToJson,
+} from "@/lib/excel";
 import type { QuestionType } from "@/types/database";
 
 interface QuestionItem {
@@ -64,9 +73,57 @@ export function QuestionSetEditorClient({
   const [previewAnswer, setPreviewAnswer] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentQ = questions[activeIndex] || questions[0];
   const typeDef = getQuestionType(currentQ.type) || getQuestionType("single_choice")!;
+
+  // Xử lý nạp câu hỏi từ file Excel
+  async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const buf = await file.arrayBuffer();
+      const res = parseQuestionsFromExcel(buf);
+      if (!res.success || res.questions.length === 0) {
+        alert(res.errors.join("\n") || "Không đọc được câu hỏi từ file Excel.");
+        return;
+      }
+
+      const nextQuestions = [...questions];
+      const startIdx = nextQuestions.length;
+
+      res.questions.forEach((q, idx) => {
+        nextQuestions.push({
+          id: `q_excel_${Date.now()}_${idx}`,
+          position: startIdx + idx,
+          type: q.type,
+          content: q.content,
+          answer_key: q.answer_key,
+          time_limit_sec: q.time_limit_sec || 20,
+          points: q.points || 1000,
+          explanation: q.explanation,
+        });
+      });
+
+      setQuestions(nextQuestions);
+      setActiveIndex(startIdx);
+      alert(`Đã nạp thành công +${res.questions.length} câu hỏi từ file Excel! Hãy bấm 'Lưu thay đổi' để lưu vào cơ sở dữ liệu.`);
+    } catch (err: any) {
+      alert(`Lỗi khi đọc file Excel: ${err?.message || "Không xác định"}`);
+    } finally {
+      if (e.target) e.target.value = "";
+    }
+  }
+
+  function handleBackupExcel() {
+    exportQuestionSetToExcel(initialTitle, questions);
+  }
+
+  function handleBackupJson() {
+    exportQuestionSetToJson({ id: setId, title: initialTitle }, questions);
+  }
 
   // Thêm câu hỏi mới
   function handleAddQuestion(type: QuestionType = "single_choice") {
@@ -166,8 +223,49 @@ export function QuestionSetEditorClient({
           </div>
         </div>
 
-        {/* Chuyển đổi Soạn thảo / Xem trước & Nút Lưu */}
-        <div className="flex items-center gap-3">
+        {/* Nhập Excel & Sao lưu & Switch Soạn thảo / Xem trước & Nút Lưu */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Nhập Excel & Sao lưu */}
+          <div className="hidden sm:flex items-center gap-1.5">
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept=".xlsx, .xls, .csv"
+              onChange={handleImportExcel}
+              className="hidden"
+            />
+
+            <button
+              type="button"
+              onClick={() => downloadSampleTemplateExcel()}
+              className="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-medium border border-slate-800 flex items-center gap-1.5 cursor-pointer transition-colors"
+              title="Tải file mẫu Excel chuẩn"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="hidden md:inline">File mẫu</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="px-2.5 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+              title="Tải lên tệp Excel để nạp thêm câu hỏi vào bộ đề này"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              <span>Nhập Excel</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleBackupExcel}
+              className="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-medium border border-slate-800 flex items-center gap-1.5 cursor-pointer transition-colors"
+              title="Sao lưu danh sách câu hỏi ra file Excel (.xlsx)"
+            >
+              <Download className="w-3.5 h-3.5 text-blue-400" />
+              <span className="hidden md:inline">Sao lưu</span>
+            </button>
+          </div>
+
           {/* Switch Soạn thảo / Xem trước */}
           <div className="flex items-center p-1 bg-slate-950 rounded-xl border border-slate-800">
             <button

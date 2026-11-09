@@ -170,3 +170,87 @@ export async function saveQuestionsBatch(
   revalidatePath("/dashboard/sets");
   return { success: true };
 }
+
+export async function createQuestionSetFromExcel(data: {
+  title: string;
+  description?: string;
+  subject?: string;
+  gradeLevel?: string;
+  questions: Array<{
+    type: QuestionType;
+    content: any;
+    answer_key: any;
+    time_limit_sec: number;
+    points: number;
+    explanation?: string;
+  }>;
+}) {
+  const { user } = await requireUser(["teacher", "admin"]);
+  const supabase = await createClient();
+
+  const title = (data.title || "Bộ câu hỏi tải lên từ Excel").trim();
+  const { data: set, error: setError } = await supabase
+    .from("question_sets")
+    .insert({
+      owner_id: user.id,
+      title,
+      description: data.description || "Nhập tự động từ file Excel",
+      subject: data.subject || "Tổng hợp",
+      grade_level: data.gradeLevel || null,
+      visibility: "private",
+    })
+    .select("id")
+    .single();
+
+  if (setError || !set) {
+    return { error: setError?.message || "Không thể tạo bộ câu hỏi từ Excel" };
+  }
+
+  if (data.questions && data.questions.length > 0) {
+    const rows = data.questions.map((q, idx) => ({
+      set_id: set.id,
+      position: idx,
+      type: q.type,
+      content: q.content,
+      answer_key: q.answer_key,
+      time_limit_sec: q.time_limit_sec || 20,
+      points: q.points || 1000,
+      explanation: q.explanation || null,
+    }));
+
+    const { error: qError } = await supabase.from("questions").insert(rows);
+    if (qError) {
+      return { error: `Đã tạo bộ đề nhưng lỗi khi lưu câu hỏi: ${qError.message}` };
+    }
+  }
+
+  revalidatePath("/dashboard/sets");
+  return { success: true, setId: set.id };
+}
+
+export async function getQuestionsForExport(setId: string) {
+  const { user, profile } = await requireUser(["teacher", "admin"]);
+  const supabase = await createClient();
+  const isAdmin = profile.role === "admin";
+
+  let query = supabase.from("question_sets").select("*").eq("id", setId);
+  if (!isAdmin) {
+    query = query.or(`owner_id.eq.${user.id},visibility.eq.public`);
+  }
+  const { data: set, error: setError } = await query.single();
+  if (setError || !set) {
+    return { error: "Không tìm thấy bộ câu hỏi hoặc bạn không có quyền truy cập" };
+  }
+
+  const { data: questions, error: qError } = await supabase
+    .from("questions")
+    .select("*")
+    .eq("set_id", setId)
+    .order("position", { ascending: true });
+
+  if (qError) {
+    return { error: "Không thể lấy danh sách câu hỏi" };
+  }
+
+  return { success: true, set, questions: questions || [] };
+}

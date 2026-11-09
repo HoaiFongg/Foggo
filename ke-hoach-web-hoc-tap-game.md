@@ -2400,6 +2400,9 @@ Dùng **Vercel Cron** hoặc **Supabase pg_cron** để chạy việc kiểm tra
 - [ ] Upload ảnh lên Supabase Storage.
 - [x] Xây **registry** dạng câu hỏi + làm 2 dạng đầu: `single_choice`, `true_false` (Editor + Player + grade).
 - [x] Nút xem trước (Preview) từng câu.
+- [x] **Nhập câu hỏi từ Excel (.xlsx, .csv):** Bộ phân tích cú pháp thông minh nhận diện dạng câu hỏi, xem trước trực quan.
+- [x] **Tải file mẫu Excel chuẩn:** File mẫu đính kèm sẵn các câu hỏi mẫu đủ dạng và sheet hướng dẫn chi tiết.
+- [x] **Sao lưu (Backup) câu hỏi:** Hỗ trợ tải về file `.xlsx` và file `.json` phục vụ lưu trữ dự phòng và phục hồi.
 - **Kết quả:** giáo viên tạo được bộ câu hỏi cơ bản.
 
 ### Giai đoạn 3: Thế giới của lớp + realtime (Tuần 7–10)

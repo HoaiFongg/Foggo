@@ -292,7 +292,7 @@ export function applyHunt(
     // === TẤN CÔNG THÀNH CÔNG ===
     const weaponAtk = nextState.equipped.weapon?.durability && nextState.equipped.weapon.durability > 0
       ? (ITEM_REGISTRY[nextState.equipped.weapon.itemId]?.atk || 0) +
-        (nextState.equipped.weapon.enhancedLevel || 0) * 4
+      (nextState.equipped.weapon.enhancedLevel || 0) * 4
       : 0;
 
     const baseAtk = SURVIVAL_CONFIG.BASE_ATK + weaponAtk;
