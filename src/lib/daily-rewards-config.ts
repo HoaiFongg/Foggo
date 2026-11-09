@@ -79,3 +79,4 @@ export const DAILY_REWARDS_CONFIG: DailyRewardItem[] = [
     ],
   },
 ];
+

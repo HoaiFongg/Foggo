@@ -143,8 +143,8 @@ erDiagram
   - `config.ts`: Cân bằng chỉ số thân thiện tân thủ (Slime 20 HP, 3 ATK), đói giảm chậm, bảo lưu 100% xu khi chết (`DEATH_GOLD_KEEP_RATIO: 1.0`).
   - `clock.ts`: Tính toán pha ngày/đêm và ngày thứ mấy dựa trên thời gian thực.
   - `monsters.ts`: Từ điển quái vật theo khu vực, hàm `getRandomFarmMonster()` xuất hiện quái ngẫu nhiên liên hoàn.
-  - `src/app/world/[id]/MonsterBattleArena.tsx`: Sàn đấu 2D RPG tương tác thật — giao diện dàn trải đều trên màn hình máy tính (`max-w-7xl`, co dãn linh hoạt), hoạt họa nhân vật & Sprite Slime 8 frames, popup cấp cứu sinh lực khi hết máu (dùng thuốc có sẵn, mua bình máu 10 xu, hồi sinh trại miễn phí).
-  - `src/components/DailyLoginStreakCard.tsx`: Bảng điểm danh đăng nhập 7 ngày nhận quà liên tiếp trên Dashboard (`src/app/dashboard/actions.ts`).
+  - `src/app/world/[id]/MonsterBattleArena.tsx`: Đấu trường 2D RPG Single-Screen Viewport (`h-screen overflow-hidden`, không cần cuộn dọc) — sân đấu quái nhỏ gọn phía trên (180px–210px), hoạt họa nhân vật & Sprite Slime 8 frames, câu hỏi & đáp án 2 cột dàn trải đều bên dưới, nút vung kiếm kèm phím tắt Enter, hiển thị Xu an toàn (`Number.isFinite`) và popup cấp cứu sinh lực khi hết máu (mua bình máu 10 xu, dùng item túi đồ, hồi sinh trại miễn phí).
+  - `src/components/DailyLoginStreakCard.tsx`: Bảng điểm danh đăng nhập 7 ngày nhận quà liên tiếp trên Dashboard học sinh; cấu hình phần thưởng tách biệt tại `src/lib/daily-rewards-config.ts`, server action tại `src/app/dashboard/actions.ts`.
 
 ### Quy luật 2 chế độ (Class Dungeon vs Home Farm):
 1. **Hầm ngục lớp (`isClassDungeon = true`):**
