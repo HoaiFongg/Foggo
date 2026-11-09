@@ -8,10 +8,15 @@ export const dropdownSlotSchema = z.object({
 
 export const dropdownListContentSchema = z.object({
   /**
-   * Nội dung văn bản / đoạn văn bản có chèn ký tự {D} và <br>.
-   * Ví dụ: "{D} Bạn nên tắt tính năng tự động chạy (Autorun)... <br>{D} Bạn nên lưu trữ..."
+   * Câu hỏi / Đề bài ở phía trên.
+   * Ví dụ: "Đối với mỗi nhận định sau về an toàn thông tin, hãy chọn câu trả lời thích hợp:"
    */
   prompt: z.string().min(1, "Nội dung câu hỏi không được để trống"),
+  /**
+   * Nội dung các câu nhận định ở phía dưới có chèn ký tự {D} và <br>.
+   * Ví dụ: "{D} Bạn nên tắt tính năng tự động chạy (Autorun)... <br>{D} Bạn nên lưu trữ..."
+   */
+  passage: z.string().optional(),
   image_url: z.string().nullable().optional(),
   /**
    * Danh sách cấu hình cho từng vị trí {D}.
@@ -22,7 +27,7 @@ export const dropdownListContentSchema = z.object({
 export const dropdownListAnswerKeySchema = z.object({
   /**
    * answers: Bản đồ ánh xạ từng dropdown_id -> đáp án đúng (dạng chuỗi văn bản).
-   * Ví dụ: { d1: "Nên", d2: "Nên", d3: "Không nên" }
+   * Ví dụ: { d1: "Đúng", d2: "Đúng", d3: "Sai" } hoặc { d1: "Có", d2: "Có", d3: "Không" }
    */
   answers: z.record(z.string(), z.string()),
 });

@@ -235,7 +235,10 @@ export function parseQuestionsFromExcel(fileBuffer: ArrayBuffer | Uint8Array): P
         }
 
         content = {
-          prompt,
+          prompt: prompt.includes("{D}")
+            ? "Đối với mỗi nhận định sau đây, hãy chọn câu trả lời thích hợp:"
+            : prompt,
+          passage: prompt.includes("{D}") ? prompt : undefined,
           image_url: null,
           dropdowns,
         };

@@ -27,3 +27,4 @@ export function gradeDropdownList(
 
   return correctCount / slotIds.length;
 }
+
