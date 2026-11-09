@@ -24,13 +24,13 @@ export function MultiSelectPlayer({
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-6">
+    <div className="w-full mx-auto space-y-5 sm:space-y-6">
       {/* Tiêu đề câu hỏi */}
-      <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 text-center shadow-xl">
+      <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 text-center shadow-xl">
         <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block mb-3">
           Chọn nhiều đáp án (Có thể chọn nhiều mục)
         </span>
-        <h2 className="text-lg sm:text-2xl font-black text-white leading-relaxed font-sans">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white leading-relaxed font-sans">
           {content?.prompt || "..."}
         </h2>
 

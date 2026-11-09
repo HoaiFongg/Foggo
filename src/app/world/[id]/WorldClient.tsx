@@ -32,7 +32,7 @@ import { getSurvivalClock } from "@/game-modes/survival/clock";
 import { getItemDef, ITEM_REGISTRY } from "@/game-modes/survival/items";
 import { MONSTER_REGISTRY, getScaledMonster } from "@/game-modes/survival/monsters";
 import { CRAFTING_RECIPES } from "@/game-modes/survival/recipes";
-import { submitSurvivalAction, performSurvivalItemAction } from "./actions";
+import { submitSurvivalAction, performSurvivalItemAction, emergencyHealOrRevive } from "./actions";
 import { MonsterBattleArena } from "./MonsterBattleArena";
 import type { SurvivalPlayerState } from "@/game-modes/survival/engine";
 
@@ -247,7 +247,22 @@ export function WorldClient({
     });
     if (res.state) {
       setPlayerState(res.state);
-      showToast("Bạn đã hồi sinh an toàn tại Trại!");
+      showToast("Bạn đã hồi sinh an toàn tại Trại! Toàn bộ Xu được giữ nguyên.");
+    }
+  }
+
+  // Cấp cứu sinh lực tân thủ
+  async function handleEmergencyHealClient(action: "use_inventory" | "buy_potion" | "free_camp", itemId?: string) {
+    const res = await emergencyHealOrRevive({
+      sessionId,
+      action,
+      itemId,
+    });
+    if (res.state) {
+      setPlayerState(res.state);
+      showToast(res.message);
+    } else {
+      alert(res.error || res.message);
     }
   }
 
@@ -350,21 +365,35 @@ export function WorldClient({
 
       {/* CẢNH BÁO NẾU ĐANG BỊ NGẤT XỈU */}
       {isDead && (
-        <div className="bg-rose-950/90 border-b border-rose-500/40 p-4 text-center">
-          <div className="max-w-md mx-auto space-y-2">
+        <div className="bg-rose-950/95 border-b border-rose-500/40 p-4 sm:p-5 text-center">
+          <div className="max-w-lg mx-auto space-y-3">
             <span className="text-xs font-mono font-bold text-rose-300 uppercase tracking-wider block">
-              ⚠️ BẠN ĐÃ BỊ ĐÁNH GỤC
+              ⚠️ BẠN ĐANG HẾT SINH LỰC · BẢO LƯU 100% XU KIẾM ĐƯỢC
             </span>
             <p className="text-xs text-rose-200">
-              Bạn đã kiệt sức giữa đảo sương mù. Hãy trở về hồi sinh tại đống lửa trại!
+              Bạn có thể mua bình máu để tăng máu tiếp tục trận chiến hoặc hồi sinh miễn phí về trại:
             </p>
-            <button
-              type="button"
-              onClick={handleRevive}
-              className="px-5 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-slate-950 font-black text-xs font-mono transition-all shadow-lg cursor-pointer"
-            >
-              HỒI SINH TẠI TRẠI
-            </button>
+
+            <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1">
+              {/* Mua bình máu cấp cứu 10 xu */}
+              <button
+                type="button"
+                disabled={playerState.coins < 10}
+                onClick={() => handleEmergencyHealClient("buy_potion")}
+                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs font-mono transition-all shadow-md cursor-pointer disabled:opacity-50"
+              >
+                🧪 MUA BÌNH MÁU CẤP CỨU (-10 Xu, +50 HP)
+              </button>
+
+              {/* Hồi sinh miễn phí về trại */}
+              <button
+                type="button"
+                onClick={() => handleEmergencyHealClient("free_camp")}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs font-mono transition-all border border-slate-700 cursor-pointer"
+              >
+                🏕️ HỒI SINH TẠI TRẠI (MIỄN PHÍ)
+              </button>
+            </div>
           </div>
         </div>
       )}

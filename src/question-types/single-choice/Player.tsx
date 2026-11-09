@@ -37,27 +37,27 @@ export function SingleChoicePlayer({
   const options = content?.options || [];
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-6">
+    <div className="w-full mx-auto space-y-5 sm:space-y-6">
       {/* Tiêu đề câu hỏi */}
-      <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 text-center shadow-xl">
-        <h2 className="text-lg sm:text-2xl font-black text-white leading-relaxed font-sans">
+      <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 text-center shadow-xl">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white leading-relaxed font-sans">
           {content?.prompt || "..."}
         </h2>
 
         {content?.image_url && (
-          <div className="mt-4 max-w-sm mx-auto rounded-2xl overflow-hidden border border-slate-800 bg-slate-950">
+          <div className="mt-4 max-w-md mx-auto rounded-2xl overflow-hidden border border-slate-800 bg-slate-950">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={content.image_url}
               alt="Minh họa"
-              className="w-full h-auto max-h-56 object-contain mx-auto"
+              className="w-full h-auto max-h-64 object-contain mx-auto"
             />
           </div>
         )}
       </div>
 
       {/* Lưới các đáp án để người chơi bấm chọn */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5">
         {options.map((opt, idx) => {
           const isSelected = value === opt.id;
           const theme = OPTION_THEMES[idx % OPTION_THEMES.length];
@@ -69,14 +69,14 @@ export function SingleChoicePlayer({
               type="button"
               disabled={disabled}
               onClick={() => onChange(opt.id)}
-              className={`p-4 sm:p-5 rounded-2xl border-2 text-left flex items-center gap-4 transition-all duration-150 active:scale-[0.98] cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 ${
+              className={`p-5 sm:p-6 rounded-2xl border-2 text-left flex items-center gap-4 transition-all duration-150 active:scale-[0.98] cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 ${
                 isSelected
                   ? `${theme.selected} text-white`
                   : `bg-slate-900/80 border-slate-800 text-slate-200 ${theme.hover}`
               }`}
             >
               <div
-                className={`w-10 h-10 rounded-xl border flex items-center justify-center font-black font-mono text-sm shrink-0 transition-all ${
+                className={`w-11 h-11 rounded-xl border flex items-center justify-center font-black font-mono text-base shrink-0 transition-all ${
                   isSelected
                     ? "bg-amber-400 text-slate-950 border-amber-300 scale-105"
                     : theme.badge
@@ -85,7 +85,7 @@ export function SingleChoicePlayer({
                 {label}
               </div>
 
-              <span className="text-sm sm:text-base font-bold leading-snug">
+              <span className="text-base sm:text-lg md:text-xl font-bold leading-snug">
                 {opt.text}
               </span>
             </button>

@@ -4,21 +4,21 @@ export const SURVIVAL_CONFIG = {
   NIGHT_DURATION_SEC: 90,
   TOTAL_CYCLE_SEC: 240,
 
-  // Chỉ số cơ bản của người chơi (Cân bằng - Chống lạm phát chỉ số)
+  // Chỉ số cơ bản của người chơi (Cân bằng & thân thiện cho tân thủ)
   MAX_HP: 100,
   MAX_HUNGER: 100,
-  INITIAL_GOLD: 30,
-  BASE_ATK: 8,
+  INITIAL_GOLD: 50,
+  BASE_ATK: 12,
   MAX_INVENTORY_SLOTS: 16,
   MAX_STACK_SIZE: 20,
 
   // Quy tắc đói & mất máu
-  HUNGER_TICK_SEC: 6, // 1 điểm đói mỗi 6 giây
+  HUNGER_TICK_SEC: 6, // 1 điểm đói mỗi 6 giây (10 phút mới cạn)
   STARVING_HP_LOSS_SEC: 4, // Đói = 0: mất 1 HP mỗi 4 giây
 
-  // Trừng phạt khi chết: giữ 70% xu, giữ trang bị đang mặc, mất 50% nguyên liệu trong túi
-  DEATH_GOLD_KEEP_RATIO: 0.7,
-  DEATH_MATERIAL_LOSS_RATIO: 0.5,
+  // Giữ nguyên 100% xu và trang bị khi ngất xỉu (không trừ xu của người chơi)
+  DEATH_GOLD_KEEP_RATIO: 1.0,
+  DEATH_MATERIAL_LOSS_RATIO: 1.0,
 
   // Tăng tiến sức mạnh quái theo ngày
   MONSTER_HP_GROWTH_PER_DAY: 0.10, // +10% HP mỗi ngày

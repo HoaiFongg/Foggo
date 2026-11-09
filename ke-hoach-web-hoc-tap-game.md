@@ -1814,6 +1814,36 @@ Sự kiện ghi vào `survival_events`: `explore`, `fog_milestone`, `fog_cleared
    - Nút **"🏃 Rút Lui"** cho phép học sinh rời khỏi sàn đấu khi hết máu hoặc quái quá mạnh.
    - **Hình phạt tháo chạy (`applyFlee`):** Trong lúc quay lưng bỏ chạy, quái vật đuổi theo cào trúng lưng gây mất 15-20 HP (được giảm trừ nhờ giáp/mũ/khiên) và bị **trừ 50 Điểm Rank**, đồng thời ngắt chuỗi combo Streak.
 
+### 5A.24. Cơ Chế Cấp Cứu Khi Hết Máu & Bảo Lưu 100% Xu Cho Tân Thủ
+
+1. **Chỉ số cân bằng thân thiện cho tân thủ:**
+   - Quái vật giai đoạn đầu được điều chỉnh ở mức độ vừa phải (Slime 20 HP, 3 ATK; Sói con 30 HP, 4 ATK), sát thương cơ bản người chơi 12 ATK. Tân thủ chỉ cần trả lời 1-2 câu hỏi là hạ gục quái.
+   - Tốc độ giảm đói giảm nhẹ (12s/điểm) giúp học sinh tập trung suy nghĩ câu hỏi học tập mà không bị áp lực đói quá nhanh.
+2. **Cấp cứu & Mua item máu khi hết máu (`emergencyHealOrRevive`):**
+   - Khi nhân vật kiệt sức ($HP \le 0$): Thay vì bị văng khỏi ván hoặc trừng phạt nặng nề, hệ thống mở popup Cấp Cứu Sinh Lực với 3 lựa chọn:
+     - **Dùng bình máu / thức ăn có sẵn trong túi:** Hồi phục sinh lực tức thì mà không tốn xu.
+     - **Mua Bình Máu Cấp Cứu tại trận:** Giá ưu đãi tân thủ chỉ 10 Xu, hồi ngay +50 HP và tiếp tục vung kiếm chiến đấu tiếp.
+     - **Hồi sinh miễn phí tại lều trại:** Hồi đầy 100% sinh lực và quay về lều an toàn.
+3. **Bảo lưu tuyệt đối 100% Xu (Coins) và Trang bị:**
+   - Khi ngất xỉu hoặc hồi sinh, toàn bộ số Xu tích lũy được bảo lưu nguyên vẹn (`nextState.coins = state.coins`), không bao giờ bị trừ hay đánh rơi.
+
+### 5A.25. Hệ Thống Điểm Danh Đăng Nhập 7 Ngày Nhận Quà (7-Day Daily Login Streak)
+
+- Hiển thị trực quan ngay trên Dashboard học sinh (`DailyLoginStreakCard`):
+  - **Ngày 1:** +50 Vàng 🪙 + 10 Đom Đóm 🪲
+  - **Ngày 2:** +80 Vàng 🪙 + 1 Bình Máu Nhỏ 🧪 (+2 Băng gạc)
+  - **Ngày 3:** +120 Vàng 🪙 + 20 Đom Đóm 🪲
+  - **Ngày 4:** +150 Vàng 🪙 + 2 Bánh Mì 🍞 + 1 Giáp Da Tân Thủ 🛡️
+  - **Ngày 5:** +200 Vàng 🪙 + 35 Đom Đóm 🪲
+  - **Ngày 6:** +250 Vàng 🪙 + 1 Kiếm Gỗ Rừng / Kiếm Sắt ⚔️
+  - **Ngày 7:** +500 Vàng 🪙 + 60 Đom Đóm 🪲 + Rương Báu Hoàng Gia 👑
+- Tự động cộng Vàng và Đom Đóm vào tài khoản, thêm vật phẩm vào hành trang solo farm của học sinh.
+
+### 5A.26. Giao Diện Câu Hỏi Dàn Trải Đều & Tự Co Dãn Mượt Mà (Fluid Widescreen UI)
+
+- Loại bỏ hoàn toàn các khung giới hạn kích thước hẹp cố định (`max-w-2xl`, `max-w-3xl`) gây tình trạng câu hỏi bị dồn cụm vào giữa màn hình.
+- Chuyển sang bố cục dàn trải toàn màn hình (`w-full max-w-6xl / 7xl`), font chữ tiêu đề lớn (`text-xl sm:text-2xl md:text-3xl`), các thẻ phương án bấm chọn rộng rãi (`p-5 sm:p-6 md:p-7`), hỗ trợ tự động co dãn (responsive) mượt mà khi phóng to, thu nhỏ hoặc chơi trên các độ phân giải màn hình máy tính khác nhau.
+
 ---
 
 ## 5B. Vào chơi KHÔNG CẦN MÃ PIN: mô hình "Thế giới"

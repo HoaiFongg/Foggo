@@ -263,6 +263,85 @@ export async function performSurvivalItemAction({
 }
 
 /**
+ * Khi hết máu: Dùng thuốc có sẵn, Mua bình máu cấp cứu hoặc Hồi sinh miễn phí
+ */
+export async function emergencyHealOrRevive({
+  sessionId,
+  action,
+  itemId,
+}: {
+  sessionId: string;
+  action: "use_inventory" | "buy_potion" | "free_camp";
+  itemId?: string;
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Phiên đăng nhập đã hết hạn" };
+  }
+
+  const { data: player } = await supabase
+    .from("session_players")
+    .select("*")
+    .eq("session_id", sessionId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (!player) {
+    return { error: "Không tìm thấy người chơi trong thế giới này" };
+  }
+
+  const nowSec = Math.floor(Date.now() / 1000);
+  let state: SurvivalPlayerState =
+    player.state && Object.keys(player.state).length > 3
+      ? player.state
+      : initSurvivalState(nowSec);
+
+  let message = "";
+
+  if (action === "buy_potion") {
+    const potionCost = 10;
+    if (state.coins < potionCost) {
+      return { error: "Bạn không đủ xu để mua bình máu cấp cứu (cần 10 xu)" };
+    }
+    state = { ...state };
+    state.coins = Math.max(0, state.coins - potionCost);
+    state.hp = Math.min(state.maxHp, Math.max(50, state.hp + 50));
+    message = "Bạn đã dùng 10 Xu mua Bình Máu Cấp Cứu và hồi phục 50 HP!";
+  } else if (action === "use_inventory" && itemId) {
+    const res = applyEat(state, itemId);
+    state = res.state;
+    if (state.hp <= 0) state.hp = 30;
+    message = res.message;
+  } else {
+    state = applyRevive(state);
+    message = "Bạn đã hồi sinh miễn phí tại Trại! Toàn bộ Xu được bảo lưu nguyên vẹn.";
+  }
+
+  const adminClient = createAdminClient();
+  await adminClient
+    .from("session_players")
+    .update({
+      score: state.score,
+      gold: state.coins,
+      state,
+      state_version: (player.state_version || 0) + 1,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", player.id);
+
+  return {
+    success: true,
+    message,
+    state,
+  };
+}
+
+
+/**
  * Rút lui khỏi trận chiến (Flee)
  * Bị trừ máu và trừ điểm rank
  */

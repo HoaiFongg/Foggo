@@ -998,8 +998,9 @@ export function applyNightDefense(
 export function applyRevive(state: SurvivalPlayerState): SurvivalPlayerState {
   const nextState = { ...state };
   nextState.hp = SURVIVAL_CONFIG.MAX_HP;
-  nextState.hunger = 80;
-  nextState.coins = Math.round(nextState.coins * SURVIVAL_CONFIG.DEATH_GOLD_KEEP_RATIO);
+  nextState.hunger = 100;
+  // Xu được bảo lưu 100%, không bị mất khi ngất xỉu
+  nextState.coins = state.coins;
   nextState.currentBattle = null;
   nextState.streak = 0;
   return nextState;

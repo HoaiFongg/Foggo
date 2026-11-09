@@ -51,15 +51,15 @@ export function DropdownListPlayer({
   ).length;
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-5">
+    <div className="w-full mx-auto space-y-5 sm:space-y-6">
       {/* 1. KHỐI CÂU HỎI / ĐỀ BÀI (Ở PHÍA TRÊN) */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-slate-900/90 border border-slate-800 text-center shadow-xl space-y-2.5">
+      <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 text-center shadow-xl space-y-3">
         <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20 inline-block">
           Câu hỏi lựa chọn theo danh sách
         </span>
 
         {/* Câu hỏi ở phía trên */}
-        <h2 className="text-base sm:text-xl font-bold text-white leading-relaxed font-sans px-2">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white leading-relaxed font-sans px-2">
           {effectivePrompt || "Đọc các nhận định dưới đây và chọn đáp án thích hợp từ danh sách sổ xuống:"}
         </h2>
 

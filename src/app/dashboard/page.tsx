@@ -25,6 +25,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NavigationHeader } from "@/components/NavigationHeader";
 import { startHomeFarmSession } from "@/app/teacher/worlds/actions";
 import { QuickJoinCard } from "@/components/QuickJoinCard";
+import { DailyLoginStreakCard } from "@/components/DailyLoginStreakCard";
 
 export const dynamic = "force-dynamic";
 
@@ -157,6 +158,13 @@ export default async function DashboardPage() {
   const shieldDef = equipped.shield?.defense ?? 0;
   const totalDefensePercent = Math.min(60, Math.round((helmetDef + armorDef + shieldDef) * 100));
   const weaponAtk = equipped.weapon?.atk ?? 25; // Kiếm Gỗ mặc định Atk 25
+
+  // Dữ liệu điểm danh đăng nhập 7 ngày
+  const streakData = user?.user_metadata?.daily_streak || {
+    streakCount: 0,
+    lastClaimDate: null,
+    claimedDays: [],
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
@@ -513,7 +521,10 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            {/* 2. HAI CHẾ ĐỘ CHƠI CHÍNH: BÃI FARM QUÁI TẠI NHÀ & HẦM NGỤC LỚP HỌC */}
+            {/* 2. ĐIỂM DANH 7 NGÀY NHẬN QUÀ LIÊN TIẾP */}
+            <DailyLoginStreakCard initialStreakData={streakData} />
+
+            {/* 3. HAI CHẾ ĐỘ CHƠI CHÍNH: BÃI FARM QUÁI TẠI NHÀ & HẦM NGỤC LỚP HỌC */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Card 1: BÃI FARM QUÁI SINH TỒN (Chế độ tự luyện 24/7) */}
               <div className="relative p-6 rounded-3xl bg-gradient-to-br from-emerald-950/30 via-slate-900 to-slate-900 border border-emerald-500/30 shadow-xl flex flex-col justify-between">

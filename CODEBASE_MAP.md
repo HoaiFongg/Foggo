@@ -23,7 +23,7 @@
 | `/register` | `src/app/(auth)/register/page.tsx` | Công khai | Đăng ký tài khoản Giáo viên (cần email) |
 | `/register/student` | `src/app/(auth)/register/student/page.tsx` | Công khai | Đăng ký Học sinh KHÔNG CẦN EMAIL (User + Pass + Mã khôi phục) |
 | `/register/recovery-code` | `src/app/(auth)/register/recovery-code/page.tsx` | Công khai | Hiển thị mã khôi phục bí mật sau khi học sinh đăng ký |
-| `/dashboard` | `src/app/dashboard/page.tsx` | User đã đăng nhập | Phân quyền 2 giao diện riêng biệt: Giáo viên quản trị bộ đề & phòng chơi; Học sinh có Hub Thám Hiểm (Trường, Lớp, Tài nguyên, Bãi Farm Solo 24/7, Đấu trường Lớp, Trang bị & Lịch sử) |
+| `/dashboard` | `src/app/dashboard/page.tsx`, `DailyLoginStreakCard.tsx`, `actions.ts` | User đã đăng nhập | Phân quyền: Giáo viên quản trị bộ đề & phòng; Học sinh có Hub Thám Hiểm (Trường, Lớp, Tài nguyên, Điểm danh 7 ngày nhận quà, Bãi Farm Solo 24/7, Đấu trường Lớp, Trang bị & Lịch sử) |
 | `/dashboard/sets` | `src/app/dashboard/sets/page.tsx` | Teacher, Admin | Danh sách bộ câu hỏi, Import/Export Excel, Xóa bộ đề (Học sinh bị ẩn) |
 | `/dashboard/sets/new` | `src/app/dashboard/sets/new/page.tsx` | Teacher, Admin | Khởi tạo nhanh bộ đề mới (tiêu đề, môn, lớp) |
 | `/dashboard/sets/[id]/edit` | `src/app/dashboard/sets/[id]/edit/page.tsx` | Owner, Admin | Trình soạn thảo 8 dạng câu hỏi, Import Excel vào bộ đề, Tải file mẫu |
@@ -138,12 +138,13 @@ erDiagram
 ## 6. BẢN ĐỒ GAME ENGINE SINH TỒN (SURVIVAL ENGINE)
 - **Thư mục:** `src/game-modes/survival/`
 - **Tệp cốt lõi:**
-  - `engine.ts`: Các hàm thuần cập nhật trạng thái game (`tick`, `applyHunt`, `applyFlee`, `applyGather`, `applyExplore`, `applyCraft`, `applyBlacksmithBuy`, `applyNightDefense`, `applyRespawn`).
+  - `engine.ts`: Các hàm thuần cập nhật trạng thái game (`tick`, `applyHunt`, `applyFlee`, `applyGather`, `applyExplore`, `applyCraft`, `applyBlacksmithBuy`, `applyNightDefense`, `applyRevive`, `applyRespawn`). Bảo lưu 100% xu của người chơi khi ngất xỉu.
   - `items.ts`: Toàn bộ từ điển vật phẩm (`ITEM_REGISTRY`), vũ khí, giáp, thuốc, và danh sách báu vật hiếm hầm ngục (`DUNGEON_RARE_ITEMS`).
-  - `config.ts`: Cân bằng chỉ số đói, máu, sát thương quái, chu kỳ ngày/đêm (ngày 150s, đêm 90s).
+  - `config.ts`: Cân bằng chỉ số thân thiện tân thủ (Slime 20 HP, 3 ATK), đói giảm chậm, bảo lưu 100% xu khi chết (`DEATH_GOLD_KEEP_RATIO: 1.0`).
   - `clock.ts`: Tính toán pha ngày/đêm và ngày thứ mấy dựa trên thời gian thực.
-  - `monsters.ts`: Từ điển quái vật theo khu vực (Heo Rừng, Nhện Đêm, Sói Sương Mù, Chúa Rừng Xanh), hàm `getRandomFarmMonster()` xuất hiện quái ngẫu nhiên liên hoàn.
-  - `src/app/world/[id]/MonsterBattleArena.tsx`: Sàn đấu 2D RPG tương tác thật — hoạt họa nhân vật lao lên chém quái khi đúng, quái phản công khi sai, bộ Sprite Slime 8-frame (`/sprites/slime_*_clean.png`), chữ nổi sát thương và nút "Rút lui" (trừ máu + rank).
+  - `monsters.ts`: Từ điển quái vật theo khu vực, hàm `getRandomFarmMonster()` xuất hiện quái ngẫu nhiên liên hoàn.
+  - `src/app/world/[id]/MonsterBattleArena.tsx`: Sàn đấu 2D RPG tương tác thật — giao diện dàn trải đều trên màn hình máy tính (`max-w-7xl`, co dãn linh hoạt), hoạt họa nhân vật & Sprite Slime 8 frames, popup cấp cứu sinh lực khi hết máu (dùng thuốc có sẵn, mua bình máu 10 xu, hồi sinh trại miễn phí).
+  - `src/components/DailyLoginStreakCard.tsx`: Bảng điểm danh đăng nhập 7 ngày nhận quà liên tiếp trên Dashboard (`src/app/dashboard/actions.ts`).
 
 ### Quy luật 2 chế độ (Class Dungeon vs Home Farm):
 1. **Hầm ngục lớp (`isClassDungeon = true`):**

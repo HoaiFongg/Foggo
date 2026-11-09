@@ -43,14 +43,14 @@ export function TrueFalsePlayer({
   const answeredCount = Object.keys(currentAnswers).length;
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-5">
+    <div className="w-full mx-auto space-y-5 sm:space-y-6">
       {/* 1. Phần đề bài / Câu dẫn */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-slate-900/90 border border-slate-800 text-center shadow-xl space-y-2">
+      <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 text-center shadow-xl space-y-3">
         <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20 inline-block">
           Câu hỏi Đúng / Sai
         </span>
 
-        <h2 className="text-base sm:text-xl font-bold text-white leading-relaxed font-sans">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white leading-relaxed font-sans">
           {content?.prompt || "Đọc các nhận định sau đây và chọn Đúng hoặc Sai:"}
         </h2>
 

@@ -205,7 +205,7 @@ describe("Survival Game Engine Unit Tests", () => {
       state.coins = 100;
       const revived = applyRevive(state);
       assert.equal(revived.hp, 100);
-      assert.equal(revived.coins, 70); // giữ 70% xu
+      assert.equal(revived.coins, 100); // giữ nguyên 100% xu
     });
   });
 });
