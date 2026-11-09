@@ -4,11 +4,11 @@ export const SURVIVAL_CONFIG = {
   NIGHT_DURATION_SEC: 90,
   TOTAL_CYCLE_SEC: 240,
 
-  // Chỉ số cơ bản của người chơi
+  // Chỉ số cơ bản của người chơi (Cân bằng - Chống lạm phát chỉ số)
   MAX_HP: 100,
   MAX_HUNGER: 100,
   INITIAL_GOLD: 30,
-  BASE_ATK: 10,
+  BASE_ATK: 8,
   MAX_INVENTORY_SLOTS: 16,
   MAX_STACK_SIZE: 20,
 

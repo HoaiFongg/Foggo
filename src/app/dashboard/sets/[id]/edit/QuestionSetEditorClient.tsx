@@ -175,15 +175,109 @@ export function QuestionSetEditorClient({
     setActiveIndex(targetIdx);
   }
 
-  // Đổi dạng câu hỏi cho câu hiện tại
+  // Đổi dạng câu hỏi cho câu hiện tại (BẢO LƯU NỘI DUNG CÂU HỎI VÀ PHƯƠNG ÁN ĐÃ NHẬP)
   function handleChangeType(newType: QuestionType) {
     const def = getQuestionType(newType);
     if (!def) return;
+
+    const defaultContent = def.defaultContent();
+    const defaultKey = def.defaultAnswerKey();
+
+    const nextContent = { ...defaultContent };
+    let nextKey = { ...defaultKey };
+
+    // 1. Luôn bảo lưu câu hỏi (prompt) nếu giáo viên đã nhập
+    if (
+      currentQ.content?.prompt &&
+      typeof currentQ.content.prompt === "string" &&
+      currentQ.content.prompt.trim().length > 0
+    ) {
+      nextContent.prompt = currentQ.content.prompt;
+    }
+
+    // 2. Bảo lưu hình ảnh nếu có
+    if (currentQ.content?.image_url) {
+      nextContent.image_url = currentQ.content.image_url;
+    }
+
+    // 3. Chuyển đổi và bảo lưu phương án / nhận định tương thích
+    const currentType = currentQ.type;
+
+    // TH A: single_choice <-> multi_select
+    if (
+      (currentType === "single_choice" && newType === "multi_select") ||
+      (currentType === "multi_select" && newType === "single_choice")
+    ) {
+      if (Array.isArray(currentQ.content?.options) && currentQ.content.options.length > 0) {
+        nextContent.options = currentQ.content.options;
+      }
+      if (newType === "multi_select") {
+        nextKey = {
+          correct_ids: currentQ.answer_key?.correct_id
+            ? [currentQ.answer_key.correct_id]
+            : (currentQ.answer_key?.correct_ids || []),
+        };
+      } else {
+        nextKey = {
+          correct_id:
+            currentQ.answer_key?.correct_ids?.[0] ||
+            currentQ.answer_key?.correct_id ||
+            currentQ.content?.options?.[0]?.id ||
+            "",
+        };
+      }
+    }
+    // TH B: single_choice / multi_select -> true_false
+    else if ((currentType === "single_choice" || currentType === "multi_select") && newType === "true_false") {
+      if (Array.isArray(currentQ.content?.options) && currentQ.content.options.length > 0) {
+        nextContent.statements = currentQ.content.options.map((opt: any) => ({
+          id: opt.id || crypto.randomUUID().slice(0, 8),
+          statement: opt.text || "",
+        }));
+        const answers: Record<string, boolean> = {};
+        const correctList =
+          currentQ.answer_key?.correct_ids ||
+          (currentQ.answer_key?.correct_id ? [currentQ.answer_key.correct_id] : []);
+        nextContent.statements.forEach((st: any) => {
+          answers[st.id] = correctList.includes(st.id);
+        });
+        nextKey = { answers };
+      }
+    }
+    // TH C: true_false -> single_choice / multi_select
+    else if (currentType === "true_false" && (newType === "single_choice" || newType === "multi_select")) {
+      if (Array.isArray(currentQ.content?.statements) && currentQ.content.statements.length > 0) {
+        nextContent.options = currentQ.content.statements.map((st: any) => ({
+          id: st.id || crypto.randomUUID().slice(0, 8),
+          text: st.statement || "",
+        }));
+        if (newType === "single_choice") {
+          const trueId = currentQ.content.statements.find(
+            (st: any) => currentQ.answer_key?.answers?.[st.id] === true
+          )?.id;
+          nextKey = { correct_id: trueId || nextContent.options[0]?.id || "" };
+        } else {
+          const trueIds = currentQ.content.statements
+            .filter((st: any) => currentQ.answer_key?.answers?.[st.id] === true)
+            .map((st: any) => st.id);
+          nextKey = {
+            correct_ids: trueIds.length > 0 ? trueIds : [nextContent.options[0]?.id],
+          };
+        }
+      }
+    }
+    // TH D: Chuyển sang dropdown_list
+    else if (newType === "dropdown_list") {
+      if (Array.isArray(currentQ.content?.options) && currentQ.content.options.length > 0) {
+        nextContent.options = currentQ.content.options;
+      }
+    }
+
     const updated = {
       ...currentQ,
       type: newType,
-      content: def.defaultContent(),
-      answer_key: def.defaultAnswerKey(),
+      content: nextContent,
+      answer_key: nextKey,
     };
     updateCurrentQuestion(updated);
     setPreviewAnswer(null);

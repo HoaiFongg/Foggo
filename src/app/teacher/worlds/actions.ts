@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth";
 import { generateJoinToken } from "@/lib/tokens";
 
@@ -66,9 +67,10 @@ export async function createWorld(formData: FormData) {
 export async function startHomeFarmSession(): Promise<void> {
   const { user, profile } = await requireUser(["student", "teacher", "admin"]);
   const supabase = await createClient();
+  const adminClient = createAdminClient();
 
   // Kiểm tra xem đã có phiên Solo Farm đang mở chưa
-  const { data: existingPlayer } = await supabase
+  const { data: existingPlayer } = await adminClient
     .from("session_players")
     .select("session_id, game_sessions(*)")
     .eq("user_id", user.id)
@@ -85,7 +87,7 @@ export async function startHomeFarmSession(): Promise<void> {
   }
 
   // Lấy bộ câu hỏi công khai đầu tiên để làm ngân hàng câu hỏi
-  const { data: sampleSet } = await supabase
+  const { data: sampleSet } = await adminClient
     .from("question_sets")
     .select("id")
     .eq("visibility", "public")
@@ -93,7 +95,7 @@ export async function startHomeFarmSession(): Promise<void> {
     .single();
 
   const token = generateJoinToken();
-  const { data: session, error } = await supabase
+  const { data: session, error } = await adminClient
     .from("game_sessions")
     .insert({
       host_id: user.id,
@@ -118,22 +120,53 @@ export async function startHomeFarmSession(): Promise<void> {
     throw new Error("Không thể tạo bãi farm quái luyện tập");
   }
 
-  // Khởi tạo người chơi với túi đồ cơ bản và 50 xu để ghé Thợ rèn & Tiệm đồ
-  await supabase.from("session_players").insert({
+  // Khởi tạo người chơi với trạng thái sinh tồn đầy đủ và 30 xu cơ bản
+  const initialSurvivalState = {
+    hp: 100,
+    maxHp: 100,
+    hunger: 100,
+    maxHunger: 100,
+    coins: 30,
+    score: 0,
+    playSec: 0,
+    lastTickTimestamp: Math.floor(Date.now() / 1000),
+    streak: 0,
+    currentZone: "forest",
+    fog: { forest: 100, cave: 100, swamp: 100 },
+    revealedPoints: [],
+    camp: { level: 1, hp: 100, maxHp: 100, hasCampfire: false, barricades: 0 },
+    equipped: {
+      weapon: { itemId: "wooden_club", durability: 35, enhancedLevel: 0 },
+    },
+    inventory: [
+      { slotIndex: 0, itemId: "wooden_club", qty: 1, durability: 35 },
+      { slotIndex: 1, itemId: "apple", qty: 3 },
+      { slotIndex: 2, itemId: "bandage", qty: 1 },
+    ],
+    monstersKilled: 0,
+    bossesKilled: 0,
+    deaths: 0,
+    nightWavesSurvived: 0,
+    currentBattle: null,
+  };
+
+  const { error: insertPlayerError } = await adminClient.from("session_players").insert({
     session_id: session.id,
     user_id: user.id,
     nickname: profile.display_name || "Nhà Thám Hiểm",
     hp: 100,
     max_hp: 100,
     score: 0,
-    gold: 50,
-    inventory: [
-      { slotIndex: 0, itemId: "wooden_club", qty: 1, durability: 40 },
-      { slotIndex: 1, itemId: "apple", qty: 3 },
-    ],
-    equipment: { weapon: "wooden_club" },
-    state: { hp: 100, hunger: 100, fogLevel: 0.8 },
+    gold: 30,
+    inventory: initialSurvivalState.inventory,
+    equipment: initialSurvivalState.equipped,
+    state: initialSurvivalState,
   });
+
+  if (insertPlayerError) {
+    console.error("Lỗi khởi tạo session_players:", insertPlayerError);
+    throw new Error(`Không thể khởi tạo nhân vật: ${insertPlayerError.message}`);
+  }
 
   revalidatePath("/worlds");
   redirect(`/world/${session.id}`);

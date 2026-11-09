@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: Request) {
   try {
@@ -112,7 +113,8 @@ export async function POST(request: Request) {
       ],
     };
 
-    const { data: newPlayer, error: createPlayerError } = await supabase
+    const adminClient = createAdminClient();
+    const { data: newPlayer, error: createPlayerError } = await adminClient
       .from("session_players")
       .insert({
         session_id: session.id,

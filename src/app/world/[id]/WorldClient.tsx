@@ -71,6 +71,9 @@ export function WorldClient({
     "hunt" | "gather" | "explore" | "craft" | "blacksmith" | "backpack" | "leaderboard"
   >("hunt");
 
+  // Bộ lọc cửa hàng / Thợ rèn
+  const [shopTab, setShopTab] = useState<"all" | "weapons" | "defense" | "consumables">("all");
+
   // State người chơi
   const [playerState, setPlayerState] = useState<SurvivalPlayerState>(
     initialPlayer.state && Object.keys(initialPlayer.state).length > 3
@@ -197,6 +200,21 @@ export function WorldClient({
     if (res.state) {
       setPlayerState(res.state);
       showToast(res.message);
+    }
+  }
+
+  // Mặc / Đổi trang bị từ túi đồ
+  async function handleEquipItem(slotIndex: number) {
+    const res = await performSurvivalItemAction({
+      sessionId,
+      action: "equip",
+      slotIndex,
+    });
+    if (res.state) {
+      setPlayerState(res.state);
+      showToast(res.message);
+    } else {
+      alert(res.error || res.message);
     }
   }
 
@@ -410,7 +428,7 @@ export function WorldClient({
             }`}
           >
             <ShoppingBag className="w-3.5 h-3.5" />
-            <span>Thợ Rèn</span>
+            <span>Cửa Hàng & Thợ Rèn</span>
           </button>
 
           <button
@@ -729,62 +747,223 @@ export function WorldClient({
           </div>
         )}
 
-        {/* TAB 5: THỢ RÈN (BLACKSMITH) */}
+        {/* TAB 5: TIỆM ĐỒ & THỢ RÈN (SHOP & BLACKSMITH) */}
         {activeTab === "blacksmith" && (
           <div className="space-y-6">
             <div>
               <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
-                <span>🔨 Lò Rèn Bác Búa (Blacksmith)</span>
+                <span>🏪 Tiệm Đồ & Lò Rèn Thám Hiểm</span>
               </h2>
               <p className="text-xs text-slate-400">
-                Dùng xu để mua trang bị vũ khí, sửa chữa vũ khí hỏng hoặc cường hóa sức mạnh.
+                Sử dụng xu kiếm được để mua trang bị vũ khí, giáp, mũ, khiên và nhu yếu phẩm.
               </p>
             </div>
 
-            {/* Vũ khí đang trang bị */}
-            {playerState.equipped.weapon && (
-              <div className="p-5 rounded-3xl bg-slate-900 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-2xl">
-                    ⚔️
+            {/* BẢNG TRANG BỊ CỦA NHÂN VẬT (4 Ô: VŨ KHÍ, MŨ, GIÁP, KHIÊN) */}
+            <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-3">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-amber-400 block">
+                Trang bị trên người:
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {/* 1. Vũ khí */}
+                <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl">⚔️</span>
+                    <div>
+                      <span className="text-[9px] font-mono uppercase text-slate-400 block">Vũ khí</span>
+                      <h4 className="font-bold text-xs text-white truncate max-w-[140px]">
+                        {playerState.equipped.weapon
+                          ? getItemDef(playerState.equipped.weapon.itemId)?.name
+                          : "Chưa trang bị"}
+                        {playerState.equipped.weapon?.enhancedLevel
+                          ? ` +${playerState.equipped.weapon.enhancedLevel}`
+                          : ""}
+                      </h4>
+                      {playerState.equipped.weapon && (
+                        <span className="text-[10px] font-mono text-amber-300 block">
+                          +
+                          {(getItemDef(playerState.equipped.weapon.itemId)?.atk || 0) +
+                            (playerState.equipped.weapon.enhancedLevel || 0) * 4}{" "}
+                          Công · Bền: {playerState.equipped.weapon.durability}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400">
-                      Vũ khí đang cầm:
-                    </span>
-                    <h3 className="font-bold text-white text-base">
-                      {getItemDef(playerState.equipped.weapon.itemId)?.name || "Vũ khí"}
-                      {playerState.equipped.weapon.enhancedLevel ? ` +${playerState.equipped.weapon.enhancedLevel}` : ""}
-                    </h3>
-                    <p className="text-xs text-slate-400 font-mono">
-                      Độ bền: {playerState.equipped.weapon.durability}/
-                      {getItemDef(playerState.equipped.weapon.itemId)?.durability || 50}
-                    </p>
-                  </div>
+                  {playerState.equipped.weapon && (
+                    <div className="flex items-center gap-1.5 mt-3 pt-2 border-t border-slate-900">
+                      <button
+                        type="button"
+                        onClick={() => handleBlacksmith("repair", playerState.equipped.weapon!.itemId)}
+                        className="flex-1 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-all cursor-pointer"
+                      >
+                        Sửa
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleBlacksmith("enhance", playerState.equipped.weapon!.itemId)}
+                        className="flex-1 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-[10px] font-mono font-bold text-slate-950 transition-all cursor-pointer"
+                      >
+                        Cường hóa (+4)
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleBlacksmith("repair", playerState.equipped.weapon!.itemId)}
-                    className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-mono font-bold text-slate-200 transition-all cursor-pointer"
-                  >
-                    Sửa chữa (Xu)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleBlacksmith("enhance", playerState.equipped.weapon!.itemId)}
-                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-mono font-bold transition-all cursor-pointer"
-                  >
-                    Cường hóa (+4 ATK)
-                  </button>
+                {/* 2. Mũ bảo hộ */}
+                <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl">🪖</span>
+                    <div>
+                      <span className="text-[9px] font-mono uppercase text-slate-400 block">Mũ bảo hộ</span>
+                      <h4 className="font-bold text-xs text-white truncate max-w-[140px]">
+                        {playerState.equipped.helmet
+                          ? getItemDef(playerState.equipped.helmet.itemId)?.name
+                          : "Chưa trang bị"}
+                      </h4>
+                      {playerState.equipped.helmet && (
+                        <span className="text-[10px] font-mono text-emerald-300 block">
+                          -
+                          {Math.round(
+                            (getItemDef(playerState.equipped.helmet.itemId)?.defensePct || 0) * 100
+                          )}
+                          % Sát thương · Bền: {playerState.equipped.helmet.durability}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {playerState.equipped.helmet && (
+                    <div className="mt-3 pt-2 border-t border-slate-900">
+                      <button
+                        type="button"
+                        onClick={() => handleBlacksmith("repair", playerState.equipped.helmet!.itemId)}
+                        className="w-full py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-all cursor-pointer"
+                      >
+                        Sửa chữa
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. Áo giáp */}
+                <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl">🛡️</span>
+                    <div>
+                      <span className="text-[9px] font-mono uppercase text-slate-400 block">Áo giáp</span>
+                      <h4 className="font-bold text-xs text-white truncate max-w-[140px]">
+                        {playerState.equipped.armor
+                          ? getItemDef(playerState.equipped.armor.itemId)?.name
+                          : "Chưa trang bị"}
+                      </h4>
+                      {playerState.equipped.armor && (
+                        <span className="text-[10px] font-mono text-emerald-300 block">
+                          -
+                          {Math.round(
+                            (getItemDef(playerState.equipped.armor.itemId)?.defensePct || 0) * 100
+                          )}
+                          % Sát thương · Bền: {playerState.equipped.armor.durability}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {playerState.equipped.armor && (
+                    <div className="mt-3 pt-2 border-t border-slate-900">
+                      <button
+                        type="button"
+                        onClick={() => handleBlacksmith("repair", playerState.equipped.armor!.itemId)}
+                        className="w-full py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-all cursor-pointer"
+                      >
+                        Sửa chữa
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. Khiên chắn */}
+                <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl">🛡️</span>
+                    <div>
+                      <span className="text-[9px] font-mono uppercase text-slate-400 block">Khiên chắn</span>
+                      <h4 className="font-bold text-xs text-white truncate max-w-[140px]">
+                        {playerState.equipped.shield
+                          ? getItemDef(playerState.equipped.shield.itemId)?.name
+                          : "Chưa trang bị"}
+                      </h4>
+                      {playerState.equipped.shield && (
+                        <span className="text-[10px] font-mono text-emerald-300 block">
+                          -
+                          {Math.round(
+                            (getItemDef(playerState.equipped.shield.itemId)?.defensePct || 0) * 100
+                          )}
+                          % Sát thương · Bền: {playerState.equipped.shield.durability}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {playerState.equipped.shield && (
+                    <div className="mt-3 pt-2 border-t border-slate-900">
+                      <button
+                        type="button"
+                        onClick={() => handleBlacksmith("repair", playerState.equipped.shield!.itemId)}
+                        className="w-full py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-all cursor-pointer"
+                      >
+                        Sửa chữa
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
 
-            {/* Danh mục vũ khí bán lẻ */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {["wooden_club", "stone_axe", "stone_sword"].map((itemId) => {
+            {/* BỘ LỌC CỬA HÀNG */}
+            <div className="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-3">
+              {[
+                { id: "all", label: "🌟 Tất Cả" },
+                { id: "weapons", label: "⚔️ Kiếm & Vũ Khí" },
+                { id: "defense", label: "🛡️ Giáp, Mũ & Khiên" },
+                { id: "consumables", label: "🧪 Nhu Yếu Phẩm & Thức Ăn" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setShopTab(tab.id as any)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                    shopTab === tab.id
+                      ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20"
+                      : "bg-slate-900 text-slate-400 hover:text-white"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* DANH SÁCH MẶT HÀNG TRONG CỬA HÀNG */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                // Kiếm & Vũ khí
+                ...(shopTab === "all" || shopTab === "weapons"
+                  ? ["wooden_club", "wooden_sword", "stone_axe", "stone_sword", "iron_sword"]
+                  : []),
+                // Giáp, Mũ & Khiên
+                ...(shopTab === "all" || shopTab === "defense"
+                  ? [
+                      "straw_hat",
+                      "leather_helmet",
+                      "iron_helmet",
+                      "cloth_armor",
+                      "leather_armor",
+                      "iron_armor",
+                      "wooden_shield",
+                      "iron_shield",
+                    ]
+                  : []),
+                // Nhu yếu phẩm & Thức ăn
+                ...(shopTab === "all" || shopTab === "consumables"
+                  ? ["apple", "bread", "cooked_meat", "bandage", "small_healing_potion", "healing_potion"]
+                  : []),
+              ].map((itemId) => {
                 const item = getItemDef(itemId);
                 if (!item) return null;
                 const canAfford = playerState.coins >= item.buyPrice;
@@ -792,16 +971,52 @@ export function WorldClient({
                 return (
                   <div
                     key={item.id}
-                    className="p-5 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col justify-between"
+                    className="p-5 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-all"
                   >
                     <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-2xl">
+                          {item.category === "weapon"
+                            ? "⚔️"
+                            : item.category === "helmet"
+                            ? "🪖"
+                            : item.category === "armor"
+                            ? "🛡️"
+                            : item.category === "shield"
+                            ? "🛡️"
+                            : item.category === "food"
+                            ? "🍖"
+                            : "🧪"}
+                        </span>
+                        <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                          {item.category === "weapon"
+                            ? "VŨ KHÍ"
+                            : item.category === "helmet"
+                            ? "MŨ"
+                            : item.category === "armor"
+                            ? "GIÁP"
+                            : item.category === "shield"
+                            ? "KHIÊN"
+                            : item.category === "food"
+                            ? "THỨC ĂN"
+                            : "TIÊU HAO"}
+                        </span>
+                      </div>
                       <h3 className="font-bold text-white text-base mb-1">{item.name}</h3>
                       <p className="text-xs text-slate-400 leading-snug mb-3">
                         {item.description}
                       </p>
-                      <div className="text-xs font-mono space-y-1 text-slate-300">
-                        <div>⚔️ Công: +{item.atk} ATK</div>
-                        <div>🛡️ Độ bền: {item.durability}</div>
+
+                      <div className="text-xs font-mono space-y-1 text-slate-300 py-2 border-t border-slate-800/80">
+                        {item.atk !== undefined && <div>⚔️ Sát thương: +{item.atk} ATK</div>}
+                        {item.defensePct !== undefined && (
+                          <div>🛡️ Phòng thủ: -{Math.round(item.defensePct * 100)}% sát thương</div>
+                        )}
+                        {item.healHp !== undefined && (
+                          <div>❤️ Hồi phục: {item.healHp > 0 ? `+${item.healHp}` : item.healHp} HP</div>
+                        )}
+                        {item.healHunger !== undefined && <div>🍗 Giảm đói: +{item.healHunger} điểm</div>}
+                        {item.durability !== undefined && <div>🔨 Độ bền: {item.durability}</div>}
                       </div>
                     </div>
 
@@ -811,7 +1026,7 @@ export function WorldClient({
                       onClick={() => handleBlacksmith("buy_gear", item.id)}
                       className={`w-full mt-4 py-2.5 rounded-xl font-bold font-mono text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                         canAfford
-                          ? "bg-amber-500 hover:bg-amber-400 text-slate-950"
+                          ? "bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20"
                           : "bg-slate-800 text-slate-500"
                       }`}
                     >
@@ -834,7 +1049,7 @@ export function WorldClient({
                   <span>🎒 Túi Đồ Sinh Tồn ({playerState.inventory.length}/16 ô)</span>
                 </h2>
                 <p className="text-xs text-slate-400">
-                  Chạm vào thức ăn để xua tan cơn đói, hoặc dùng băng gạc để hồi phục sinh lực.
+                  Chạm vào vũ khí/giáp/mũ/khiên để trang bị, chạm thức ăn/bình máu để sử dụng ngay.
                 </p>
               </div>
             </div>
@@ -856,18 +1071,32 @@ export function WorldClient({
                   );
                 }
 
+                const isEquippable = ["weapon", "armor", "helmet", "shield"].includes(
+                  itemDef.category
+                );
                 const canEat = itemDef.category === "food" || itemDef.category === "consumable";
 
                 return (
                   <div
                     key={idx}
-                    onClick={() => canEat && handleEatItem(itemDef.id)}
-                    className={`aspect-square p-2 rounded-2xl border flex flex-col justify-between transition-all select-none ${
-                      canEat
-                        ? "bg-slate-900 border-amber-500/40 hover:border-amber-400 cursor-pointer shadow-md"
+                    onClick={() => {
+                      if (isEquippable) handleEquipItem(slot.slotIndex);
+                      else if (canEat) handleEatItem(itemDef.id);
+                    }}
+                    className={`aspect-square p-2.5 rounded-2xl border flex flex-col justify-between transition-all select-none ${
+                      isEquippable
+                        ? "bg-slate-900 border-amber-500/40 hover:border-amber-400 cursor-pointer shadow-md hover:scale-[1.02]"
+                        : canEat
+                        ? "bg-slate-900 border-emerald-500/40 hover:border-emerald-400 cursor-pointer shadow-md hover:scale-[1.02]"
                         : "bg-slate-900/70 border-slate-800"
                     }`}
-                    title={canEat ? "Chạm để sử dụng" : itemDef.name}
+                    title={
+                      isEquippable
+                        ? `Chạm để trang bị ${itemDef.name}`
+                        : canEat
+                        ? `Chạm để sử dụng ${itemDef.name}`
+                        : itemDef.name
+                    }
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-lg">
@@ -875,6 +1104,12 @@ export function WorldClient({
                           ? "🍖"
                           : itemDef.category === "weapon"
                           ? "⚔️"
+                          : itemDef.category === "helmet"
+                          ? "🪖"
+                          : itemDef.category === "armor"
+                          ? "🛡️"
+                          : itemDef.category === "shield"
+                          ? "🛡️"
                           : itemDef.category === "consumable"
                           ? "🧪"
                           : "🪵"}
@@ -888,8 +1123,13 @@ export function WorldClient({
                       <span className="text-[11px] font-bold text-white block truncate">
                         {itemDef.name}
                       </span>
+                      {isEquippable && (
+                        <span className="text-[9px] font-mono font-bold text-amber-400 block">
+                          [Trang bị]
+                        </span>
+                      )}
                       {canEat && (
-                        <span className="text-[9px] font-mono text-emerald-400 block">
+                        <span className="text-[9px] font-mono font-bold text-emerald-400 block">
                           [Dùng]
                         </span>
                       )}

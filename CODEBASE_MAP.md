@@ -151,8 +151,26 @@ erDiagram
    - Bảng xếp hạng và sự kiện chung toàn lớp.
 2. **Farm quái tại nhà (`isHomeFarm = true`, `kind = 'solo'`):**
    - Học sinh vào bãi luyện solo cày Vàng và Đom Đóm khi GV chưa mở phòng lớp.
-   - Tiêu Vàng tại Thợ Rèn Bác Búa và Tiệm Cô Túi để sắm Kiếm, Giáp Sắt, Thuốc.
+   - Tiêu Vàng tại Thợ Rèn & Tiệm Đồ để sắm Kiếm, Mũ, Giáp Sắt, Khiên và Nhu yếu phẩm/Thuốc.
    - Vàng và Trang bị lưu vĩnh viễn mang vào Hầm ngục lớp học.
+
+### Chỉ số cân bằng RPG & Chống lạm phát (Game Balance):
+- **Nhân vật:** HP: 100, Đói: 100, ATK cơ bản (tay không): 8, Vàng khởi đầu: 30 xu.
+- **4 Ô Trang Bị (`EquippedGear`):**
+  - ⚔️ **Vũ khí (`weapon`):** Gậy gỗ (+4 ATK), Kiếm gỗ (+6 ATK), Kiếm đá (+10 ATK), Kiếm sắt (+15 ATK). Có thể cường hóa +4 ATK/cấp.
+  - 🪖 **Mũ (`helmet`):** Mũ rơm (-3% ST), Mũ da (-6% ST), Mũ sắt (-10% ST).
+  - 🛡️ **Giáp (`armor`):** Áo vải (-5% ST), Giáp da (-10% ST), Giáp sắt (-18% ST).
+  - 🛡️ **Khiên (`shield`):** Khiên gỗ (-6% ST), Khiên sắt (-12% ST).
+  *(Tổng phòng thủ Giáp + Mũ + Khiên tối đa 60% giảm sát thương, giữ nguyên độ kịch tính khi săn quái).*
+- **Nhu yếu phẩm & Thức ăn:** Táo (+15 đói, +3 HP), Bánh mì (+30 đói, +6 HP), Thịt nướng (+45 đói, +12 HP), Băng gạc (+25 HP), Bình máu nhỏ (+40 HP), Bình máu lớn (+75 HP).
+- **Quái vật cơ bản (Forest):**
+  - `slime` (30 HP, 5 ATK, 3-6 xu)
+  - `baby_wolf` (40 HP, 6 ATK, 5-8 xu)
+  - `wolf` (55 HP, 8 ATK, 7-12 xu)
+  - `mist_spider` (48 HP, 10 ATK, 7-12 xu)
+  - `wild_boar` (65 HP, 9 ATK, 8-14 xu)
+  - `forest_goblin` (80 HP, 12 ATK, 12-18 xu)
+  - Boss `boar_king` (200 HP, 16 ATK, 70-110 xu)
 
 ---
 
@@ -163,7 +181,9 @@ erDiagram
   - `exporter.ts`: Xuất bộ câu hỏi ra file `.xlsx` hoặc `.json` sao lưu an toàn.
 - **Giao diện tích hợp:**
   - `src/app/dashboard/sets/page.tsx`: Nút "Tải file mẫu Excel", "Nhập đề từ Excel", "Sao lưu bộ đề".
-  - `src/app/dashboard/sets/[id]/edit/QuestionSetEditorClient.tsx`: Nút "Nhập thêm từ Excel", "Xuất file đề (.xlsx / .json)".
+  - `src/app/dashboard/sets/[id]/edit/QuestionSetEditorClient.tsx`:
+    - Thanh cuộn độc lập cho danh sách câu hỏi bên trái (`overflow-y-auto`, không kéo dài màn hình).
+    - Bảo lưu 100% nội dung câu hỏi (`prompt`), hình ảnh và phương án/mệnh đề tương thích khi người dùng chuyển đổi dạng câu hỏi (`handleChangeType`).
 
 ---
 
@@ -173,6 +193,7 @@ erDiagram
 3. **Sửa trang tạo hầm ngục mới:** vào thẳng [`src/app/teacher/worlds/new/NewWorldClient.tsx`](file:///d:/Project/Foggo/src/app/teacher/worlds/new/NewWorldClient.tsx).
 4. **Sửa trang Dashboard:** vào thẳng [`src/app/dashboard/page.tsx`](file:///d:/Project/Foggo/src/app/dashboard/page.tsx).
 5. **Thêm vật phẩm hoặc chỉnh tỉ lệ rơi:** vào [`src/game-modes/survival/items.ts`](file:///d:/Project/Foggo/src/game-modes/survival/items.ts) và [`engine.ts`](file:///d:/Project/Foggo/src/game-modes/survival/engine.ts).
-6. **Kiểm thử logic:** chạy lệnh `npm test` (kiểm tra 42 bài unit test của game engine và chấm điểm).
-7. **Kiểm tra biên dịch:** chạy lệnh `npm run build` (kiểm tra toàn bộ 21 trang và TypeScript).
+6. **Bảo mật cơ sở dữ liệu & RLS:** Khi thao tác server actions liên quan đến `session_players`, `game_sessions`, sử dụng `createAdminClient()` từ `@/lib/supabase/admin` để tránh lỗi `new row violates row-level security policy for table "session_players"`.
+7. **Kiểm thử logic:** chạy lệnh `npm test` (kiểm tra 51 bài unit test của game engine và chấm điểm).
+8. **Kiểm tra biên dịch:** chạy lệnh `npm run build` (kiểm tra toàn bộ 21 trang và TypeScript).
 

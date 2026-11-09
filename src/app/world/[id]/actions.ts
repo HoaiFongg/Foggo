@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { gradeQuestion } from "@/question-types/registry";
 import {
   initSurvivalState,
@@ -12,6 +13,7 @@ import {
   applyCraft,
   applyEat,
   applyBlacksmith,
+  applyEquipGear,
   applyNightDefense,
   applyRevive,
   type SurvivalPlayerState,
@@ -124,8 +126,9 @@ export async function submitSurvivalAction({
     message = defendResult.message;
   }
 
-  // 4. Lưu lượt trả lời vào session_answers
-  await supabase.from("session_answers").upsert(
+  // 4. Lưu lượt trả lời vào session_answers bằng adminClient
+  const adminClient = createAdminClient();
+  await adminClient.from("session_answers").upsert(
     {
       session_id: sessionId,
       player_id: player.id,
@@ -138,7 +141,7 @@ export async function submitSurvivalAction({
   );
 
   // 5. Cập nhật nhân vật session_players
-  await supabase
+  await adminClient
     .from("session_players")
     .update({
       score: state.score,
@@ -150,7 +153,7 @@ export async function submitSurvivalAction({
     .eq("id", player.id);
 
   // 6. Ghi nhật ký survival_events
-  await supabase.from("survival_events").insert({
+  await adminClient.from("survival_events").insert({
     session_id: sessionId,
     player_id: player.id,
     type: actionType,
@@ -184,10 +187,12 @@ export async function performSurvivalItemAction({
   sessionId,
   action,
   itemId,
+  slotIndex,
 }: {
   sessionId: string;
-  action: "eat" | "buy_gear" | "repair" | "enhance" | "revive";
+  action: "eat" | "buy_gear" | "repair" | "enhance" | "revive" | "equip";
   itemId?: string;
+  slotIndex?: number;
 }) {
   const supabase = await createClient();
   const {
@@ -221,6 +226,10 @@ export async function performSurvivalItemAction({
     const res = applyEat(state, itemId);
     state = res.state;
     message = res.message;
+  } else if (action === "equip" && typeof slotIndex === "number") {
+    const res = applyEquipGear(state, slotIndex);
+    state = res.state;
+    message = res.message;
   } else if (action === "revive") {
     state = applyRevive(state);
     message = "Bạn đã hồi sinh tại đống lửa trại an toàn!";
@@ -230,7 +239,8 @@ export async function performSurvivalItemAction({
     message = res.message;
   }
 
-  await supabase
+  const adminClient = createAdminClient();
+  await adminClient
     .from("session_players")
     .update({
       score: state.score,

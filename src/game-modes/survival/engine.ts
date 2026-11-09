@@ -12,17 +12,17 @@ export interface InventorySlot {
   durability?: number;
 }
 
+export interface EquippedItem {
+  itemId: string;
+  durability: number;
+  enhancedLevel?: number;
+}
+
 export interface EquippedGear {
-  weapon?: {
-    itemId: string;
-    durability: number;
-    enhancedLevel?: number;
-  };
-  armor?: {
-    itemId: string;
-    durability: number;
-    enhancedLevel?: number;
-  };
+  weapon?: EquippedItem;
+  armor?: EquippedItem;
+  helmet?: EquippedItem;
+  shield?: EquippedItem;
 }
 
 export interface FogState {
@@ -373,16 +373,33 @@ export function applyHunt(
     // === TRẢ LỜI SAI HOẶC QUÁ GIỜ: QUÁI ĐÁNH TRẢ ===
     nextState.streak = 0;
 
-    const armorDefPct = nextState.equipped.armor?.durability && nextState.equipped.armor.durability > 0
-      ? (ITEM_REGISTRY[nextState.equipped.armor.itemId]?.defensePct || 0)
-      : 0;
+    // Tính tổng chỉ số phòng thủ từ Giáp, Mũ và Khiên (cân bằng, tối đa 60% giảm sát thương)
+    const armorDef =
+      nextState.equipped.armor?.durability && nextState.equipped.armor.durability > 0
+        ? (ITEM_REGISTRY[nextState.equipped.armor.itemId]?.defensePct || 0)
+        : 0;
+    const helmetDef =
+      nextState.equipped.helmet?.durability && nextState.equipped.helmet.durability > 0
+        ? (ITEM_REGISTRY[nextState.equipped.helmet.itemId]?.defensePct || 0)
+        : 0;
+    const shieldDef =
+      nextState.equipped.shield?.durability && nextState.equipped.shield.durability > 0
+        ? (ITEM_REGISTRY[nextState.equipped.shield.itemId]?.defensePct || 0)
+        : 0;
 
-    const damageTaken = Math.max(1, Math.round(monster.atk * (1 - armorDefPct)));
+    const totalDefPct = Math.min(0.60, armorDef + helmetDef + shieldDef);
+    const damageTaken = Math.max(1, Math.round(monster.atk * (1 - totalDefPct)));
     nextState.hp = Math.max(0, nextState.hp - damageTaken);
 
-    // Hao mòn giáp
+    // Hao mòn trang bị phòng thủ khi bị đánh
     if (nextState.equipped.armor && nextState.equipped.armor.durability > 0) {
       nextState.equipped.armor.durability = Math.max(0, nextState.equipped.armor.durability - 1);
+    }
+    if (nextState.equipped.helmet && nextState.equipped.helmet.durability > 0) {
+      nextState.equipped.helmet.durability = Math.max(0, nextState.equipped.helmet.durability - 1);
+    }
+    if (nextState.equipped.shield && nextState.equipped.shield.durability > 0) {
+      nextState.equipped.shield.durability = Math.max(0, nextState.equipped.shield.durability - 1);
     }
 
     if (nextState.hp <= 0) {
@@ -640,7 +657,73 @@ export function applyEat(
 }
 
 /**
- * Xử lý Giao dịch Thợ rèn / Mua trang bị bằng xu
+ * Xử lý Trang bị vật phẩm từ ba lô vào người (vũ khí, giáp, mũ, khiên)
+ */
+export function applyEquipGear(
+  state: SurvivalPlayerState,
+  slotIndex: number
+): { state: SurvivalPlayerState; success: boolean; message: string } {
+  const nextState: SurvivalPlayerState = {
+    ...state,
+    equipped: { ...state.equipped },
+    inventory: state.inventory.map((s) => ({ ...s })),
+  };
+
+  const invSlot = nextState.inventory.find((s) => s.slotIndex === slotIndex);
+  if (!invSlot) {
+    return { state, success: false, message: "Không tìm thấy vật phẩm trong ô này" };
+  }
+
+  const itemDef = getItemDef(invSlot.itemId);
+  if (!itemDef) {
+    return { state, success: false, message: "Vật phẩm không hợp lệ" };
+  }
+
+  let gearSlot: "weapon" | "armor" | "helmet" | "shield" | null = null;
+  if (itemDef.category === "weapon") gearSlot = "weapon";
+  else if (itemDef.category === "armor") gearSlot = "armor";
+  else if (itemDef.category === "helmet") gearSlot = "helmet";
+  else if (itemDef.category === "shield") gearSlot = "shield";
+
+  if (!gearSlot) {
+    return { state, success: false, message: "Vật phẩm này không thể trang bị" };
+  }
+
+  const currentEquipped = nextState.equipped[gearSlot];
+
+  // Gỡ bỏ slot này trong inventory
+  nextState.inventory = nextState.inventory.filter((s) => s.slotIndex !== slotIndex);
+
+  // Nếu đã có trang bị đang mặc ở ô đó, hoán đổi đưa vào inventory
+  if (currentEquipped) {
+    const { inventory, success } = addItemToInventory(
+      nextState.inventory,
+      currentEquipped.itemId,
+      1,
+      currentEquipped.durability
+    );
+    if (!success) {
+      return { state, success: false, message: "Túi đồ không đủ chỗ để đổi trang bị" };
+    }
+    nextState.inventory = inventory;
+  }
+
+  // Mặc trang bị mới
+  nextState.equipped[gearSlot] = {
+    itemId: itemDef.id,
+    durability: invSlot.durability ?? itemDef.durability ?? 50,
+    enhancedLevel: 0,
+  };
+
+  return {
+    state: nextState,
+    success: true,
+    message: `Đã trang bị ${itemDef.name}!`,
+  };
+}
+
+/**
+ * Xử lý Giao dịch Thợ rèn / Cửa hàng mua vật phẩm bằng xu
  */
 export function applyBlacksmith(
   state: SurvivalPlayerState,
@@ -652,52 +735,96 @@ export function applyBlacksmith(
 
   if (action === "buy_gear") {
     if (!itemDef || itemDef.buyPrice <= 0) {
-      return { state, success: false, message: "Trang bị không hợp lệ để mua" };
+      return { state, success: false, message: "Vật phẩm không hợp lệ để mua" };
     }
     if (nextState.coins < itemDef.buyPrice) {
-      return { state, success: false, message: "Bạn không đủ xu để mua trang bị này" };
+      return { state, success: false, message: "Bạn không đủ xu để mua vật phẩm này" };
     }
 
-    const { inventory, success } = addItemToInventory(nextState.inventory, itemId, 1);
-    if (!success) {
-      return { state, success: false, message: "Túi đồ của bạn đã đầy" };
+    // Nếu là trang bị và ô đó người chơi đang để trống -> tự động trang bị luôn
+    let autoEquipped = false;
+    if (itemDef.category === "weapon" && !nextState.equipped.weapon) {
+      nextState.equipped.weapon = {
+        itemId,
+        durability: itemDef.durability || 40,
+        enhancedLevel: 0,
+      };
+      autoEquipped = true;
+    } else if (itemDef.category === "armor" && !nextState.equipped.armor) {
+      nextState.equipped.armor = {
+        itemId,
+        durability: itemDef.durability || 50,
+        enhancedLevel: 0,
+      };
+      autoEquipped = true;
+    } else if (itemDef.category === "helmet" && !nextState.equipped.helmet) {
+      nextState.equipped.helmet = {
+        itemId,
+        durability: itemDef.durability || 40,
+        enhancedLevel: 0,
+      };
+      autoEquipped = true;
+    } else if (itemDef.category === "shield" && !nextState.equipped.shield) {
+      nextState.equipped.shield = {
+        itemId,
+        durability: itemDef.durability || 45,
+        enhancedLevel: 0,
+      };
+      autoEquipped = true;
+    } else {
+      const { inventory, success } = addItemToInventory(nextState.inventory, itemId, 1);
+      if (!success) {
+        return { state, success: false, message: "Túi đồ của bạn đã đầy" };
+      }
+      nextState.inventory = inventory;
     }
 
     nextState.coins -= itemDef.buyPrice;
-    nextState.inventory = inventory;
 
     return {
       state: nextState,
       success: true,
-      message: `Đã mua thành công ${itemDef.name}!`,
+      message: autoEquipped
+        ? `Đã mua và trang bị ngay ${itemDef.name}!`
+        : `Đã mua thành công ${itemDef.name}!`,
     };
   }
 
   if (action === "repair") {
-    // Sửa trang bị đang cầm: Tốn 30% giá gốc
-    const weapon = nextState.equipped.weapon;
-    if (!weapon) {
-      return { state, success: false, message: "Chưa trang bị vũ khí nào để sửa" };
+    // Sửa trang bị theo itemId hoặc ô trang bị tương ứng
+    let gear: EquippedItem | undefined = nextState.equipped.weapon;
+    if (itemId === "armor" || nextState.equipped.armor?.itemId === itemId) {
+      gear = nextState.equipped.armor;
+    } else if (itemId === "helmet" || nextState.equipped.helmet?.itemId === itemId) {
+      gear = nextState.equipped.helmet;
+    } else if (itemId === "shield" || nextState.equipped.shield?.itemId === itemId) {
+      gear = nextState.equipped.shield;
+    } else if (itemId === "weapon" || nextState.equipped.weapon?.itemId === itemId) {
+      gear = nextState.equipped.weapon;
     }
-    const def = getItemDef(weapon.itemId);
-    const repairCost = Math.round((def?.buyPrice || 40) * 0.3);
+
+    if (!gear) {
+      return { state, success: false, message: "Chưa có trang bị nào ở ô này để sửa" };
+    }
+    const def = getItemDef(gear.itemId);
+    const repairCost = Math.max(5, Math.round((def?.buyPrice || 40) * 0.3));
 
     if (nextState.coins < repairCost) {
-      return { state, success: false, message: `Cần ${repairCost} xu để sửa vũ khí` };
+      return { state, success: false, message: `Cần ${repairCost} xu để sửa trang bị` };
     }
 
     nextState.coins -= repairCost;
-    weapon.durability = def?.durability || 50;
+    gear.durability = def?.durability || 50;
 
     return {
       state: nextState,
       success: true,
-      message: `Đã phục hồi độ bền cho ${def?.name || "vũ khí"}!`,
+      message: `Đã phục hồi độ bền cho ${def?.name || "trang bị"}!`,
     };
   }
 
   if (action === "enhance") {
-    // Cường hóa trang bị: Tốn 1 pha lê + 50 xu
+    // Cường hóa vũ khí: Tốn 1 pha lê + 50 xu
     const weapon = nextState.equipped.weapon;
     if (!weapon) {
       return { state, success: false, message: "Chưa trang bị vũ khí để cường hóa" };
