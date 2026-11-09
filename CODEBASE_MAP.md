@@ -174,3 +174,4 @@ erDiagram
 5. **Thêm vật phẩm hoặc chỉnh tỉ lệ rơi:** vào [`src/game-modes/survival/items.ts`](file:///d:/Project/Foggo/src/game-modes/survival/items.ts) và [`engine.ts`](file:///d:/Project/Foggo/src/game-modes/survival/engine.ts).
 6. **Kiểm thử logic:** chạy lệnh `npm test` (kiểm tra 42 bài unit test của game engine và chấm điểm).
 7. **Kiểm tra biên dịch:** chạy lệnh `npm run build` (kiểm tra toàn bộ 21 trang và TypeScript).
+

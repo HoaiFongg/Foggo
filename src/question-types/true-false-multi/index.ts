@@ -17,9 +17,9 @@ export const trueFalseMultiQuestionType: QuestionTypeDefinition<
   TrueFalseMultiUserAnswer
 > = {
   type: "true_false_multi",
-  name: "Nhiều mệnh đề Đúng/Sai",
-  description: "Đánh giá Đúng hoặc Sai cho một danh sách các khẳng định",
-  isPlus: true,
+  name: "Đúng / Sai (Chuẩn IC3 GS6)",
+  description: "Bảng nhận định phát biểu chọn Đúng (Yes) hoặc Sai (No) theo chuẩn IC3 GS6 & GDPT 2018",
+  isPlus: false,
   contentSchema: trueFalseMultiContentSchema,
   answerKeySchema: trueFalseMultiAnswerKeySchema,
   userAnswerSchema: trueFalseMultiUserAnswerSchema,
@@ -27,18 +27,18 @@ export const trueFalseMultiQuestionType: QuestionTypeDefinition<
   Editor: TrueFalseMultiEditor,
   Player: TrueFalseMultiPlayer,
   defaultContent: () => ({
-    prompt: "Đọc các nhận định sau về cơ chế sinh tồn trên đảo Foggo:",
+    prompt: "Đọc các phát biểu sau đây và cho biết phát biểu nào Đúng, phát biểu nào Sai:",
     statements: [
-      { id: "s1", text: "Đèn bão có thể ngăn quái vật sương mù tới gần trại." },
-      { id: "s2", text: "Học sinh có thể xem đáp án đúng trong bảng mã nguồn F12." },
-      { id: "s3", text: "Trả lời đúng câu hỏi sẽ giúp gây sát thương lên quái vật." },
+      { id: "s1", text: "" },
+      { id: "s2", text: "" },
+      { id: "s3", text: "" },
     ],
   }),
   defaultAnswerKey: () => ({
     answers: {
-      s1: true,
+      s1: false,
       s2: false,
-      s3: true,
+      s3: false,
     },
   }),
 };

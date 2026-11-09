@@ -939,13 +939,13 @@ Tất cả dạng câu hỏi lưu chung trong bảng `questions`, với cột `t
 | # | Mã `type` | Tên | Gói |
 |---|---|---|---|
 | 1 | `single_choice` | Trắc nghiệm 1 đáp án | Free |
-| 2 | `true_false` | Đúng / Sai | Free |
+| 2 | `true_false` | Đúng / Sai (Đơn lẻ 1 phát biểu) | Free |
 | 3 | `multi_select` | Chọn nhiều đáp án | Plus |
 | 4 | `drag_order` | Kéo thả: sắp xếp thứ tự | Plus |
 | 5 | `drag_match` | Kéo thả: ghép cặp | Plus |
 | 6 | `drag_fill` | Kéo thả: điền chỗ trống | Plus |
 | 7 | `hotspot` | Chọn vùng đúng trên ảnh | Plus |
-| 8 | `true_false_multi` | Nhiều mệnh đề Đúng/Sai | Plus |
+| 8 | `true_false_multi` | Đúng / Sai (Bảng nhận định chuẩn IC3 GS6 & GDPT 2018) | Free |
 | 9 | `typing` (mở rộng sau) | Gõ đáp án | Free |
 
 > Bạn có thể tự quyết dạng nào Free, dạng nào Plus. Gợi ý trên chỉ để tham khảo.
@@ -1062,18 +1062,41 @@ Tất cả dạng câu hỏi lưu chung trong bảng `questions`, với cột `t
 
 **Công cụ cho giáo viên:** trình chỉnh sửa vẽ vùng trên ảnh (kéo để vẽ hình chữ nhật/tròn, click từng đỉnh để vẽ đa giác), có nút xóa/sửa vùng.
 
-#### (8) `true_false_multi` — nhiều mệnh đề Đúng/Sai
+#### (8) `true_false_multi` — Bảng nhận định Đúng / Sai (Chuẩn IC3 GS6 & GDPT 2018)
+Được thiết kế theo cấu trúc bảng trắc nghiệm Đúng/Sai chuẩn quốc tế IC3 GS6 và chương trình Giáo dục Phổ thông 2018 của Bộ Giáo dục & Đào tạo Việt Nam:
+- **Tiêu đề bảng:** `Bảng Phát Biểu / Nhận Định (Chuẩn IC3 GS6): [X nhận định]` kèm nút `+ Thêm Nhận Định` (nền cyan `#0284c7`).
+- **Gợi ý thao tác:** `💡 Nhập từng câu phát biểu và tích chọn đáp án Đúng (Yes) hoặc Sai (No) cho từng dòng.`
+- **Cấu trúc 4 cột chuẩn:**
+  1. `Câu phát biểu / Nhận định`: Ô nhập nội dung từng nhận định phát biểu (`#1`, `#2`, `#3`...).
+  2. `Đúng (Yes)`: Header màu Cyan (`#0284c7`), radio button kích hoạt viền phát sáng cyan và chấm tròn trắng nổi bật.
+  3. `Sai (No)`: Header màu Royal Blue (`#2563eb`), radio button kích hoạt viền phát sáng royal blue và chấm tròn trắng nổi bật.
+  4. `Xóa`: Nút thùng rác tiện lợi cho phép thêm/bớt nhận định linh hoạt (tối đa 10 nhận định).
+
 ```json
 {
-  "prompt": "Đánh dấu Đúng/Sai cho từng phát biểu:",
+  "prompt": "Đọc các phát biểu sau đây và cho biết phát biểu nào Đúng, phát biểu nào Sai:",
   "statements": [
-    { "id": "s1", "text": "Cá voi là loài cá." },
-    { "id": "s2", "text": "Dơi là loài thú biết bay." }
+    { "id": "s1", "text": "Hệ điều hành Windows là phần mềm ứng dụng." },
+    { "id": "s2", "text": "CPU đóng vai trò là bộ não xử lý của máy tính." },
+    { "id": "s3", "text": "RAM là bộ nhớ ngoài có khả năng lưu trữ vĩnh viễn dữ liệu khi mất điện." }
   ]
 }
-// answer_key
-{ "answers": { "s1": false, "s2": true }, "scoring": "partial" }
+// answer_key (chỉ lưu trữ và chấm điểm ở Server)
+{ "answers": { "s1": false, "s2": true, "s3": false } }
 ```
+**Chấm điểm:** Tỷ lệ phần trăm theo số nhận định đúng (ví dụ đúng 2/3 câu = 0.67 điểm).
+
+### 4.4. Tính năng Sao lưu (Backup) & Nhập đề thi từ file Excel (.xlsx)
+Hỗ trợ giáo viên nhập liệu hàng loạt và sao lưu dữ liệu an toàn, không phụ thuộc vào nhập thủ công từng câu:
+1. **Tải file mẫu Excel (`downloadSampleTemplateExcel`):**
+   - File `.xlsx` chuẩn gồm 2 sheet:
+     - `De_Thi_Mau`: 8 câu hỏi mẫu đầy đủ các loại (`single_choice`, `true_false`, `true_false_multi`, `multi_select`), có cột câu hỏi, dạng câu, các lựa chọn A/B/C/D hoặc bảng nhận định, đáp án đúng, giải thích, thời gian và điểm số.
+     - `Huong_Dan`: Hướng dẫn quy ước cú pháp, mẹo ra đề và bảng mã dạng câu hỏi.
+2. **Nhập câu hỏi thông minh (`parseQuestionsFromExcel`):**
+   - Tự động chuẩn hóa tiêu đề cột tiếng Việt (loại bỏ dấu tiếng Việt `đ -> d`, khoảng trắng thừa, không phân biệt hoa/thường).
+   - Hỗ trợ nhập trực tiếp từ trang danh sách bộ câu hỏi (tạo bộ câu hỏi mới từ Excel) hoặc nhập nối tiếp vào bộ câu hỏi đang chỉnh sửa.
+3. **Sao lưu trọn gói (`exportQuestionSetToExcel` & `exportQuestionSetToJson`):**
+   - Xuất toàn bộ câu hỏi và đáp án ra file Excel định dạng bảng biểu đẹp mắt hoặc file JSON chuẩn cấu trúc Foggo để dễ dàng khôi phục trên bất kỳ hệ thống nào.
 
 ### 4.3. Thiết kế code: "Question Type Registry"
 Để dễ thêm dạng câu hỏi mới sau này, mỗi dạng là một **module độc lập** gồm 4 phần:

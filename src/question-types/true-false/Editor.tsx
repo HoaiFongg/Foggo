@@ -54,9 +54,14 @@ export function TrueFalseEditor({
 
       {/* Chọn ĐÚNG hay SAI */}
       <div>
-        <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-3 font-mono">
-          Đáp án đúng của phát biểu này:
-        </label>
+        <div className="flex items-center justify-between mb-3">
+          <label className="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
+            Đáp án đúng của phát biểu này:
+          </label>
+          <span className="text-[11px] text-cyan-400 font-medium">
+            💡 Hoặc dùng bảng IC3 GS6 cho nhiều nhận định
+          </span>
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
           <button
@@ -64,20 +69,20 @@ export function TrueFalseEditor({
             onClick={() => handleSetCorrect(true)}
             className={`p-5 rounded-2xl border-2 flex items-center justify-center gap-3 font-black text-sm transition-all cursor-pointer ${
               answerKey.correct === true
-                ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.25)]"
+                ? "bg-[#0284c7]/20 border-[#0284c7] text-cyan-300 shadow-[0_0_20px_rgba(2,132,199,0.3)] ring-1 ring-cyan-400/50"
                 : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
             }`}
           >
             <div
               className={`w-8 h-8 rounded-xl flex items-center justify-center ${
                 answerKey.correct === true
-                  ? "bg-emerald-500 text-slate-950"
+                  ? "bg-[#0284c7] text-white"
                   : "bg-slate-800 text-slate-400"
               }`}
             >
               <Check className="w-5 h-5 stroke-[3]" />
             </div>
-            <span>ĐÚNG</span>
+            <span>ĐÚNG (Yes)</span>
           </button>
 
           <button
@@ -85,20 +90,20 @@ export function TrueFalseEditor({
             onClick={() => handleSetCorrect(false)}
             className={`p-5 rounded-2xl border-2 flex items-center justify-center gap-3 font-black text-sm transition-all cursor-pointer ${
               answerKey.correct === false
-                ? "bg-rose-500/20 border-rose-400 text-rose-300 shadow-[0_0_20px_rgba(244,63,94,0.25)]"
+                ? "bg-[#2563eb]/20 border-[#2563eb] text-blue-300 shadow-[0_0_20px_rgba(37,99,235,0.3)] ring-1 ring-blue-400/50"
                 : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
             }`}
           >
             <div
               className={`w-8 h-8 rounded-xl flex items-center justify-center ${
                 answerKey.correct === false
-                  ? "bg-rose-500 text-slate-950"
+                  ? "bg-[#2563eb] text-white"
                   : "bg-slate-800 text-slate-400"
               }`}
             >
               <X className="w-5 h-5 stroke-[3]" />
             </div>
-            <span>SAI</span>
+            <span>SAI (No)</span>
           </button>
         </div>
       </div>
