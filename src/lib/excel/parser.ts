@@ -193,21 +193,72 @@ export function parseQuestionsFromExcel(fileBuffer: ArrayBuffer | Uint8Array): P
       let answerKey: any = null;
 
       if (qType === "true_false") {
-        const isTrue =
-          normCorrect === "dung" ||
-          normCorrect === "true" ||
-          normCorrect === "d" ||
-          normCorrect === "t" ||
-          normCorrect === "1" ||
-          normCorrect === "a";
+        const rawStatementsList = [rawOptA, rawOptB, rawOptC, rawOptD].filter(
+          (text) => text && text.trim() !== ""
+        );
 
-        content = {
-          prompt,
-          image_url: null,
-        };
-        answerKey = {
-          correct: isTrue,
-        };
+        if (rawStatementsList.length > 0) {
+          // Trường hợp nhiều nhận định bên trong câu hỏi
+          const statements = rawStatementsList.map((text, idx) => ({
+            id: `s${idx + 1}`,
+            text: text.trim(),
+          }));
+
+          const answers: Record<string, boolean> = {};
+          // Phân tích đáp án (ví dụ "Đúng, Sai, Đúng, Sai" hoặc "Đ, S, Đ, S" hoặc "A: Đúng, B: Sai")
+          const parts = rawCorrect
+            .split(/[,;\n]+/)
+            .map((p) => p.trim())
+            .filter(Boolean);
+
+          statements.forEach((st, idx) => {
+            const letter = ["A", "B", "C", "D"][idx];
+            // Tìm theo dạng "A: Đúng" hoặc theo thứ tự index
+            const matchingPart =
+              parts.find((p) => normalizeHeader(p).startsWith(letter.toLowerCase() + ":")) ||
+              parts[idx] ||
+              "";
+            const normP = normalizeHeader(matchingPart);
+            const isStatementTrue =
+              normP.includes("dung") ||
+              normP.includes("true") ||
+              normP.endsWith(":d") ||
+              normP === "d" ||
+              normP === "t" ||
+              normP === "1";
+            answers[st.id] = isStatementTrue;
+          });
+
+          content = {
+            prompt,
+            image_url: null,
+            statements,
+          };
+          answerKey = {
+            answers,
+            // Hỗ trợ cả trường hợp lấy nhận định đầu tiên làm correct
+            correct: answers[statements[0].id],
+          };
+        } else {
+          // Trường hợp 1 nhận định đơn lẻ
+          const isTrue =
+            normCorrect === "dung" ||
+            normCorrect === "true" ||
+            normCorrect === "d" ||
+            normCorrect === "t" ||
+            normCorrect === "1" ||
+            normCorrect === "a";
+
+          content = {
+            prompt,
+            image_url: null,
+            statements: [{ id: "s1", text: prompt }],
+          };
+          answerKey = {
+            answers: { s1: isTrue },
+            correct: isTrue,
+          };
+        }
       } else if (qType === "multi_select") {
         const rawOptions = [
           { key: "A", text: rawOptA },

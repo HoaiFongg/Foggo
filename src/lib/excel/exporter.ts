@@ -44,9 +44,25 @@ export function exportQuestionSetToExcel(
     const answerKey = q.answer_key || {};
     const prompt = content.prompt || "";
 
-    if (q.type === "true_false") {
+    if (q.type === "true_false" || q.type === "true_false_multi") {
       typeName = "Đúng sai";
-      correctStr = answerKey.correct === true ? "Đúng" : "Sai";
+      if (Array.isArray(content.statements) && content.statements.length > 0) {
+        optA = content.statements[0]?.text || "";
+        optB = content.statements[1]?.text || "";
+        optC = content.statements[2]?.text || "";
+        optD = content.statements[3]?.text || "";
+        const answersMap = answerKey.answers || {};
+        correctStr = content.statements
+          .map((s: any, sIdx: number) => {
+            const letter = ["A", "B", "C", "D"][sIdx] || `#${sIdx + 1}`;
+            const val = answersMap[s.id] === true ? "Đúng" : "Sai";
+            return `${letter}: ${val}`;
+          })
+          .join(", ");
+      } else {
+        correctStr =
+          answerKey.correct === true || answerKey.answers?.s1 === true ? "Đúng" : "Sai";
+      }
     } else if (q.type === "multi_select") {
       typeName = "Nhiều đáp án";
       const options = content.options || [];

@@ -47,6 +47,22 @@ describe("Question Types Grading Unit Tests", () => {
       assert.equal(gradeTrueFalse(null as any, { correct: true }), 0.0);
       assert.equal(gradeTrueFalse("true" as any, { correct: true }), 0.0);
     });
+
+    test("chấm điểm câu có nhiều nhận định bên trong: đúng 100%", () => {
+      const multiKey = { answers: { s1: true, s2: false, s3: true, s4: false } };
+      assert.equal(
+        gradeTrueFalse({ s1: true, s2: false, s3: true, s4: false }, multiKey),
+        1.0
+      );
+    });
+
+    test("chấm điểm câu có nhiều nhận định bên trong: đúng 3/4 nhận định", () => {
+      const multiKey = { answers: { s1: true, s2: false, s3: true, s4: false } };
+      assert.equal(
+        gradeTrueFalse({ s1: true, s2: false, s3: true, s4: true }, multiKey),
+        0.75
+      );
+    });
   });
 
   describe("multi_select", () => {
