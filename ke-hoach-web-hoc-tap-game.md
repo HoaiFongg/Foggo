@@ -1838,6 +1838,7 @@ Sự kiện ghi vào `survival_events`: `explore`, `fog_milestone`, `fog_cleared
   - **Ngày 6:** +250 Vàng 🪙 + 1 Kiếm Gỗ Rừng / Kiếm Sắt ⚔️
   - **Ngày 7:** +500 Vàng 🪙 + 60 Đom Đóm 🪲 + Rương Báu Hoàng Gia 👑
 - Tự động cộng Vàng và Đom Đóm vào tài khoản, thêm vật phẩm vào hành trang solo farm của học sinh.
+- Cấu hình phần thưởng được lưu tách biệt tại [`src/lib/daily-rewards-config.ts`](file:///d:/Project/Foggo/src/lib/daily-rewards-config.ts) giúp Client Component (`DailyLoginStreakCard.tsx`) đọc trực tiếp mảng phần thưởng, tránh lỗi Turbopack `DAILY_REWARDS_CONFIG.map is not a function` khi export từ file `"use server"`.
 
 ### 5A.26. Giao Diện Đấu Trường Trọn Vẹn 1 Màn Hình (Single-Screen Viewport - Không Cần Cuộn) & Hiển Thị Xu Nổi Bật
 

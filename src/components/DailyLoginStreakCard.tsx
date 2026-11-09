@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Sparkles, CheckCircle2, Gift, Loader2, Coins, CalendarDays, Lock } from "lucide-react";
-import { claimDailyLoginReward, DAILY_REWARDS_CONFIG } from "@/app/dashboard/actions";
+import { claimDailyLoginReward } from "@/app/dashboard/actions";
+import { DAILY_REWARDS_CONFIG } from "@/lib/daily-rewards-config";
 
 interface DailyLoginStreakCardProps {
   initialStreakData: {
