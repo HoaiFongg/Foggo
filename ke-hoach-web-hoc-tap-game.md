@@ -2749,6 +2749,7 @@ jobs:
 - [x] Giao diện dùng tốt trên điện thoại + Responsive Navigation Bar cho mọi phân quyền
 - [x] Chuẩn hóa giao diện chuyên nghiệp đẳng cấp Big Tech (Google/Vercel/Linear) kết hợp phong cách Retro Pixel Art: Landing page mockup trực quan, Header glassmorphism & role chip, Điểm danh 7 ngày kèm thanh tiến độ tuần và rương VIP, Bảng xếp hạng bục huy chương 🥇🥈🥉, đấu trường và thẻ săn quái pixelated
 - [x] Tài khoản kiểm thử thực chiến tự động (Học sinh: hocsinh_test, Giáo viên: giaovien_test@foggo.vn) lưu tại TEST_ACCOUNTS.md, script chạy kiểm thử gameplay: scripts/test-account-runner.ts
+- [x] Sửa triệt để lỗi truy vấn Bảng Quản trị Admin (/admin): Chỉ định tường minh Foreign Key `schools:school_id(name)` và `classes:class_id(name)` để giải quyết lỗi PGRST201, hiển thị đầy đủ danh sách Học sinh, Giáo viên và Trường học
 
 ### Trước khi thu tiền
 - [x] Thanh toán + webhook hoạt động, test kỹ

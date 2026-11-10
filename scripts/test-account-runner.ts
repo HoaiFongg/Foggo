@@ -67,7 +67,7 @@ async function main() {
   // BƯỚC 1: KHỞI TẠO HOẶC LẤY TÀI KHOẢN TEST
   console.log("\n[1/6] Kiểm tra tài khoản test:", TEST_STUDENT_ACCOUNT.username);
   
-  let userId: string | null = null;
+  let userId: string = "";
   const { data: existedUser } = await adminClient
     .from("profiles")
     .select("*")
@@ -78,7 +78,7 @@ async function main() {
     userId = existedUser.id;
     console.log("✅ Tài khoản đã tồn tại với ID:", userId);
     // Đảm bảo mật khẩu luôn đúng
-    await adminClient.auth.admin.updateUserById(userId, {
+    await adminClient.auth.admin.updateUserById(existedUser.id, {
       password: TEST_STUDENT_ACCOUNT.password,
     });
   } else {
@@ -120,12 +120,12 @@ async function main() {
     password: TEST_STUDENT_ACCOUNT.password,
   });
 
-  if (loginError || !loginData.user) {
+  if (loginError || !loginData.user || !loginData.session) {
     console.error("❌ Đăng nhập thất bại:", loginError);
     process.exit(1);
   }
   console.log("✅ Đăng nhập Học Sinh thành công! User UID:", loginData.user.id);
-  console.log("   Phiên token:", loginData.session?.access_token ? "Hợp lệ" : "Không có");
+  console.log("   Phiên token:", loginData.session.access_token ? "Hợp lệ" : "Không có");
 
   // Đảm bảo có cả tài khoản Giáo Viên test
   const { data: existedTeacher } = await adminClient

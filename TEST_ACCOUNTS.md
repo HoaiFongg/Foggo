@@ -55,3 +55,4 @@ Script này tự động:
 3. Chạy mô phỏng săn quái Slime, kiểm tra sát thương, chuỗi streak và cộng Xu.
 4. Mua trang bị tại Thợ Rèn và tự động mặc trang bị vào người.
 5. Đồng bộ tiến trình chơi vào PostgreSQL Supabase.
+

@@ -71,10 +71,10 @@ export default async function AdminPage() {
 
   const isUserAdmin = profile?.role === "admin" || isSuperAdminEmail;
 
-  // Tải danh sách người dùng kèm trường và lớp
+  // Tải danh sách người dùng kèm trường và lớp (dùng explicit FK để tránh lỗi PGRST201 do có nhiều quan hệ FK giữa profiles và schools)
   const { data: users } = await adminClient
     .from("profiles")
-    .select("*, schools(name), classes(name)")
+    .select("*, schools:school_id(name), classes:class_id(name)")
     .order("created_at", { ascending: false })
     .limit(150);
 
