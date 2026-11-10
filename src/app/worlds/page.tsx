@@ -138,11 +138,10 @@ export default async function WorldsPage() {
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-2.5">
                           <span
-                            className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded ${
-                              w.status === "open"
-                                ? "bg-emerald-500/10 text-emerald-400"
-                                : "bg-slate-800 text-slate-400"
-                            }`}
+                            className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded ${w.status === "open"
+                              ? "bg-emerald-500/10 text-emerald-400"
+                              : "bg-slate-800 text-slate-400"
+                              }`}
                           >
                             {w.status === "open" ? "Đang mở" : "Đã đóng"}
                           </span>
