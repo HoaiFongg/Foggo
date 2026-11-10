@@ -3,20 +3,13 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Sparkles, Heart, Flame } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/useLanguage";
 
 interface CuteSlimeLoadingProps {
   title?: string;
   subtitle?: string;
   variant?: "fullscreen" | "card" | "compact";
 }
-
-const CUTE_MESSAGES = [
-  "Bé Slime đang khởi động nhún nhảy nè... ✨",
-  "Đang thắp sáng đèn lồng và xua bớt sương mù... 🔥",
-  "Đom Đóm đang bay đến soi đường cho bạn... 🪲",
-  "Đang chuẩn bị câu đố siêu thú vị luôn á... 🎒",
-  "Chờ một xíu xiu thôi nhen, sắp xong rồi! (´｡• ᵕ •｡`)",
-];
 
 // Thứ tự sprite tạo hoạt họa nhún nhảy tự nhiên
 const SLIME_FRAMES = [
@@ -32,8 +25,11 @@ export function CuteSlimeLoading({
   subtitle,
   variant = "fullscreen",
 }: CuteSlimeLoadingProps) {
+  const { t, isEn } = useLanguage();
   const [frameIndex, setFrameIndex] = useState(0);
   const [messageIndex, setMessageIndex] = useState(0);
+
+  const messages = t.slime.messages;
 
   // Đổi frame sprite mỗi 250ms
   useEffect(() => {
@@ -47,12 +43,12 @@ export function CuteSlimeLoading({
   useEffect(() => {
     if (title) return; // Nếu có title cố định thì không xoay
     const timer = setInterval(() => {
-      setMessageIndex((prev) => (prev + 1) % CUTE_MESSAGES.length);
+      setMessageIndex((prev) => (prev + 1) % messages.length);
     }, 2800);
     return () => clearInterval(timer);
-  }, [title]);
+  }, [title, messages.length]);
 
-  const activeMessage = title || CUTE_MESSAGES[messageIndex];
+  const activeMessage = title || messages[messageIndex % messages.length];
   const activeSprite = SLIME_FRAMES[frameIndex];
 
   // 1. Dạng Compact (Dùng cho nút bấm, thanh trạng thái nhỏ)
@@ -70,7 +66,7 @@ export function CuteSlimeLoading({
           />
         </div>
         <span className="font-semibold tracking-wide">
-          {title || "Đang tải xíu nhen..."}
+          {title || (isEn ? "Loading a moment..." : "Đang tải xíu nhen...")}
         </span>
       </div>
     );
@@ -173,3 +169,4 @@ export function CuteSlimeLoading({
     </div>
   );
 }
+

@@ -2753,6 +2753,7 @@ jobs:
 - [x] Kiểm thử toàn diện 31 bài test logic, chức năng & điều hướng hệ thống (scripts/full-system-test.ts): 100% test cases đạt chuẩn bao gồm HTTP Routes, Auth RBAC, Điểm danh 7 ngày, 8 dạng câu hỏi, Săn quái và Admin
 - [x] Kiểm tra và củng cố bảo mật toàn diện (scripts/security-audit.ts): Duy trì phiên tự động qua refresh token @supabase/ssr, băm SHA-256 mã khôi phục kèm timingSafeEqual, chặn triệt để lộ answer_key ở client, vô hiệu hóa leo thang đặc quyền qua user_metadata, bảo vệ route /admin tại edge middleware
 - [x] Tắt biểu tượng chữ N (Next.js Dev Indicator) ở góc dưới bên trái và thiết lập hệ sinh thái loading Bé Slime siêu dễ thương toàn trang: Hoạt họa squishy bounce Bé Slime, bóng thoại đáng yêu xoay vòng, NavigationProgressBar laser 0ms kèm pet pill, World loading sàn đấu và Dashboard loading skeleton
+- [x] Hệ thống đa ngôn ngữ song ngữ Tiếng Việt 🇻🇳 & English 🇬🇧: Xây dựng Zustand store i18n phản ứng 0ms, lưu trữ localStorage & cookie foggo_lang, nút chuyển đổi LanguageSwitcher (🇻🇳 VI ⇋ 🇬🇧 EN), hỗ trợ song ngữ toàn bộ NavigationHeader, Landing Page, Battle Arena và hiệu ứng Bé Slime loading
 
 ### Trước khi thu tiền
 - [x] Thanh toán + webhook hoạt động, test kỹ

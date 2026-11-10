@@ -220,6 +220,18 @@ erDiagram
     - **Bé Slime nhún nhảy siêu dễ thương ([`src/components/ui/CuteSlimeLoading.tsx`](file:///d:/Project/Foggo/src/components/ui/CuteSlimeLoading.tsx)):** Đầy đủ hoạt họa squishy bounce (`animate-slime-bounce`), bóng đổ co giãn theo nhịp (`animate-slime-shadow`), đom đóm lơ lửng (`animate-firefly-drift`), bóng thoại xoay vòng các câu nói đáng yêu (`( ´｡• ᵕ •｡` )`) và thanh tiến trình pixel retro phát sáng.
     - **Thanh Progress Bar laser đỉnh màn hình:** [`src/components/NavigationProgressBar.tsx`](file:///d:/Project/Foggo/src/components/NavigationProgressBar.tsx) phản hồi ngay 0ms khi click link, chạy tia laser gradient và pill *"Bé Slime đang mở đường... ✨"*.
     - **Tích hợp toàn diện:** [`src/app/loading.tsx`](file:///d:/Project/Foggo/src/app/loading.tsx), [`src/app/world/[id]/loading.tsx`](file:///d:/Project/Foggo/src/app/world/[id]/loading.tsx), [`src/app/dashboard/loading.tsx`](file:///d:/Project/Foggo/src/app/dashboard/loading.tsx) và [`src/components/ui/LoadingOverlay.tsx`](file:///d:/Project/Foggo/src/components/ui/LoadingOverlay.tsx).
+18. **Hệ Thống Đa Ngôn Ngữ Song Ngữ (Bilingual i18n - Tiếng Việt 🇻🇳 & English 🇬🇧):**
+    - **Kiến trúc:** [`src/lib/i18n/`](file:///d:/Project/Foggo/src/lib/i18n/)
+      - [`types.ts`](file:///d:/Project/Foggo/src/lib/i18n/types.ts): Định nghĩa kiểu `Language = "vi" | "en"` và schema dịch thuật `Translations` chặt chẽ (`common`, `nav`, `landing`, `dashboard`, `battle`, `slime`).
+      - [`vi.ts`](file:///d:/Project/Foggo/src/lib/i18n/vi.ts): Bộ từ điển Tiếng Việt chuẩn phong cách học tập sinh tồn sương mù Foggo.
+      - [`en.ts`](file:///d:/Project/Foggo/src/lib/i18n/en.ts): Bộ từ điển Tiếng Anh chuyên nghiệp, tự nhiên chuẩn quốc tế.
+      - [`useLanguage.ts`](file:///d:/Project/Foggo/src/lib/i18n/useLanguage.ts): Reactive Zustand store với middleware `persist` lưu `localStorage` (`foggo_user_language`) và đồng bộ `document.cookie` (`foggo_lang`), cung cấp hook `useLanguage()` (`t`, `language`, `setLanguage`, `toggleLanguage`, `isVi`, `isEn`).
+    - **Nút chuyển đổi ngôn ngữ (Language Switcher):**
+      - [`src/components/LanguageSwitcher.tsx`](file:///d:/Project/Foggo/src/components/LanguageSwitcher.tsx): Nút bấm dạng pill nhỏ gọn, hiển thị cờ và mã ngôn ngữ (`🇻🇳 VI` ⇋ `🇬🇧 EN`), hiệu ứng viền sáng amber, chuyển đổi tức thì 0ms không cần reload trang.
+    - **Tích hợp toàn diện:**
+      - [`src/components/NavigationHeader.tsx`](file:///d:/Project/Foggo/src/components/NavigationHeader.tsx): Tích hợp đa ngôn ngữ toàn bộ thanh điều hướng, vai trò người dùng, tooltip đăng xuất và nhúng `LanguageSwitcher`.
+      - [`src/app/LandingClient.tsx`](file:///d:/Project/Foggo/src/app/LandingClient.tsx) & [`src/app/page.tsx`](file:///d:/Project/Foggo/src/app/page.tsx): Toàn bộ trang chủ (hero, mockup đấu trường RPG pixel, 3 trụ cột gameplay, 3 bước giáo viên, tính năng nổi bật, FAQ, footer) phản ứng chuyển ngữ tức thì.
+      - [`src/components/ui/CuteSlimeLoading.tsx`](file:///d:/Project/Foggo/src/components/ui/CuteSlimeLoading.tsx): Bóng thoại Bé Slime chuyển đổi câu thoại siêu dễ thương theo ngôn ngữ đã chọn.
 
 
 

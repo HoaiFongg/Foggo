@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   Flame,
@@ -13,6 +15,8 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { logout } from "@/app/(auth)/actions";
+import { useLanguage } from "@/lib/i18n/useLanguage";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import type { Profile } from "@/types/database";
 
 interface NavigationHeaderProps {
@@ -24,7 +28,8 @@ export function NavigationHeader({
   profile,
   activeItem = "dashboard",
 }: NavigationHeaderProps) {
-  const displayName = profile?.display_name || "Người chơi";
+  const { t } = useLanguage();
+  const displayName = profile?.display_name || t.common.student;
   const role = profile?.role || "student";
   const isAdmin = role === "admin" || displayName.toLowerCase().includes("admin");
   const isTeacher = role === "teacher" || isAdmin;
@@ -61,7 +66,7 @@ export function NavigationHeader({
               }`}
             >
               <LayoutDashboard className="w-3.5 h-3.5" />
-              <span>Tổng quan</span>
+              <span>{t.nav.dashboard}</span>
             </Link>
 
             <Link
@@ -73,7 +78,7 @@ export function NavigationHeader({
               }`}
             >
               <Swords className="w-3.5 h-3.5" />
-              <span>Hầm ngục</span>
+              <span>{t.nav.worlds}</span>
             </Link>
 
             {isTeacherOrAdmin && (
@@ -86,7 +91,7 @@ export function NavigationHeader({
                 }`}
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                <span>Bộ câu hỏi</span>
+                <span>{t.nav.questionSets}</span>
               </Link>
             )}
 
@@ -96,7 +101,7 @@ export function NavigationHeader({
                 className="px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-900 transition-all shrink-0 font-mono text-xs border border-transparent"
               >
                 <Users className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Học sinh</span>
+                <span>{t.nav.students}</span>
               </Link>
             )}
 
@@ -106,7 +111,7 @@ export function NavigationHeader({
                 className="px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-900 transition-all shrink-0 font-mono text-xs border border-transparent"
               >
                 <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
-                <span>Giáo viên</span>
+                <span>{t.nav.teachers}</span>
               </Link>
             )}
 
@@ -120,7 +125,7 @@ export function NavigationHeader({
                 }`}
               >
                 <Compass className="w-3.5 h-3.5" />
-                <span>Khám phá</span>
+                <span>{t.nav.explore}</span>
               </Link>
             )}
 
@@ -134,24 +139,27 @@ export function NavigationHeader({
                 }`}
               >
                 <Crown className="w-3.5 h-3.5" />
-                <span>Quản trị</span>
+                <span>{t.nav.admin}</span>
               </Link>
             )}
           </nav>
         </div>
 
         {/* Right Actions & Profile */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
           {/* Quick Create Button */}
           {isTeacherOrAdmin && (
             <Link
               href="/teacher/worlds/new"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 text-xs font-bold font-mono transition-all shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
+              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 text-xs font-bold font-mono transition-all shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Mở Hầm Ngục</span>
+              <span>{t.nav.openDungeon}</span>
             </Link>
           )}
+
+          {/* Đổi ngôn ngữ (Language Switcher) */}
+          <LanguageSwitcher />
 
           {/* Đom Đóm (tiền ngoài ván) */}
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-300 text-xs font-mono shadow-inner">
@@ -160,7 +168,7 @@ export function NavigationHeader({
           </div>
 
           {/* Profile & Role */}
-          <div className="flex items-center gap-2.5 pl-3 border-l border-slate-800">
+          <div className="flex items-center gap-2.5 pl-2.5 sm:pl-3 border-l border-slate-800">
             {/* Avatar Pill */}
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 font-black text-xs font-mono shadow-sm">
               {displayName.charAt(0).toUpperCase()}
@@ -178,14 +186,14 @@ export function NavigationHeader({
                 }`}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${isAdmin ? "bg-rose-400" : isTeacher ? "bg-amber-400" : "bg-emerald-400"}`} />
-                {isAdmin ? "Admin" : isTeacher ? "Giáo viên" : "Học sinh"}
+                {isAdmin ? t.common.admin : isTeacher ? t.common.teacher : t.common.student}
               </span>
             </div>
 
             <form action={logout}>
               <button
                 type="submit"
-                title="Đăng xuất"
+                title={t.common.logout}
                 className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent hover:border-slate-800 transition-all cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
