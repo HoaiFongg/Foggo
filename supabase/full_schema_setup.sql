@@ -113,6 +113,25 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
+-- Bảo vệ các trường hệ thống trên profiles: Không cho phép client sửa role, plan, fireflies, recovery_code_hash
+create or replace function public.protect_profile_system_fields()
+returns trigger language plpgsql security definer as $$
+begin
+  if auth.role() = 'authenticated' then
+    new.role := old.role;
+    new.plan := old.plan;
+    new.plan_expires_at := old.plan_expires_at;
+    new.fireflies := old.fireflies;
+    new.recovery_code_hash := old.recovery_code_hash;
+  end if;
+  return new;
+end; $$;
+
+drop trigger if exists trg_protect_profile_system_fields on public.profiles;
+create trigger trg_protect_profile_system_fields
+  before update on public.profiles
+  for each row execute function public.protect_profile_system_fields();
+
 -- ============ 4. THÀNH VIÊN LỚP (CLASS MEMBERS) ============
 create table if not exists public.class_members (
   class_id uuid references public.classes(id) on delete cascade,

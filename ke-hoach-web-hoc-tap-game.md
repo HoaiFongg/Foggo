@@ -2751,6 +2751,7 @@ jobs:
 - [x] Tài khoản kiểm thử thực chiến tự động (Học sinh: hocsinh_test, Giáo viên: giaovien_test@foggo.vn) lưu tại TEST_ACCOUNTS.md, script chạy kiểm thử gameplay: scripts/test-account-runner.ts
 - [x] Sửa triệt để lỗi truy vấn Bảng Quản trị Admin (/admin): Chỉ định tường minh Foreign Key `schools:school_id(name)` và `classes:class_id(name)` để giải quyết lỗi PGRST201, hiển thị đầy đủ danh sách Học sinh, Giáo viên và Trường học
 - [x] Kiểm thử toàn diện 31 bài test logic, chức năng & điều hướng hệ thống (scripts/full-system-test.ts): 100% test cases đạt chuẩn bao gồm HTTP Routes, Auth RBAC, Điểm danh 7 ngày, 8 dạng câu hỏi, Săn quái và Admin
+- [x] Kiểm tra và củng cố bảo mật toàn diện (scripts/security-audit.ts): Duy trì phiên tự động qua refresh token @supabase/ssr, băm SHA-256 mã khôi phục kèm timingSafeEqual, chặn triệt để lộ answer_key ở client, vô hiệu hóa leo thang đặc quyền qua user_metadata, bảo vệ route /admin tại edge middleware
 
 ### Trước khi thu tiền
 - [x] Thanh toán + webhook hoạt động, test kỹ

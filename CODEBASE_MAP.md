@@ -210,6 +210,12 @@ erDiagram
     - `npx tsx scripts/full-system-test.ts`: Kiểm tra tự động 31 bài test tích hợp phủ khắp 6 tầng hệ thống (HTTP Routes, Auth & RBAC, Điểm danh 7 ngày, Question Engine 8 dạng câu hỏi, Sinh tồn & Đấu trường Săn Quái Bất Tận, Admin Dashboard).
     - `npx tsx scripts/test-account-runner.ts`: Mô phỏng luồng đăng nhập học sinh thực tế, vào solo farm, săn quái, ghé thợ rèn mua & mặc trang bị, đồng bộ DB Supabase.
     - `npm test`: Kiểm tra 52 bài unit test logic thuật toán game engine và chấm điểm.
+16. **Kiến trúc Bảo mật, Xác thực & Duy trì Phiên Đăng nhập (Security Architecture):**
+    - **Duy trì phiên liên tục (Session Retention):** Sử dụng `@supabase/ssr` trong `src/middleware.ts` và `src/lib/supabase/server.ts`. Hàm `supabase.auth.getUser()` tự động xác thực chữ ký JWT với máy chủ và tự động đổi `refresh_token` lấy `access_token` mới trong cookie khi token cũ hết hạn (người chơi không bao giờ bị văng khi đang làm bài).
+    - **Bảo vệ mã khôi phục học sinh:** Mã bí mật sinh ngẫu nhiên `randomBytes(12)` không chứa ký tự dễ nhầm lẫn (`0/O`, `1/I`), chỉ lưu bản băm SHA-256 (`recovery_code_hash`) trong cơ sở dữ liệu. Hàm so sánh dùng `timingSafeEqual` chống tấn công đo thời gian (Timing Attack). Khi khôi phục mật khẩu thành công, mã cũ tự động bị hủy và sinh mã mới.
+    - **Chống gian lận lộ đáp án:** Client học sinh chỉ nhận `id, type, content, points` (tuyệt đối không chọn `answer_key`). Chấm điểm 100% tại Server Action (`src/app/world/[id]/actions.ts`).
+    - **Chống leo thang đặc quyền (Privilege Escalation):** Loại bỏ việc tin cậy `user.user_metadata?.role` tại client; chỉ cấp quyền SuperAdmin cho email hệ thống (`hoaifongg@gmail.com`) hoặc `app_metadata` bảo mật; thêm `/admin` vào `PROTECTED` middleware; thiết lập trigger `trg_protect_profile_system_fields` tại PostgreSQL để ngăn chặn người dùng thường tự ý sửa `role`, `plan`, `fireflies`.
+
 
 
 

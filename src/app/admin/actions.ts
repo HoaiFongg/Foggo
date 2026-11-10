@@ -15,8 +15,8 @@ async function verifyAdminCaller() {
   if (!user) throw new Error("Chưa đăng nhập");
 
   const isSuperAdmin =
-    user.email === "hoaifongg@gmail.com" ||
-    user.user_metadata?.role === "admin";
+    user.email?.toLowerCase() === "hoaifongg@gmail.com" ||
+    user.app_metadata?.role === "admin";
 
   if (isSuperAdmin) return user;
 

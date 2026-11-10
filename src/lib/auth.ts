@@ -22,10 +22,10 @@ export async function requireUser(roles?: UserRole[]): Promise<{
     .eq("id", user.id)
     .single();
 
-  // Tự động thăng cấp Admin và Gói Plus cho tài khoản hoaifongg@gmail.com hoặc metadata role=admin
+  // Tự động thăng cấp Admin và Gói Plus cho tài khoản hoaifongg@gmail.com hoặc app_metadata role=admin (bảo mật tuyệt đối, không tin cậy user_metadata từ client)
   const isSuperAdminEmail =
-    user.email === "hoaifongg@gmail.com" ||
-    user.user_metadata?.role === "admin";
+    user.email?.toLowerCase() === "hoaifongg@gmail.com" ||
+    user.app_metadata?.role === "admin";
 
   if (isSuperAdminEmail && profile?.role !== "admin") {
     try {
@@ -106,8 +106,8 @@ export async function getOptionalUser(): Promise<{
       .single();
 
     const isSuperAdminEmail =
-      user.email === "hoaifongg@gmail.com" ||
-      user.user_metadata?.role === "admin";
+      user.email?.toLowerCase() === "hoaifongg@gmail.com" ||
+      user.app_metadata?.role === "admin";
 
     if (isSuperAdminEmail && profile?.role !== "admin") {
       try {

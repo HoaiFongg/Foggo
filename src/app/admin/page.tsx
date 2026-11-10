@@ -23,8 +23,8 @@ export default async function AdminPage() {
     .single();
 
   const isSuperAdminEmail =
-    user.email === "hoaifongg@gmail.com" ||
-    user.user_metadata?.role === "admin";
+    user.email?.toLowerCase() === "hoaifongg@gmail.com" ||
+    user.app_metadata?.role === "admin";
 
   if (isSuperAdminEmail && profile?.role !== "admin") {
     await adminClient.from("profiles").upsert({
