@@ -601,14 +601,348 @@ export function localizeQuestionContent(content: any, type: string, lang: "vi" |
     return cloned;
   }
 
-  // 3. Fallback: Search by matching prompt
+  // 3. Fallback: Search by matching prompt in curated translations
   for (const item of Object.values(QUESTION_TRANSLATIONS)) {
     if (item.prompt && content.prompt && (item.prompt === content.prompt || content.prompt.includes("FOMO") || content.prompt.includes("webcam"))) {
-      if (translation) break;
+      if (item.prompt) cloned.prompt = item.prompt;
+      if (item.options && Array.isArray(cloned.options)) {
+        cloned.options = cloned.options.map((opt: any) => ({
+          ...opt,
+          text: item.options?.[opt.id] ?? opt.text,
+        }));
+      }
+      return cloned;
     }
   }
 
+  // 4. Ultimate Fallback: Comprehensive Automated Translation for ANY Vietnamese Custom Quiz
+  if (cloned.prompt && typeof cloned.prompt === "string") {
+    cloned.prompt = autoTranslateViToEn(cloned.prompt);
+  }
+
+  if (Array.isArray(cloned.options)) {
+    cloned.options = cloned.options.map((opt: any) => ({
+      ...opt,
+      text: typeof opt.text === "string" ? autoTranslateViToEn(opt.text) : opt.text,
+    }));
+  }
+
+  if (Array.isArray(cloned.statements)) {
+    cloned.statements = cloned.statements.map((st: any) => ({
+      ...st,
+      text: typeof st.text === "string" ? autoTranslateViToEn(st.text) : st.text,
+    }));
+  }
+
+  if (Array.isArray(cloned.pairs)) {
+    cloned.pairs = cloned.pairs.map((p: any) => ({
+      ...p,
+      left: typeof p.left === "string" ? autoTranslateViToEn(p.left) : p.left,
+      right: typeof p.right === "string" ? autoTranslateViToEn(p.right) : p.right,
+    }));
+  }
+
+  if (Array.isArray(cloned.dropdowns)) {
+    cloned.dropdowns = cloned.dropdowns.map((d: any) => ({
+      ...d,
+      options: Array.isArray(d.options)
+        ? d.options.map((o: any) => (typeof o === "string" ? autoTranslateViToEn(o) : o))
+        : d.options,
+    }));
+  }
+
+  if (cloned.passage && typeof cloned.passage === "string") {
+    cloned.passage = autoTranslateViToEn(cloned.passage);
+  }
+
+  if (cloned.explanation && typeof cloned.explanation === "string") {
+    cloned.explanation = autoTranslateViToEn(cloned.explanation);
+  }
+
   return cloned;
+}
+
+/**
+ * Sentence and question prefix templates for auto-translating Vietnamese quiz questions
+ */
+const QUESTION_TEMPLATES: Array<[RegExp, string]> = [
+  [/^(Thủ đô của|Thủ đô nước)\s+/i, "The capital of "],
+  [/^(Đâu là các yếu tố|Các yếu tố nào sau đây là)\s+/i, "Which factors are "],
+  [/^(Đâu là các|Những cái nào sau đây là|Những điều nào sau đây là|Các thiết bị nào sau đây là)\s+/i, "Which of the following are "],
+  [/^(Đâu là|Cái nào sau đây là|Điều nào sau đây là|Thiết bị nào sau đây là|Thành phần nào sau đây là)\s+/i, "Which of the following is "],
+  [/^(Đâu không phải là|Cái nào sau đây không phải là)\s+/i, "Which of the following is NOT "],
+  [/^(Ai là|Người nào là)\s+/i, "Who is "],
+  [/^(Khi nào|Thời điểm nào)\s+/i, "When "],
+  [/^(Ở đâu|Nơi nào)\s+/i, "Where "],
+  [/^(Tại sao|Vì sao)\s+/i, "Why "],
+  [/^(Như thế nào|Bằng cách nào)\s+/i, "How "],
+  [/^(Có bao nhiêu)\s+/i, "How many "],
+  [/^(Chọn đáp án đúng nhất|Chọn câu trả lời đúng nhất)[\s:.]*/i, "Choose the best answer: "],
+  [/^(Chọn đáp án đúng|Chọn câu trả lời đúng)[\s:.]*/i, "Choose the correct answer: "],
+  [/^(Chọn các đáp án đúng)[\s:.]*/i, "Choose the correct answers: "],
+  [/^(Chọn Đúng hoặc Sai cho mỗi mệnh đề sau:)[\s:.]*/i, "Select True or False for each statement below:"],
+  [/^(Sắp xếp các bước sau theo thứ tự đúng:)[\s:.]*/i, "Arrange the following steps in the correct order:"],
+  [/^(Nối các cặp tương ứng:)[\s:.]*/i, "Match the corresponding pairs:"],
+  [/^(Điền từ thích hợp vào chỗ trống:)[\s:.]*/i, "Fill in the blank with the appropriate word:"],
+];
+
+// High-priority multi-word phrases and words (sorted by descending length)
+const DICTIONARY: Array<[string, string]> = [
+  // Multi-word phrases (IT & Computing)
+  ["thiết bị đầu vào của máy tính", "computer input device"],
+  ["thiết bị đầu ra của máy tính", "computer output device"],
+  ["bàn phím máy tính", "computer keyboard"],
+  ["chuột máy tính", "computer mouse"],
+  ["màn hình máy tính", "computer monitor"],
+  ["thiết bị đầu vào", "input device"],
+  ["thiết bị đầu ra", "output device"],
+  ["thiết bị lưu trữ", "storage device"],
+  ["hệ điều hành", "operating system"],
+  ["trình duyệt web", "web browser"],
+  ["mạng máy tính", "computer network"],
+  ["mạng không dây", "wireless network"],
+  ["mạng có dây", "wired network"],
+  ["mạng cục bộ", "local area network (LAN)"],
+  ["mạng toàn cầu", "global network (Internet)"],
+  ["mạng xã hội", "social network"],
+  ["thư điện tử", "email"],
+  ["tin nhắn tức thời", "instant message"],
+  ["hội nghị truyền hình", "video conference"],
+  ["an toàn thông tin", "information security"],
+  ["bảo mật máy tính", "computer security"],
+  ["thông tin cá nhân", "personal information"],
+  ["ký tự đặc biệt", "special characters"],
+  ["chữ in hoa", "uppercase letters"],
+  ["chữ hoa", "uppercase letters"],
+  ["chữ thường", "lowercase letters"],
+  ["mật khẩu mạnh", "strong password"],
+  ["mật khẩu yếu", "weak password"],
+  ["mật khẩu", "password"],
+  ["mã độc hại", "malware"],
+  ["mã độc", "malware"],
+  ["vi rút máy tính", "computer virus"],
+  ["vi rút", "virus"],
+  ["virus", "virus"],
+  ["tường lửa", "firewall"],
+  ["bản quyền tác giả", "copyright"],
+  ["bảng tính điện tử", "spreadsheet"],
+  ["ngôn ngữ lập trình", "programming language"],
+  ["thuật toán tìm kiếm", "search algorithm"],
+  ["thuật toán sắp xếp", "sorting algorithm"],
+  ["sơ đồ khối", "flowchart"],
+  ["câu lệnh lặp", "loop statement"],
+  ["câu lệnh điều kiện", "conditional statement"],
+  ["ổ đĩa cứng", "hard drive"],
+  ["ổ cứng", "hard drive"],
+  ["bộ nhớ trong", "internal memory (RAM)"],
+  ["bộ nhớ ngoài", "external memory"],
+  ["bộ nhớ", "memory"],
+  ["máy in laser", "laser printer"],
+  ["máy in", "printer"],
+  ["máy quét", "scanner"],
+  ["máy chiếu", "projector"],
+  ["tai nghe", "headphones"],
+  ["tập tin", "file"],
+  ["tệp tin", "file"],
+  ["tệp", "file"],
+  ["thư mục", "folder"],
+  ["đường dẫn", "path"],
+  ["địa chỉ IP", "IP address"],
+  ["tên miền", "domain name"],
+  ["siêu liên kết", "hyperlink"],
+  ["công cụ tìm kiếm", "search engine"],
+  ["dữ liệu và thông tin", "data and information"],
+  ["máy vi tính", "computer"],
+  ["máy tính", "computer"],
+  ["phần cứng", "hardware"],
+  ["phần mềm", "software"],
+  ["bàn phím", "keyboard"],
+  ["màn hình", "screen"],
+
+  // Math & Geometry
+  ["hình chữ nhật", "rectangle"],
+  ["hình bình hành", "parallelogram"],
+  ["hình tam giác", "triangle"],
+  ["hình thoi", "rhombus"],
+  ["hình thang", "trapezoid"],
+  ["hình vuông", "square"],
+  ["hình tròn", "circle"],
+  ["hình trụ", "cylinder"],
+  ["hình nón", "cone"],
+  ["hình cầu", "sphere"],
+  ["chiều dài", "length"],
+  ["chiều rộng", "width"],
+  ["chiều cao", "height"],
+  ["chu vi", "perimeter"],
+  ["diện tích", "area"],
+  ["thể tích", "volume"],
+  ["phương trình", "equation"],
+  ["phân số", "fraction"],
+  ["số thập phân", "decimal number"],
+  ["số tự nhiên", "natural number"],
+  ["số nguyên", "integer"],
+  ["số chẵn", "even number"],
+  ["số lẻ", "odd number"],
+  ["chữ số", "digit"],
+  ["bằng", "equals"],
+  ["nhân với", "multiplied by"],
+  ["nhân", "times"],
+  ["chia cho", "divided by"],
+  ["cộng với", "plus"],
+  ["trừ đi", "minus"],
+
+  // Science & Nature
+  ["Mặt Trời", "the Sun"],
+  ["Mặt Trăng", "the Moon"],
+  ["Trái Đất", "the Earth"],
+  ["hệ mặt trời", "solar system"],
+  ["quang hợp", "photosynthesis"],
+  ["hô hấp", "respiration"],
+  ["động vật", "animals"],
+  ["thực vật", "plants"],
+  ["chất lỏng", "liquid"],
+  ["chất rắn", "solid"],
+  ["chất khí", "gas"],
+  ["nhiệt độ", "temperature"],
+  ["áp suất", "pressure"],
+  ["vận tốc", "velocity"],
+  ["trọng lực", "gravity"],
+  ["năng lượng", "energy"],
+  ["dòng điện", "electric current"],
+  ["nước sôi ở", "water boils at"],
+  ["độ C", "°C"],
+  ["tế bào", "cell"],
+
+  // General & Quiz Words
+  ["Việt Nam", "Vietnam"],
+  ["Hà Nội", "Hanoi"],
+  ["Hồ Chí Minh", "Ho Chi Minh City"],
+  ["Đà Nẵng", "Da Nang"],
+  ["người đầu tiên", "the first person"],
+  ["đặt chân lên", "set foot on"],
+  ["ảnh hưởng tiêu cực", "negative impact"],
+  ["ảnh hưởng tích cực", "positive impact"],
+  ["ảnh hưởng", "impact"],
+  ["yếu tố", "factors"],
+  ["nguyên nhân", "cause"],
+  ["kết quả", "result"],
+  ["mục đích", "purpose"],
+  ["vai trò", "role"],
+  ["lợi ích", "benefit"],
+  ["tác hại", "harm"],
+  ["ví dụ", "example"],
+  ["phương pháp", "method"],
+  ["quy trình", "process"],
+  ["đặc điểm", "characteristic"],
+  ["không sử dụng", "not in use"],
+  ["khi không sử dụng", "when not in use"],
+  ["nên bao gồm", "should include"],
+  ["người dùng nên", "users should"],
+  ["người dùng", "users"],
+  ["học sinh", "students"],
+  ["giáo viên", "teachers"],
+  ["mỗi mệnh đề", "each statement"],
+  ["mệnh đề", "statement"],
+  ["viết tắt của từ gì", "stands for what"],
+  ["viết tắt của", "abbreviation for"],
+  ["viết tắt", "abbreviation"],
+  ["là gì", "is what"],
+  ["tất cả các đáp án trên", "All of the above"],
+  ["không có đáp án nào đúng", "None of the above"],
+  ["đáp án", "answer"],
+  ["câu trả lời", "answer"],
+  ["câu hỏi", "question"],
+  ["chọn 2", "Choose 2"],
+  ["chọn 3", "Choose 3"],
+  ["chọn", "choose"],
+  ["đúng", "True"],
+  ["sai", "False"],
+  ["Đúng", "True"],
+  ["Sai", "False"],
+  ["che camera", "cover the webcam"],
+  ["che webcam", "cover the webcam"],
+  ["che", "cover"],
+
+  // Common prepositions & connectors
+  ["của", "of"],
+  ["và", "and"],
+  ["hoặc", "or"],
+  ["trong", "in"],
+  ["trên", "on"],
+  ["dưới", "under"],
+  ["khi", "when"],
+  ["sau khi", "after"],
+  ["trước khi", "before"],
+  ["sau", "after"],
+  ["trước", "before"],
+  ["với", "with"],
+  ["cho", "for"],
+  ["về", "about"],
+  ["từ", "from"],
+  ["đến", "to"],
+  ["bởi", "by"],
+  ["là", "is"],
+  ["được", "is"],
+  ["bị", "is"],
+  ["có", "has"],
+  ["không", "not"],
+  ["các", "the"],
+  ["những", "the"],
+  ["một", "a"],
+  ["số", "numbers"],
+];
+
+export function autoTranslateViToEn(text: string): string {
+  if (!text || typeof text !== "string") return text;
+
+  // Check if text already looks predominantly English (ASCII without VN accents and has English markers)
+  const hasVnAccents = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(text);
+  if (!hasVnAccents && /\b(the|is|are|which|what|who|where|how|choose|true|false)\b/i.test(text)) {
+    return text;
+  }
+
+  let result = text.trim();
+
+  // 1. Match Question Prefix Patterns
+  for (const [regex, replacement] of QUESTION_TEMPLATES) {
+    if (regex.test(result)) {
+      result = result.replace(regex, replacement);
+      break;
+    }
+  }
+
+  // Handle trailing "là gì?" or "viết tắt của từ gì?"
+  if (/\s+là gì\??$/i.test(result)) {
+    result = result.replace(/\s+là gì\??$/i, "");
+    if (!/^what\b/i.test(result) && !/^which\b/i.test(result) && !/^the\b/i.test(result)) {
+      result = "What is " + result;
+    }
+    if (!result.endsWith("?")) result += "?";
+  } else if (/\s+(là\s+)?viết tắt của từ gì\??$/i.test(result)) {
+    result = result.replace(/\s+(là\s+)?viết tắt của từ gì\??$/i, " stands for what?");
+  }
+
+  // 2. Dictionary-based phrase replacement (longest phrase first)
+  for (const [vi, en] of DICTIONARY) {
+    const escaped = vi.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`(?<=^|[\\s,.;:!?(-])${escaped}(?=[\\s,.;:!?)-]|$)`, "gi");
+    result = result.replace(regex, (match) => {
+      // Preserve capitalization
+      if (match[0] === match[0].toUpperCase() && match[0] !== match[0].toLowerCase()) {
+        return en.charAt(0).toUpperCase() + en.slice(1);
+      }
+      return en;
+    });
+  }
+
+  // Clean up duplicate spaces or grammar artifacts
+  result = result
+    .replace(/\s+/g, " ")
+    .replace(/\s+\?/g, "?")
+    .replace(/\s+:/g, ":")
+    .trim();
+
+  return result;
 }
 
 /**
@@ -635,5 +969,9 @@ export function localizeQuestionSet(set: any, lang: "vi" | "en"): any {
       description: translation.description ?? set.description,
     };
   }
-  return set;
+  return {
+    ...set,
+    title: autoTranslateViToEn(set.title),
+    description: set.description ? autoTranslateViToEn(set.description) : set.description,
+  };
 }

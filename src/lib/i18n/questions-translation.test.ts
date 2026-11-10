@@ -46,3 +46,28 @@ test("localizeQuestionSet translates set title when lang is en", () => {
   const localized = localizeQuestionSet(set, "en");
   assert.equal(localized.title, "Grade 7 CS & Digital Literacy Review");
 });
+
+test("localizeQuestion auto-translates arbitrary custom Vietnamese questions seamlessly", () => {
+  const customQ = {
+    id: "arbitrary-custom-uuid-12345",
+    type: "single_choice",
+    content: {
+      prompt: "Thiết bị nào sau đây là thiết bị đầu vào của máy tính?",
+      options: [
+        { id: "opt_1", text: "Bàn phím máy tính" },
+        { id: "opt_2", text: "Màn hình máy tính" },
+        { id: "opt_3", text: "Máy in laser" },
+        { id: "opt_4", text: "Tai nghe" },
+      ],
+    },
+  };
+
+  const localized = localizeQuestion(customQ, "en");
+  assert.match(localized.content.prompt, /Which of the following is computer input device\?/i);
+  assert.equal(localized.content.options[0].text, "Computer keyboard");
+  assert.equal(localized.content.options[1].text, "Computer monitor");
+  assert.equal(localized.content.options[2].text, "Laser printer");
+  assert.equal(localized.content.options[3].text, "Headphones");
+  assert.equal(localized.content.options[0].id, "opt_1"); // IDs strictly preserved
+});
+

@@ -149,12 +149,13 @@ export function MonsterBattleArena({
   const spawnNextMonster = () => {
     const next = getRandomFarmMonster(true);
     const scaled = getScaledMonster(next.id, clock.dayNumber, !clock.isDay);
+    const nextName = (t.monsters as any)?.[next.id] || next.name;
     setMonsterDef(next);
     setMonsterMaxHp(scaled.hp);
     setMonsterCurrentHp(scaled.hp);
     setMonsterAnim("spawn");
     setSlimeFrame(1);
-    setBattleNotice(`⚡ Quái vật mới xuất hiện: ${next.name}!`);
+    setBattleNotice(isEn ? `⚡ New monster appeared: ${nextName}!` : `⚡ Quái vật mới xuất hiện: ${next.name}!`);
 
     setTimeout(() => {
       setMonsterAnim("idle");
@@ -182,7 +183,7 @@ export function MonsterBattleArena({
     setSubmitting(false);
 
     if (!res || "error" in res) {
-      alert(res?.error || "Có lỗi xảy ra khi nộp bài");
+      alert(res?.error || (isEn ? "An error occurred while submitting" : "Có lỗi xảy ra khi nộp bài"));
       return;
     }
 
@@ -221,8 +222,12 @@ export function MonsterBattleArena({
             setMonsterAnim("dead");
             const coins = res.huntResult?.coinsAwarded ?? 10;
             const score = res.huntResult?.scoreAwarded ?? 500;
-            setBattleNotice(`🎉 TIÊU DIỆT ${monsterDef.name.toUpperCase()}! +${coins} Xu 🪙, +${score} Điểm 🏆`);
-            addFloatingText(`🪙 +${coins} Xu!`, "text-yellow-300", 65, 30);
+            setBattleNotice(
+              isEn
+                ? `🎉 DEFEATED ${monsterName.toUpperCase()}! +${coins} Coins 🪙, +${score} Points 🏆`
+                : `🎉 TIÊU DIỆT ${monsterDef.name.toUpperCase()}! +${coins} Xu 🪙, +${score} Điểm 🏆`
+            );
+            addFloatingText(isEn ? `🪙 +${coins} Coins!` : `🪙 +${coins} Xu!`, "text-yellow-300", 65, 30);
 
             if (res.state) onStateUpdate(res.state);
 
@@ -247,7 +252,7 @@ export function MonsterBattleArena({
               addFloatingText(`💔 -${damageTaken} HP`, "text-rose-400", 25, 40);
 
               if (totalDefensePct > 0) {
-                addFloatingText(`🛡️ Giảm -${totalDefensePct}%`, "text-blue-400", 25, 25);
+                addFloatingText(isEn ? `🛡️ -${totalDefensePct}% Dmg` : `🛡️ Giảm -${totalDefensePct}%`, "text-blue-400", 25, 25);
               }
 
               if (monsterDef.id === "slime") {
@@ -272,7 +277,7 @@ export function MonsterBattleArena({
       }, 350);
     } else {
       // 2. TRẢ LỜI SAI -> QUÁI ĐÁNH TRẢ
-      setBattleNotice(`❌ Trả lời chưa chính xác! ${monsterDef.name} phản công!`);
+      setBattleNotice(isEn ? `❌ Incorrect answer! ${monsterName} counterattacks!` : `❌ Trả lời chưa chính xác! ${monsterDef.name} phản công!`);
 
       if (monsterDef.id === "slime") {
         setSlimeFrame(3);
@@ -286,7 +291,7 @@ export function MonsterBattleArena({
         addFloatingText(`💔 -${damageTaken} HP!`, "text-rose-400", 25, 40);
 
         if (totalDefensePct > 0) {
-          addFloatingText(`🛡️ Giảm -${totalDefensePct}%`, "text-blue-400", 25, 25);
+          addFloatingText(isEn ? `🛡️ -${totalDefensePct}% Dmg` : `🛡️ Giảm -${totalDefensePct}%`, "text-blue-400", 25, 25);
         }
 
         if (monsterDef.id === "slime") {
@@ -671,7 +676,7 @@ export function MonsterBattleArena({
             </div>
 
             <span className="text-[10px] font-mono font-bold text-white bg-slate-950/80 px-2 py-0.5 rounded-full border border-slate-800">
-              Nhà Thám Hiểm
+              {isEn ? "Explorer" : "Nhà Thám Hiểm"}
             </span>
           </div>
 

@@ -25,6 +25,9 @@ import { getScaledMonster } from "@/game-modes/survival/monsters";
 import { submitSurvivalAction, performSurvivalItemAction, emergencyHealOrRevive } from "./actions";
 import { MonsterBattleArena } from "./MonsterBattleArena";
 import { useLanguage } from "@/lib/i18n/useLanguage";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { localizeItemDef, localizeMonsterDef, localizeWorldTitle } from "@/lib/i18n/game-translations";
+import { localizeQuestion } from "@/lib/i18n/questions-translation";
 import type { SurvivalPlayerState } from "@/game-modes/survival/engine";
 
 interface WorldClientProps {
@@ -319,7 +322,7 @@ export function WorldClient({
             </Link>
             <div>
               <h1 className="text-xs sm:text-sm font-black text-white truncate max-w-[150px] sm:max-w-xs">
-                {worldTitle}
+                {localizeWorldTitle(worldTitle, language)}
               </h1>
               <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
                 <span className="flex items-center gap-1">
@@ -340,8 +343,8 @@ export function WorldClient({
             </div>
           </div>
 
-          {/* Vitals: HP, Đói, Xu, Điểm */}
-          <div className="flex items-center gap-2 sm:gap-4">
+          {/* Vitals: HP, Đói, Xu, Điểm & Language Switcher */}
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Máu (HP) */}
             <div className="flex items-center gap-1.5 bg-slate-950/80 px-2.5 py-1.5 rounded-xl border border-rose-500/30">
               <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 shrink-0" />
@@ -383,6 +386,9 @@ export function WorldClient({
               <Trophy className="w-3.5 h-3.5 text-amber-400" />
               <span>{Number.isFinite(playerState?.score) ? playerState.score : 0}</span>
             </div>
+
+            {/* Nút đổi ngôn ngữ tức thì */}
+            <LanguageSwitcher />
           </div>
         </div>
       </header>
@@ -487,16 +493,20 @@ export function WorldClient({
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
-                  <span>🌲 Vùng Rừng Xanh (Forest)</span>
+                  <span>{isEn ? "🌲 Deep Forest Zone (Forest)" : "🌲 Vùng Rừng Xanh (Forest)"}</span>
                 </h2>
                 <p className="text-xs text-slate-400">
-                  Trả lời đúng câu hỏi để vung kiếm tấn công quái vật. Đánh bại quái để thu thập xu và thịt!
+                  {isEn
+                    ? "Answer questions correctly to strike monsters with your sword. Defeat beasts to collect coins and meat!"
+                    : "Trả lời đúng câu hỏi để vung kiếm tấn công quái vật. Đánh bại quái để thu thập xu và thịt!"}
                 </p>
               </div>
               {playerState.streak > 0 && (
                 <div className="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3 py-1 rounded-xl text-xs font-mono font-bold flex items-center gap-1">
                   <Flame className="w-4 h-4 fill-amber-400" />
-                  <span>Chuỗi x{playerState.streak} (+{playerState.streak * 8}%)</span>
+                  <span>
+                    {isEn ? `Streak x${playerState.streak} (+${playerState.streak * 8}%)` : `Chuỗi x${playerState.streak} (+${playerState.streak * 8}%)`}
+                  </span>
                 </div>
               )}
             </div>
@@ -506,24 +516,26 @@ export function WorldClient({
               <div>
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-mono text-[10px] font-bold uppercase tracking-wider">
-                    Săn Quái RPG Theo Lượt · Quái Xuất Hiện Bất Tận
+                    {isEn ? "Turn-based RPG Combat · Infinite Monster Waves" : "Săn Quái RPG Theo Lượt · Quái Xuất Hiện Bất Tận"}
                   </span>
                 </div>
                 <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
-                  <span>⚔️ Đấu Trường Săn Quái Bất Tận</span>
+                  <span>{isEn ? "⚔️ Infinite Monster Arena" : "⚔️ Đấu Trường Săn Quái Bất Tận"}</span>
                 </h3>
                 <p className="text-xs text-slate-300 max-w-xl leading-relaxed mt-1">
-                  Đánh bại con này quái khác sẽ lập tức xuất hiện! Nhân vật lao lên chém khi bạn trả lời đúng, quái phản công khi sai. Có quyền rút lui (bị cào -15 HP &amp; trừ 50 điểm rank).
+                  {isEn
+                    ? "Defeat one monster and the next spawns instantly! Characters strike when you answer correctly, monsters counterattack when wrong. You can flee (-15 HP & -50 rank score)."
+                    : "Đánh bại con này quái khác sẽ lập tức xuất hiện! Nhân vật lao lên chém khi bạn trả lời đúng, quái phản công khi sai. Có quyền rút lui (bị cào -15 HP & trừ 50 điểm rank)."}
                 </p>
               </div>
 
               <button
                 type="button"
-                onClick={() => startAction("hunt", "slime", "Đấu Trường Săn Quái Bất Tận")}
+                onClick={() => startAction("hunt", "slime", isEn ? "Infinite Monster Arena" : "Đấu Trường Săn Quái Bất Tận")}
                 className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-amber-400 to-emerald-500 hover:from-emerald-400 hover:to-amber-300 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
               >
                 <Swords className="w-4 h-4" />
-                <span>BƯỚC VÀO SÀN ĐẤU NGAY</span>
+                <span>{isEn ? "ENTER ARENA NOW" : "BƯỚC VÀO SÀN ĐẤU NGAY"}</span>
               </button>
             </div>
 
@@ -531,6 +543,7 @@ export function WorldClient({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {["slime", "wolf", "wild_boar", "boar_king"].map((mId) => {
                 const m = getScaledMonster(mId, clock.dayNumber, !clock.isDay);
+                const locMonster = localizeMonsterDef(m, language);
                 const monstersKilled = playerState.monstersKilled ?? 0;
                 const isBossLairLocked = m.isBoss && monstersKilled < 5;
 
@@ -574,38 +587,44 @@ export function WorldClient({
                               : "text-amber-300 bg-amber-500/15 border-amber-500/30"
                           }`}
                         >
-                          {m.isBoss ? "👑 TRÙM KHU VỰC" : m.id === "slime" ? "CẤP 1 · DỄ" : m.id === "wolf" ? "CẤP 2 · VỪA" : "CẤP 3 · KHÓ"}
+                          {m.isBoss
+                            ? (isEn ? "👑 REGIONAL BOSS" : "👑 TRÙM KHU VỰC")
+                            : m.id === "slime"
+                            ? (isEn ? "TIER 1 · EASY" : "CẤP 1 · DỄ")
+                            : m.id === "wolf"
+                            ? (isEn ? "TIER 2 · MEDIUM" : "CẤP 2 · VỪA")
+                            : (isEn ? "TIER 3 · HARD" : "CẤP 3 · KHÓ")}
                         </span>
                       </div>
 
                       <h3 className="font-black text-white text-base mb-1 flex items-center gap-1.5">
-                        <span>{m.name}</span>
+                        <span>{locMonster.name}</span>
                       </h3>
                       <p className="text-xs text-slate-400 leading-snug line-clamp-2 mb-3">
-                        {m.description}
+                        {locMonster.description}
                       </p>
                     </div>
 
                     <div className="space-y-3 pt-3 border-t border-slate-800/80">
                       <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                         <div className="flex items-center justify-between p-1.5 rounded-lg bg-slate-950 border border-slate-800/80">
-                          <span className="text-slate-400">❤️ Máu:</span>
+                          <span className="text-slate-400">{isEn ? "❤️ HP:" : "❤️ Máu:"}</span>
                           <span className="font-bold text-rose-400">{m.hp}</span>
                         </div>
                         <div className="flex items-center justify-between p-1.5 rounded-lg bg-slate-950 border border-slate-800/80">
-                          <span className="text-slate-400">⚔️ Công:</span>
+                          <span className="text-slate-400">{isEn ? "⚔️ ATK:" : "⚔️ Công:"}</span>
                           <span className="font-bold text-amber-400">+{m.atk}</span>
                         </div>
                       </div>
 
                       {isBossLairLocked ? (
                         <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-center text-[11px] text-slate-400 font-mono">
-                          🔒 Khóa! Cần hạ 5 quái thường ({monstersKilled}/5).
+                          {isEn ? `🔒 Locked! Defeat 5 normal monsters (${monstersKilled}/5).` : `🔒 Khóa! Cần hạ 5 quái thường (${monstersKilled}/5).`}
                         </div>
                       ) : (
                         <button
                           type="button"
-                          onClick={() => startAction("hunt", m.id, m.name)}
+                          onClick={() => startAction("hunt", m.id, locMonster.name)}
                           className={`w-full py-2.5 rounded-xl font-bold font-mono text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                             m.isBoss
                               ? "bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 shadow-md shadow-amber-500/25 active:scale-95"
@@ -613,7 +632,7 @@ export function WorldClient({
                           }`}
                         >
                           <Swords className="w-3.5 h-3.5" />
-                          <span>Khiêu Chiến</span>
+                          <span>{isEn ? "Fight" : "Khiêu Chiến"}</span>
                         </button>
                       )}
                     </div>
@@ -629,17 +648,19 @@ export function WorldClient({
           <div className="space-y-6">
             <div>
               <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
-                <span>🏪 Tiệm Đồ & Lò Rèn Thám Hiểm</span>
+                <span>{isEn ? "🏪 Shop & Explorer's Forge" : "🏪 Tiệm Đồ & Lò Rèn Thám Hiểm"}</span>
               </h2>
               <p className="text-xs text-slate-400">
-                Sử dụng xu kiếm được để mua trang bị vũ khí, giáp, mũ, khiên và nhu yếu phẩm.
+                {isEn
+                  ? "Use earned coins to purchase weapons, armor, helmets, shields, and survival supplies."
+                  : "Sử dụng xu kiếm được để mua trang bị vũ khí, giáp, mũ, khiên và nhu yếu phẩm."}
               </p>
             </div>
 
             {/* BẢNG TRANG BỊ CỦA NHÂN VẬT (4 Ô: VŨ KHÍ, MŨ, GIÁP, KHIÊN) */}
             <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-3">
               <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-amber-400 block">
-                Trang bị trên người:
+                {isEn ? "Equipped Gear:" : "Trang bị trên người:"}
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* 1. Vũ khí */}
@@ -647,11 +668,13 @@ export function WorldClient({
                   <div className="flex items-center gap-2.5">
                     <span className="text-2xl">⚔️</span>
                     <div>
-                      <span className="text-[9px] font-mono uppercase text-slate-400 block">Vũ khí</span>
+                      <span className="text-[9px] font-mono uppercase text-slate-400 block">
+                        {isEn ? "Weapon" : "Vũ khí"}
+                      </span>
                       <h4 className="font-bold text-xs text-white truncate max-w-[140px]">
                         {playerState.equipped?.weapon
-                          ? getItemDef(playerState.equipped.weapon.itemId)?.name
-                          : "Chưa trang bị"}
+                          ? localizeItemDef(getItemDef(playerState.equipped.weapon.itemId), language).name
+                          : (isEn ? "Not equipped" : "Chưa trang bị")}
                         {playerState.equipped?.weapon?.enhancedLevel
                           ? ` +${playerState.equipped.weapon.enhancedLevel}`
                           : ""}
@@ -661,7 +684,7 @@ export function WorldClient({
                           +
                           {(getItemDef(playerState.equipped.weapon.itemId)?.atk || 0) +
                             (playerState.equipped.weapon.enhancedLevel || 0) * 4}{" "}
-                          Công · Bền: {playerState.equipped.weapon.durability}
+                          {isEn ? "ATK · Durability:" : "Công · Bền:"} {playerState.equipped.weapon.durability}
                         </span>
                       )}
                     </div>
@@ -673,14 +696,14 @@ export function WorldClient({
                         onClick={() => handleBlacksmith("repair", playerState.equipped!.weapon!.itemId)}
                         className="flex-1 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-all cursor-pointer"
                       >
-                        Sửa
+                        {isEn ? "Repair" : "Sửa"}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleBlacksmith("enhance", playerState.equipped!.weapon!.itemId)}
                         className="flex-1 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-[10px] font-mono font-bold text-slate-950 transition-all cursor-pointer"
                       >
-                        Cường hóa (+4)
+                        {isEn ? "Enhance (+4)" : "Cường hóa (+4)"}
                       </button>
                     </div>
                   )}
@@ -691,11 +714,13 @@ export function WorldClient({
                   <div className="flex items-center gap-2.5">
                     <span className="text-2xl">🪖</span>
                     <div>
-                      <span className="text-[9px] font-mono uppercase text-slate-400 block">Mũ bảo hộ</span>
+                      <span className="text-[9px] font-mono uppercase text-slate-400 block">
+                        {isEn ? "Helmet" : "Mũ bảo hộ"}
+                      </span>
                       <h4 className="font-bold text-xs text-white truncate max-w-[140px]">
                         {playerState.equipped?.helmet
-                          ? getItemDef(playerState.equipped.helmet.itemId)?.name
-                          : "Chưa trang bị"}
+                          ? localizeItemDef(getItemDef(playerState.equipped.helmet.itemId), language).name
+                          : (isEn ? "Not equipped" : "Chưa trang bị")}
                       </h4>
                       {playerState.equipped?.helmet && (
                         <span className="text-[10px] font-mono text-emerald-300 block">
@@ -703,7 +728,7 @@ export function WorldClient({
                           {Math.round(
                             (getItemDef(playerState.equipped.helmet.itemId)?.defensePct || 0) * 100
                           )}
-                          % Sát thương · Bền: {playerState.equipped.helmet.durability}
+                          {isEn ? "% Dmg Red. · Durability:" : "% Sát thương · Bền:"} {playerState.equipped.helmet.durability}
                         </span>
                       )}
                     </div>
@@ -715,7 +740,7 @@ export function WorldClient({
                         onClick={() => handleBlacksmith("repair", playerState.equipped!.helmet!.itemId)}
                         className="w-full py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-all cursor-pointer"
                       >
-                        Sửa chữa
+                        {isEn ? "Repair" : "Sửa chữa"}
                       </button>
                     </div>
                   )}
@@ -726,11 +751,13 @@ export function WorldClient({
                   <div className="flex items-center gap-2.5">
                     <span className="text-2xl">🛡️</span>
                     <div>
-                      <span className="text-[9px] font-mono uppercase text-slate-400 block">Áo giáp</span>
+                      <span className="text-[9px] font-mono uppercase text-slate-400 block">
+                        {isEn ? "Armor" : "Áo giáp"}
+                      </span>
                       <h4 className="font-bold text-xs text-white truncate max-w-[140px]">
                         {playerState.equipped?.armor
-                          ? getItemDef(playerState.equipped.armor.itemId)?.name
-                          : "Chưa trang bị"}
+                          ? localizeItemDef(getItemDef(playerState.equipped.armor.itemId), language).name
+                          : (isEn ? "Not equipped" : "Chưa trang bị")}
                       </h4>
                       {playerState.equipped?.armor && (
                         <span className="text-[10px] font-mono text-emerald-300 block">
@@ -738,7 +765,7 @@ export function WorldClient({
                           {Math.round(
                             (getItemDef(playerState.equipped.armor.itemId)?.defensePct || 0) * 100
                           )}
-                          % Sát thương · Bền: {playerState.equipped.armor.durability}
+                          {isEn ? "% Dmg Red. · Durability:" : "% Sát thương · Bền:"} {playerState.equipped.armor.durability}
                         </span>
                       )}
                     </div>
@@ -750,7 +777,7 @@ export function WorldClient({
                         onClick={() => handleBlacksmith("repair", playerState.equipped!.armor!.itemId)}
                         className="w-full py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-all cursor-pointer"
                       >
-                        Sửa chữa
+                        {isEn ? "Repair" : "Sửa chữa"}
                       </button>
                     </div>
                   )}
@@ -761,11 +788,13 @@ export function WorldClient({
                   <div className="flex items-center gap-2.5">
                     <span className="text-2xl">🛡️</span>
                     <div>
-                      <span className="text-[9px] font-mono uppercase text-slate-400 block">Khiên chắn</span>
+                      <span className="text-[9px] font-mono uppercase text-slate-400 block">
+                        {isEn ? "Shield" : "Khiên chắn"}
+                      </span>
                       <h4 className="font-bold text-xs text-white truncate max-w-[140px]">
                         {playerState.equipped?.shield
-                          ? getItemDef(playerState.equipped.shield.itemId)?.name
-                          : "Chưa trang bị"}
+                          ? localizeItemDef(getItemDef(playerState.equipped.shield.itemId), language).name
+                          : (isEn ? "Not equipped" : "Chưa trang bị")}
                       </h4>
                       {playerState.equipped?.shield && (
                         <span className="text-[10px] font-mono text-emerald-300 block">
@@ -773,7 +802,7 @@ export function WorldClient({
                           {Math.round(
                             (getItemDef(playerState.equipped.shield.itemId)?.defensePct || 0) * 100
                           )}
-                          % Sát thương · Bền: {playerState.equipped.shield.durability}
+                          {isEn ? "% Dmg Red. · Durability:" : "% Sát thương · Bền:"} {playerState.equipped.shield.durability}
                         </span>
                       )}
                     </div>
@@ -785,7 +814,7 @@ export function WorldClient({
                         onClick={() => handleBlacksmith("repair", playerState.equipped!.shield!.itemId)}
                         className="w-full py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-all cursor-pointer"
                       >
-                        Sửa chữa
+                        {isEn ? "Repair" : "Sửa chữa"}
                       </button>
                     </div>
                   )}
@@ -796,10 +825,10 @@ export function WorldClient({
             {/* BỘ LỌC CỬA HÀNG */}
             <div className="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-3">
               {[
-                { id: "all", label: "🌟 Tất Cả" },
-                { id: "weapons", label: "⚔️ Kiếm & Vũ Khí" },
-                { id: "defense", label: "🛡️ Giáp, Mũ & Khiên" },
-                { id: "consumables", label: "🧪 Nhu Yếu Phẩm & Thức Ăn" },
+                { id: "all", label: isEn ? "🌟 All" : "🌟 Tất Cả" },
+                { id: "weapons", label: isEn ? "⚔️ Swords & Weapons" : "⚔️ Kiếm & Vũ Khí" },
+                { id: "defense", label: isEn ? "🛡️ Armor, Helmets & Shields" : "🛡️ Giáp, Mũ & Khiên" },
+                { id: "consumables", label: isEn ? "🧪 Supplies & Food" : "🧪 Nhu Yếu Phẩm & Thức Ăn" },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -843,6 +872,7 @@ export function WorldClient({
               ].map((itemId) => {
                 const item = getItemDef(itemId);
                 if (!item) return null;
+                const locItem = localizeItemDef(item, language);
                 const canAfford = (Number.isFinite(playerState?.coins) ? playerState.coins : 0) >= item.buyPrice;
 
                 return (
@@ -867,33 +897,39 @@ export function WorldClient({
                         </span>
                         <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                           {item.category === "weapon"
-                            ? "VŨ KHÍ"
+                            ? (isEn ? "WEAPON" : "VŨ KHÍ")
                             : item.category === "helmet"
-                            ? "MŨ"
+                            ? (isEn ? "HELMET" : "MŨ")
                             : item.category === "armor"
-                            ? "GIÁP"
+                            ? (isEn ? "ARMOR" : "GIÁP")
                             : item.category === "shield"
-                            ? "KHIÊN"
+                            ? (isEn ? "SHIELD" : "KHIÊN")
                             : item.category === "food"
-                            ? "THỨC ĂN"
-                            : "TIÊU HAO"}
+                            ? (isEn ? "FOOD" : "THỨC ĂN")
+                            : (isEn ? "CONSUMABLE" : "TIÊU HAO")}
                         </span>
                       </div>
-                      <h3 className="font-bold text-white text-base mb-1">{item.name}</h3>
+                      <h3 className="font-bold text-white text-base mb-1">{locItem.name}</h3>
                       <p className="text-xs text-slate-400 leading-snug mb-3">
-                        {item.description}
+                        {locItem.description}
                       </p>
 
                       <div className="text-xs font-mono space-y-1 text-slate-300 py-2 border-t border-slate-800/80">
-                        {item.atk !== undefined && <div>⚔️ Sát thương: +{item.atk} ATK</div>}
+                        {item.atk !== undefined && (
+                          <div>{isEn ? `⚔️ Damage: +${item.atk} ATK` : `⚔️ Sát thương: +${item.atk} ATK`}</div>
+                        )}
                         {item.defensePct !== undefined && (
-                          <div>🛡️ Phòng thủ: -{Math.round(item.defensePct * 100)}% sát thương</div>
+                          <div>{isEn ? `🛡️ Defense: -${Math.round(item.defensePct * 100)}% damage` : `🛡️ Phòng thủ: -${Math.round(item.defensePct * 100)}% sát thương`}</div>
                         )}
                         {item.healHp !== undefined && (
-                          <div>❤️ Hồi phục: {item.healHp > 0 ? `+${item.healHp}` : item.healHp} HP</div>
+                          <div>{isEn ? `❤️ Recovery: ${item.healHp > 0 ? `+${item.healHp}` : item.healHp} HP` : `❤️ Hồi phục: ${item.healHp > 0 ? `+${item.healHp}` : item.healHp} HP`}</div>
                         )}
-                        {item.healHunger !== undefined && <div>🍗 Giảm đói: +{item.healHunger} điểm</div>}
-                        {item.durability !== undefined && <div>🔨 Độ bền: {item.durability}</div>}
+                        {item.healHunger !== undefined && (
+                          <div>{isEn ? `🍗 Hunger Relief: +${item.healHunger} pts` : `🍗 Giảm đói: +${item.healHunger} điểm`}</div>
+                        )}
+                        {item.durability !== undefined && (
+                          <div>{isEn ? `🔨 Durability: ${item.durability}` : `🔨 Độ bền: ${item.durability}`}</div>
+                        )}
                       </div>
                     </div>
 
@@ -908,7 +944,7 @@ export function WorldClient({
                       }`}
                     >
                       <Coins className="w-3.5 h-3.5" />
-                      <span>Mua ({item.buyPrice} Xu)</span>
+                      <span>{isEn ? `Buy (${item.buyPrice} Coins)` : `Mua (${item.buyPrice} Xu)`}</span>
                     </button>
                   </div>
                 );
@@ -923,10 +959,12 @@ export function WorldClient({
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
-                  <span>🎒 Túi Đồ Sinh Tồn ({playerState.inventory.length}/16 ô)</span>
+                  <span>{isEn ? `🎒 Survival Backpack (${playerState.inventory.length}/16 slots)` : `🎒 Túi Đồ Sinh Tồn (${playerState.inventory.length}/16 ô)`}</span>
                 </h2>
                 <p className="text-xs text-slate-400">
-                  Chạm vào vũ khí/giáp/mũ/khiên để trang bị, chạm thức ăn/bình máu để sử dụng ngay.
+                  {isEn
+                    ? "Tap weapons/armor/helmets/shields to equip; tap food/potions to consume."
+                    : "Chạm vào vũ khí/giáp/mũ/khiên để trang bị, chạm thức ăn/bình máu để sử dụng ngay."}
                 </p>
               </div>
             </div>
@@ -936,6 +974,7 @@ export function WorldClient({
               {Array.from({ length: 16 }).map((_, idx) => {
                 const slot = playerState.inventory.find((s) => s.slotIndex === idx);
                 const itemDef = slot ? getItemDef(slot.itemId) : null;
+                const locItem = itemDef ? localizeItemDef(itemDef, language) : null;
 
                 if (!slot || !itemDef) {
                   return (
@@ -969,10 +1008,10 @@ export function WorldClient({
                     }`}
                     title={
                       isEquippable
-                        ? `Chạm để trang bị ${itemDef.name}`
+                        ? (isEn ? `Tap to equip ${locItem?.name}` : `Chạm để trang bị ${itemDef.name}`)
                         : canEat
-                        ? `Chạm để sử dụng ${itemDef.name}`
-                        : itemDef.name
+                        ? (isEn ? `Tap to use ${locItem?.name}` : `Chạm để sử dụng ${itemDef.name}`)
+                        : locItem?.name || itemDef.name
                     }
                   >
                     <div className="flex items-center justify-between">
@@ -998,16 +1037,16 @@ export function WorldClient({
 
                     <div className="truncate">
                       <span className="text-[11px] font-bold text-white block truncate">
-                        {itemDef.name}
+                        {locItem?.name || itemDef.name}
                       </span>
                       {isEquippable && (
                         <span className="text-[9px] font-mono font-bold text-amber-400 block">
-                          [Trang bị]
+                          [{isEn ? "Equip" : "Trang bị"}]
                         </span>
                       )}
                       {canEat && (
                         <span className="text-[9px] font-mono font-bold text-emerald-400 block">
-                          [Dùng]
+                          [{isEn ? "Use" : "Dùng"}]
                         </span>
                       )}
                     </div>
@@ -1023,10 +1062,12 @@ export function WorldClient({
           <div className="space-y-6">
             <div>
               <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
-                <span>🏆 Bảng Vinh Danh Đảo Foggo</span>
+                <span>{isEn ? "🏆 Foggo Island Hall of Fame" : "🏆 Bảng Vinh Danh Đảo Foggo"}</span>
               </h2>
               <p className="text-xs text-slate-400">
-                Thành tích của những nhà sinh tồn xuất sắc nhất trong thế giới.
+                {isEn
+                  ? "Achievements of top survivors in this world."
+                  : "Thành tích của những nhà sinh tồn xuất sắc nhất trong thế giới."}
               </p>
             </div>
 
@@ -1034,10 +1075,10 @@ export function WorldClient({
               <table className="w-full text-left text-xs font-mono">
                 <thead className="bg-slate-950 text-slate-400 border-b border-slate-800">
                   <tr>
-                    <th className="py-3 px-4">Hạng</th>
-                    <th className="py-3 px-4">Học Sinh</th>
-                    <th className="py-3 px-4 text-right">Xu</th>
-                    <th className="py-3 px-4 text-right">Điểm Số</th>
+                    <th className="py-3 px-4">{isEn ? "Rank" : "Hạng"}</th>
+                    <th className="py-3 px-4">{isEn ? "Student" : "Học Sinh"}</th>
+                    <th className="py-3 px-4 text-right">{isEn ? "Coins" : "Xu"}</th>
+                    <th className="py-3 px-4 text-right">{isEn ? "Score" : "Điểm Số"}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800">
@@ -1080,14 +1121,16 @@ export function WorldClient({
                             <span className="text-white font-semibold">{p.nickname}</span>
                             {isSelf && (
                               <span className="px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 text-[9px] font-mono font-black uppercase">
-                                Bạn
+                                {isEn ? "You" : "Bạn"}
                               </span>
                             )}
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-right text-amber-300 font-mono font-bold">{p.gold} Xu</td>
+                        <td className="py-3 px-4 text-right text-amber-300 font-mono font-bold">
+                          {p.gold} {t.common.coins}
+                        </td>
                         <td className="py-3 px-4 text-right text-emerald-400 font-bold font-mono">
-                          {p.score} Điểm
+                          {p.score} {isEn ? "Points" : "Điểm"}
                         </td>
                       </tr>
                     );
@@ -1137,7 +1180,9 @@ export function WorldClient({
                 {activeAction.targetName}
               </span>
               <p className="text-xs text-slate-400">
-                Trả lời chính xác để hoàn thành hành động này!
+                {isEn
+                  ? "Answer correctly to complete this action!"
+                  : "Trả lời chính xác để hoàn thành hành động này!"}
               </p>
             </div>
 
@@ -1161,7 +1206,7 @@ export function WorldClient({
 
                 {feedback.explanation && (
                   <p className="text-xs text-slate-300 bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-left">
-                    💡 <strong>Giải thích:</strong> {feedback.explanation}
+                    💡 <strong>{isEn ? "Explanation:" : "Giải thích:"}</strong> {feedback.explanation}
                   </p>
                 )}
 
@@ -1173,22 +1218,22 @@ export function WorldClient({
                   }}
                   className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold font-mono text-xs transition-all shadow-md cursor-pointer"
                 >
-                  Tiếp Tục Cuộc Sinh Tồn
+                  {isEn ? "Continue Survival Quest" : "Tiếp Tục Cuộc Sinh Tồn"}
                 </button>
               </div>
             ) : (
-              /* Giao diện câu hỏi từ Registry */
+              /* Giao diện câu hỏi từ Registry - ĐÃ ÁP DỤNG LOCALIZATION */
               <div className="space-y-6">
                 {PlayerComponent ? (
                   <PlayerComponent
-                    content={question.content}
+                    content={localizeQuestion(question, language).content}
                     value={userAnswer}
                     onChange={(val) => setUserAnswer(val)}
                     disabled={submitting}
                   />
                 ) : (
                   <div className="p-8 text-center text-slate-400">
-                    Chưa tải được dạng câu hỏi
+                    {isEn ? "Could not load question type" : "Chưa tải được dạng câu hỏi"}
                   </div>
                 )}
 
@@ -1200,7 +1245,11 @@ export function WorldClient({
                   className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black font-mono text-sm transition-all shadow-lg shadow-amber-500/25 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-4 h-4" />
-                  <span>{submitting ? "Đang xử lý..." : "XÁC NHẬN HÀNH ĐỘNG"}</span>
+                  <span>
+                    {submitting
+                      ? (isEn ? "Processing..." : "Đang xử lý...")
+                      : (isEn ? "CONFIRM ACTION" : "XÁC NHẬN HÀNH ĐỘNG")}
+                  </span>
                 </button>
               </div>
             )}
