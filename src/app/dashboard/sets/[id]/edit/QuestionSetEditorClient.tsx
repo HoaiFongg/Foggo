@@ -28,6 +28,8 @@ import {
   exportQuestionSetToExcel,
   exportQuestionSetToJson,
 } from "@/lib/excel";
+import { useLanguage } from "@/lib/i18n/useLanguage";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import type { QuestionType } from "@/types/database";
 
 interface QuestionItem {
@@ -52,6 +54,7 @@ export function QuestionSetEditorClient({
   initialTitle,
   initialQuestions,
 }: QuestionSetEditorProps) {
+  const { t, isEn } = useLanguage();
   const [questions, setQuestions] = useState<QuestionItem[]>(
     initialQuestions.length > 0
       ? initialQuestions
@@ -342,31 +345,33 @@ export function QuestionSetEditorClient({
               type="button"
               onClick={() => downloadSampleTemplateExcel()}
               className="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-medium border border-slate-800 flex items-center gap-1.5 cursor-pointer transition-colors"
-              title="Tải file mẫu Excel chuẩn"
+              title="Template"
             >
               <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden md:inline">File mẫu</span>
+              <span className="hidden md:inline">{isEn ? "Template" : "File mẫu"}</span>
             </button>
 
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               className="px-2.5 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
-              title="Tải lên tệp Excel để nạp thêm câu hỏi vào bộ đề này"
+              title="Import from Excel"
             >
               <Upload className="w-3.5 h-3.5" />
-              <span>Nhập Excel</span>
+              <span>{t.sets.importExcel}</span>
             </button>
 
             <button
               type="button"
               onClick={handleBackupExcel}
               className="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-medium border border-slate-800 flex items-center gap-1.5 cursor-pointer transition-colors"
-              title="Sao lưu danh sách câu hỏi ra file Excel (.xlsx)"
+              title="Export questions to Excel"
             >
               <Download className="w-3.5 h-3.5 text-blue-400" />
-              <span className="hidden md:inline">Sao lưu</span>
+              <span className="hidden md:inline">{isEn ? "Backup" : "Sao lưu"}</span>
             </button>
+
+            <LanguageSwitcher />
           </div>
 
           {/* Switch Soạn thảo / Xem trước */}
@@ -381,7 +386,7 @@ export function QuestionSetEditorClient({
               }`}
             >
               <Edit className="w-3.5 h-3.5" />
-              <span>Soạn thảo</span>
+              <span>{isEn ? "Editor" : "Soạn thảo"}</span>
             </button>
 
             <button
@@ -397,7 +402,7 @@ export function QuestionSetEditorClient({
               }`}
             >
               <Eye className="w-3.5 h-3.5" />
-              <span>Xem trước</span>
+              <span>{isEn ? "Preview" : "Xem trước"}</span>
             </button>
           </div>
 
@@ -415,12 +420,12 @@ export function QuestionSetEditorClient({
             {savedSuccess ? (
               <>
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Đã lưu!</span>
+                <span>{isEn ? "Saved!" : "Đã lưu!"}</span>
               </>
             ) : (
               <>
                 <Save className="w-4 h-4" />
-                <span>{saving ? "Đang lưu..." : "Lưu thay đổi"}</span>
+                <span>{saving ? (isEn ? "Saving..." : "Đang lưu...") : (isEn ? "Save Changes" : "Lưu thay đổi")}</span>
               </>
             )}
           </button>
@@ -434,7 +439,7 @@ export function QuestionSetEditorClient({
           {/* Header của thanh danh sách câu hỏi */}
           <div className="p-3.5 pb-2.5 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-950">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
-              Danh sách câu hỏi
+              {isEn ? "Questions List" : "Danh sách câu hỏi"}
             </span>
             <span className="text-xs font-mono text-amber-400 font-semibold bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
               {activeIndex + 1}/{questions.length}
@@ -449,7 +454,7 @@ export function QuestionSetEditorClient({
             {questions.map((q, idx) => {
               const isActive = idx === activeIndex;
               const def = getQuestionType(q.type);
-              const snippet = q.content?.prompt || "Câu hỏi chưa có tiêu đề";
+              const snippet = q.content?.prompt || (isEn ? "Untitled question" : "Câu hỏi chưa có tiêu đề");
 
               return (
                 <div
@@ -467,10 +472,10 @@ export function QuestionSetEditorClient({
                 >
                   <div className="flex items-center justify-between gap-1 mb-1.5">
                     <span className="text-[11px] font-mono font-bold text-amber-400">
-                      Câu {idx + 1}
+                      {isEn ? `Q.${idx + 1}` : `Câu ${idx + 1}`}
                     </span>
                     <span className="text-[10px] text-slate-400 font-mono">
-                      {q.time_limit_sec}s · {q.points}đ
+                      {q.time_limit_sec}s · {q.points}{isEn ? "pts" : "đ"}
                     </span>
                   </div>
 
@@ -480,7 +485,7 @@ export function QuestionSetEditorClient({
 
                   <div className="mt-2 pt-2 border-t border-slate-800/60 flex items-center justify-between">
                     <span className="text-[10px] font-mono text-slate-400 truncate max-w-[120px]">
-                      {def?.name || q.type}
+                      {(t.questionTypes as any)?.[q.type] || def?.name || q.type}
                     </span>
 
                     {/* Điều khiển vị trí & xóa */}
@@ -534,7 +539,7 @@ export function QuestionSetEditorClient({
           {/* Menu thêm câu hỏi (CỐ ĐỊNH Ở ĐÁY SIDEBAR, KHÔNG BỊ TRÔI THEO DANH SÁCH) */}
           <div className="p-3 border-t border-slate-800 shrink-0 bg-slate-950/95 space-y-2">
             <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 block px-0.5">
-              + Thêm dạng câu hỏi:
+              {isEn ? "+ Add Question Type:" : "+ Thêm dạng câu hỏi:"}
             </span>
             <div className="grid grid-cols-1 gap-1.5 max-h-36 overflow-y-auto pr-1">
               {getAllQuestionTypes().map((def) => (
@@ -544,7 +549,7 @@ export function QuestionSetEditorClient({
                   onClick={() => handleAddQuestion(def.type)}
                   className="w-full py-1.5 px-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/50 text-slate-200 text-xs font-medium flex items-center justify-between gap-1.5 transition-colors cursor-pointer text-left"
                 >
-                  <span className="truncate">{def.name}</span>
+                  <span className="truncate">{(t.questionTypes as any)?.[def.type] || def.name}</span>
                   {def.isPlus && (
                     <span className="text-[9px] font-mono font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/30 shrink-0">
                       PLUS

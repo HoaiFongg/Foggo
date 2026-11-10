@@ -222,15 +222,30 @@ erDiagram
     - **Tích hợp toàn diện:** [`src/app/loading.tsx`](file:///d:/Project/Foggo/src/app/loading.tsx), [`src/app/world/[id]/loading.tsx`](file:///d:/Project/Foggo/src/app/world/[id]/loading.tsx), [`src/app/dashboard/loading.tsx`](file:///d:/Project/Foggo/src/app/dashboard/loading.tsx) và [`src/components/ui/LoadingOverlay.tsx`](file:///d:/Project/Foggo/src/components/ui/LoadingOverlay.tsx).
 18. **Hệ Thống Đa Ngôn Ngữ Song Ngữ (Bilingual i18n - Tiếng Việt 🇻🇳 & English 🇬🇧):**
     - **Kiến trúc:** [`src/lib/i18n/`](file:///d:/Project/Foggo/src/lib/i18n/)
-      - [`types.ts`](file:///d:/Project/Foggo/src/lib/i18n/types.ts): Định nghĩa kiểu `Language = "vi" | "en"` và schema dịch thuật `Translations` chặt chẽ (`common`, `nav`, `landing`, `dashboard`, `battle`, `slime`).
+      - [`types.ts`](file:///d:/Project/Foggo/src/lib/i18n/types.ts): Định nghĩa kiểu `Language = "vi" | "en"` và schema dịch thuật `Translations` chặt chẽ (`common`, `nav`, `landing`, `dashboard`, `battle`, `slime`, `worlds`, `sets`, `questionTypes`, `monsters`, `auth`, `pricing`).
       - [`vi.ts`](file:///d:/Project/Foggo/src/lib/i18n/vi.ts): Bộ từ điển Tiếng Việt chuẩn phong cách học tập sinh tồn sương mù Foggo.
       - [`en.ts`](file:///d:/Project/Foggo/src/lib/i18n/en.ts): Bộ từ điển Tiếng Anh chuyên nghiệp, tự nhiên chuẩn quốc tế.
       - [`useLanguage.ts`](file:///d:/Project/Foggo/src/lib/i18n/useLanguage.ts): Reactive Zustand store với middleware `persist` lưu `localStorage` (`foggo_user_language`) và đồng bộ `document.cookie` (`foggo_lang`), cung cấp hook `useLanguage()` (`t`, `language`, `setLanguage`, `toggleLanguage`, `isVi`, `isEn`).
+      - [`questions-translation.ts`](file:///d:/Project/Foggo/src/lib/i18n/questions-translation.ts): **Engine dịch thuật động Ngân hàng câu hỏi:**
+        - Cung cấp hàm `localizeQuestionContent(content, language)`, `localizeQuestion(question, language)` và `localizeQuestionSet(set, language)`.
+        - Hỗ trợ dịch động cả 8 dạng câu hỏi: đề bài (`prompt`), danh sách đáp án (`options.text`), mệnh đề đúng sai (`statements.text`), cặp ghép (`pairs`), ô trống (`blanks`).
+        - **Bảo toàn 100% ID và Logic chấm điểm:** Giữ nguyên vẹn toàn bộ ID của option (`opt_1`, `opt_2`), statement (`s1`, `s2`), pair (`p1`, `p2`), giúp việc gửi đáp án lên server action và so khớp với `answer_key` luôn chính xác tuyệt đối mà không cần can thiệp logic chấm điểm server.
+        - Unit test bảo vệ: `src/lib/i18n/questions-translation.test.ts` (kiểm tra tính toàn vẹn 2 chiều Tiếng Việt ⇋ Tiếng Anh).
     - **Nút chuyển đổi ngôn ngữ (Language Switcher):**
       - [`src/components/LanguageSwitcher.tsx`](file:///d:/Project/Foggo/src/components/LanguageSwitcher.tsx): Nút bấm dạng pill nhỏ gọn, hiển thị cờ và mã ngôn ngữ (`🇻🇳 VI` ⇋ `🇬🇧 EN`), hiệu ứng viền sáng amber, chuyển đổi tức thì 0ms không cần reload trang.
-    - **Tích hợp toàn diện:**
+    - **Tích hợp toàn diện trên toàn bộ hệ thống:**
       - [`src/components/NavigationHeader.tsx`](file:///d:/Project/Foggo/src/components/NavigationHeader.tsx): Tích hợp đa ngôn ngữ toàn bộ thanh điều hướng, vai trò người dùng, tooltip đăng xuất và nhúng `LanguageSwitcher`.
-      - [`src/app/LandingClient.tsx`](file:///d:/Project/Foggo/src/app/LandingClient.tsx) & [`src/app/page.tsx`](file:///d:/Project/Foggo/src/app/page.tsx): Toàn bộ trang chủ (hero, mockup đấu trường RPG pixel, 3 trụ cột gameplay, 3 bước giáo viên, tính năng nổi bật, FAQ, footer) phản ứng chuyển ngữ tức thì.
+      - [`src/app/LandingClient.tsx`](file:///d:/Project/Foggo/src/app/LandingClient.tsx) & [`src/app/page.tsx`](file:///d:/Project/Foggo/src/app/page.tsx): Toàn bộ trang chủ phản ứng chuyển ngữ tức thì.
+      - [`src/app/dashboard/DashboardClient.tsx`](file:///d:/Project/Foggo/src/app/dashboard/DashboardClient.tsx): Chuyển ngữ toàn bộ bảng điều khiển cho Giáo viên, Admin và Học sinh (thẻ chào mừng, bãi farm 24/7, đấu trường lớp, trang bị và lịch sử).
+      - [`src/app/world/[id]/MonsterBattleArena.tsx`](file:///d:/Project/Foggo/src/app/world/[id]/MonsterBattleArena.tsx): Toàn bộ giao diện đấu trường săn quái: tên quái vật, câu hỏi, phương án lựa chọn, nút hành động, modal rút lui và modal ngã gục đều tự động dịch theo ngôn ngữ người chơi chọn.
+      - [`src/app/world/[id]/WorldClient.tsx`](file:///d:/Project/Foggo/src/app/world/[id]/WorldClient.tsx): 4 tab điều hướng thế giới, chu kỳ ngày/đêm và các cảnh báo sinh tồn.
+      - [`src/app/dashboard/sets/QuestionSetsClient.tsx`](file:///d:/Project/Foggo/src/app/dashboard/sets/QuestionSetsClient.tsx): Danh sách bộ đề, phân loại môn học và số lượng câu hỏi.
+      - [`src/app/dashboard/sets/[id]/edit/QuestionSetEditorClient.tsx`](file:///d:/Project/Foggo/src/app/dashboard/sets/[id]/edit/QuestionSetEditorClient.tsx): Trình soạn thảo câu hỏi, danh sách câu hỏi thanh bên và huy hiệu loại câu hỏi.
+      - [`src/app/worlds/WorldsClient.tsx`](file:///d:/Project/Foggo/src/app/worlds/WorldsClient.tsx): Danh sách hầm ngục và thế giới đang mở.
+      - [`src/app/explore/ExploreClient.tsx`](file:///d:/Project/Foggo/src/app/explore/ExploreClient.tsx): Thư viện khám phá cộng đồng.
+      - [`src/app/pricing/PricingClient.tsx`](file:///d:/Project/Foggo/src/app/pricing/PricingClient.tsx): Bảng giá các gói dịch vụ.
+      - Bộ components hiển thị câu hỏi [`src/question-types/*/Player.tsx`](file:///d:/Project/Foggo/src/question-types/): Toàn bộ huy hiệu loại câu hỏi, hướng dẫn thao tác và nút bấm ĐÚNG / SAI tự động chuyển đổi theo ngôn ngữ người dùng.
+      - [`scripts/seed-english-set.ts`](file:///d:/Project/Foggo/scripts/seed-english-set.ts): Bộ câu hỏi mẫu tiếng Anh chuẩn quốc tế ("Grade 7 CS & Digital Literacy (English)") được lưu trữ trực tiếp trong cơ sở dữ liệu Supabase với cờ `language: 'en'`.
       - [`src/components/ui/CuteSlimeLoading.tsx`](file:///d:/Project/Foggo/src/components/ui/CuteSlimeLoading.tsx): Bóng thoại Bé Slime chuyển đổi câu thoại siêu dễ thương theo ngôn ngữ đã chọn.
 
 

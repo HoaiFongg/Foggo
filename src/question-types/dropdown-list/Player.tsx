@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown, Check } from "lucide-react";
 import type { PlayerProps } from "../types";
 import type { DropdownListContent, DropdownListUserAnswer } from "./schema";
+import { useLanguage } from "@/lib/i18n/useLanguage";
 
 export function DropdownListPlayer({
   content,
@@ -11,6 +12,7 @@ export function DropdownListPlayer({
   onChange,
   disabled = false,
 }: PlayerProps<DropdownListContent, DropdownListUserAnswer>) {
+  const { t, isEn } = useLanguage();
   const prompt = content?.prompt || "";
   // Xử lý dữ liệu tương thích nếu câu hỏi cũ chỉ lưu {D} trong prompt
   const passage =
@@ -55,7 +57,7 @@ export function DropdownListPlayer({
       {/* 1. KHỐI CÂU HỎI / ĐỀ BÀI (Ở PHÍA TRÊN) */}
       <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg space-y-1.5">
         <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/20 inline-block">
-          Câu hỏi lựa chọn theo danh sách
+          {t.questionTypes.dropdown_list}
         </span>
 
         {/* Câu hỏi ở phía trên */}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ArrowUp, ArrowDown, GripVertical } from "lucide-react";
 import type { PlayerProps } from "../types";
 import type { DragOrderContent, DragOrderUserAnswer } from "./schema";
+import { useLanguage } from "@/lib/i18n/useLanguage";
 
 export function DragOrderPlayer({
   content,
@@ -11,6 +12,7 @@ export function DragOrderPlayer({
   onChange,
   disabled = false,
 }: PlayerProps<DragOrderContent, DragOrderUserAnswer>) {
+  const { t } = useLanguage();
   const originalItems = content?.items || [];
 
   // Khởi tạo danh sách bị xáo trộn nếu chưa có value
@@ -49,7 +51,7 @@ export function DragOrderPlayer({
     <div className="w-full max-w-2xl mx-auto space-y-2.5 sm:space-y-3">
       <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg">
         <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 inline-block mb-1">
-          Sắp xếp theo thứ tự đúng
+          {t.questionTypes.drag_order}
         </span>
         <h2 className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug">
           {content?.prompt || "..."}

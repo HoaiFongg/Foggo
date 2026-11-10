@@ -28,6 +28,8 @@ import {
   exportQuestionSetToJson,
   type ParsedExcelQuestion,
 } from "@/lib/excel";
+import { useLanguage } from "@/lib/i18n/useLanguage";
+import { localizeQuestionSet } from "@/lib/i18n/questions-translation";
 
 interface QuestionSetItem {
   id: string;
@@ -52,6 +54,7 @@ export function QuestionSetsClient({
   systemSets,
   isAdmin,
 }: QuestionSetsClientProps) {
+  const { t, language, isEn } = useLanguage();
   const [showImportModal, setShowImportModal] = useState(false);
   const [isExporting, setIsExporting] = useState<string | null>(null);
 
@@ -157,7 +160,7 @@ export function QuestionSetsClient({
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-              Bộ câu hỏi
+              {t.sets.title}
             </h1>
             {isAdmin && (
               <span className="px-2 py-0.5 rounded bg-rose-500/15 border border-rose-500/30 text-rose-300 font-mono text-[10px] font-semibold">
@@ -166,7 +169,7 @@ export function QuestionSetsClient({
             )}
           </div>
           <p className="text-xs text-slate-400">
-            Quản lý ngân hàng đề thi, sao lưu dự phòng và nhập nhanh câu hỏi từ file Excel.
+            {t.sets.subtitle}
           </p>
         </div>
 
@@ -177,10 +180,10 @@ export function QuestionSetsClient({
             type="button"
             onClick={() => downloadSampleTemplateExcel()}
             className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-            title="Tải file mẫu Excel chuẩn với 8 dạng câu hỏi và hướng dẫn chi tiết"
+            title="Download Excel Template"
           >
             <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Tải file mẫu Excel</span>
+            <span>{t.sets.downloadTemplate}</span>
           </button>
 
           {/* Nút 2: Nhập đề từ Excel */}
@@ -190,7 +193,7 @@ export function QuestionSetsClient({
             className="px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Upload className="w-3.5 h-3.5" />
-            <span>Nhập đề từ Excel</span>
+            <span>{t.sets.importExcel}</span>
           </button>
 
           {/* Nút 3: Tạo bộ đề mới thủ công */}
@@ -199,7 +202,7 @@ export function QuestionSetsClient({
             className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Tạo bộ đề mới</span>
+            <span>{t.sets.createBtn}</span>
           </Link>
         </div>
       </div>
@@ -208,7 +211,7 @@ export function QuestionSetsClient({
       <div className="mb-10">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-            Bộ câu hỏi của bạn ({mySets.length})
+            {isEn ? `Your Question Sets (${mySets.length})` : `Bộ câu hỏi của bạn (${mySets.length})`}
           </h2>
         </div>
 
@@ -216,9 +219,9 @@ export function QuestionSetsClient({
           <div className="p-10 rounded-2xl bg-slate-900/40 border border-slate-800 text-center max-w-md mx-auto my-8 space-y-4">
             <BookOpen className="w-8 h-8 text-slate-500 mx-auto" />
             <div>
-              <h3 className="text-sm font-semibold text-white mb-1">Chưa có bộ câu hỏi nào</h3>
+              <h3 className="text-sm font-semibold text-white mb-1">{t.sets.empty}</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Bạn có thể tạo bộ đề thủ công hoặc tải file Excel có sẵn lên để hệ thống tự động nhận diện và tạo đề trong 3 giây.
+                {isEn ? "Create a set manually or upload an Excel file to generate quiz items automatically." : "Bạn có thể tạo bộ đề thủ công hoặc tải file Excel có sẵn lên để hệ thống tự động nhận diện và tạo đề trong 3 giây."}
               </p>
             </div>
 
@@ -228,20 +231,21 @@ export function QuestionSetsClient({
                 onClick={() => downloadSampleTemplateExcel()}
                 className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-medium hover:bg-slate-700 cursor-pointer"
               >
-                Tải file mẫu Excel
+                {t.sets.downloadTemplate}
               </button>
               <button
                 type="button"
                 onClick={() => setShowImportModal(true)}
                 className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold cursor-pointer"
               >
-                Nhập file Excel
+                {t.sets.importExcel}
               </button>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {mySets.map((set) => {
+              const localized = localizeQuestionSet(set, language);
               const questionCount = set.questions?.[0]?.count ?? 0;
               const isWorking = isExporting === set.id;
 
@@ -253,29 +257,29 @@ export function QuestionSetsClient({
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-2.5">
                       <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded bg-slate-800 text-amber-400">
-                        {set.subject || "Tổng hợp"}
+                        {set.subject ? (isEn && set.subject === "Tổng hợp" ? "General" : set.subject) : (isEn ? "General" : "Tổng hợp")}
                       </span>
                       <span className="text-slate-500 text-xs">
                         {set.visibility === "public" ? (
-                          <span title="Công khai"><Globe className="w-3.5 h-3.5 text-emerald-400" /></span>
+                          <span title={t.sets.visibilityPublic}><Globe className="w-3.5 h-3.5 text-emerald-400" /></span>
                         ) : set.visibility === "unlisted" ? (
                           <span title="Link"><EyeOff className="w-3.5 h-3.5 text-blue-400" /></span>
                         ) : (
-                          <span title="Riêng tư"><Lock className="w-3.5 h-3.5 text-slate-500" /></span>
+                          <span title={t.sets.visibilityPrivate}><Lock className="w-3.5 h-3.5 text-slate-500" /></span>
                         )}
                       </span>
                     </div>
 
                     <h3 className="text-sm font-bold text-white mb-1 line-clamp-1 group-hover:text-amber-400 transition-colors">
-                      {set.title}
+                      {localized.title}
                     </h3>
                     <p className="text-xs text-slate-400 line-clamp-2 mb-4 leading-relaxed">
-                      {set.description || "Không có mô tả."}
+                      {localized.description || (isEn ? "No description provided." : "Không có mô tả.")}
                     </p>
                   </div>
 
                   <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono">
-                    <span>{questionCount} câu hỏi</span>
+                    <span>{questionCount} {t.sets.questionsCount}</span>
 
                     <div className="flex items-center gap-1">
                       {/* Nút Sao lưu Excel */}
@@ -284,7 +288,7 @@ export function QuestionSetsClient({
                         onClick={() => handleBackup(set.id, set.title, "excel")}
                         disabled={isWorking}
                         className="p-1.5 rounded-lg bg-slate-800 hover:bg-emerald-500/20 hover:text-emerald-300 text-slate-400 transition-colors cursor-pointer"
-                        title="Sao lưu ra file Excel (.xlsx)"
+                        title="Export Excel"
                       >
                         <FileSpreadsheet className="w-3.5 h-3.5" />
                       </button>

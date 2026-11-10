@@ -24,6 +24,7 @@ import { getItemDef } from "@/game-modes/survival/items";
 import { getScaledMonster } from "@/game-modes/survival/monsters";
 import { submitSurvivalAction, performSurvivalItemAction, emergencyHealOrRevive } from "./actions";
 import { MonsterBattleArena } from "./MonsterBattleArena";
+import { useLanguage } from "@/lib/i18n/useLanguage";
 import type { SurvivalPlayerState } from "@/game-modes/survival/engine";
 
 interface WorldClientProps {
@@ -57,6 +58,8 @@ export function WorldClient({
   questions,
   leaderboard: initialLeaderboard,
 }: WorldClientProps) {
+  const { t, language, isEn } = useLanguage();
+
   // Tabs: hunt | blacksmith | backpack | leaderboard
   const [activeTab, setActiveTab] = useState<
     "hunt" | "blacksmith" | "backpack" | "leaderboard"
@@ -325,11 +328,13 @@ export function WorldClient({
                   ) : (
                     <Moon className="w-3 h-3 text-indigo-400" />
                   )}
-                  <span>Ngày {clock.dayNumber} · {clock.formattedTime}</span>
+                  <span>{t.common.day} {clock.dayNumber} · {clock.formattedTime}</span>
                 </span>
                 <span className="text-slate-600">|</span>
                 <span className={clock.isDay ? "text-amber-300" : "text-indigo-300 font-bold"}>
-                  {clock.isDay ? `Đêm sau ${clock.phaseRemainingSec}s` : `Trời sáng sau ${clock.phaseRemainingSec}s`}
+                  {clock.isDay
+                    ? (isEn ? `Night in ${clock.phaseRemainingSec}s` : `Đêm sau ${clock.phaseRemainingSec}s`)
+                    : (isEn ? `Dawn in ${clock.phaseRemainingSec}s` : `Trời sáng sau ${clock.phaseRemainingSec}s`)}
                 </span>
               </div>
             </div>
@@ -370,7 +375,7 @@ export function WorldClient({
             {/* Xu */}
             <div className="flex items-center gap-1.5 bg-amber-500/15 px-3 py-1.5 rounded-xl border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
               <Coins className="w-3.5 h-3.5 text-amber-400" />
-              <span>{Number.isFinite(playerState?.coins) ? playerState.coins : 0} Xu</span>
+              <span>{Number.isFinite(playerState?.coins) ? playerState.coins : 0} {t.common.coins}</span>
             </div>
 
             {/* Điểm */}
@@ -387,10 +392,10 @@ export function WorldClient({
         <div className="bg-rose-950/95 border-b border-rose-500/40 p-4 sm:p-5 text-center">
           <div className="max-w-lg mx-auto space-y-3">
             <span className="text-xs font-mono font-bold text-rose-300 uppercase tracking-wider block">
-              ⚠️ BẠN ĐANG HẾT SINH LỰC · BẢO LƯU 100% XU KIẾM ĐƯỢC
+              {isEn ? "⚠️ YOU ARE OUT OF HP · 100% COINS PRESERVED" : "⚠️ BẠN ĐANG HẾT SINH LỰC · BẢO LƯU 100% XU KIẾM ĐƯỢC"}
             </span>
             <p className="text-xs text-rose-200">
-              Bạn có thể mua bình máu để tăng máu tiếp tục trận chiến hoặc hồi sinh miễn phí về trại:
+              {isEn ? "You can buy a potion to continue fighting or revive for free at the camp:" : "Bạn có thể mua bình máu để tăng máu tiếp tục trận chiến hoặc hồi sinh miễn phí về trại:"}
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1">
@@ -401,7 +406,7 @@ export function WorldClient({
                 onClick={() => handleEmergencyHealClient("buy_potion")}
                 className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs font-mono transition-all shadow-md cursor-pointer disabled:opacity-50"
               >
-                🧪 MUA BÌNH MÁU CẤP CỨU (-10 Xu, +50 HP)
+                🧪 {isEn ? "BUY EMERGENCY POTION (-10 Coins, +50 HP)" : "MUA BÌNH MÁU CẤP CỨU (-10 Xu, +50 HP)"}
               </button>
 
               {/* Hồi sinh miễn phí về trại */}
@@ -410,7 +415,7 @@ export function WorldClient({
                 onClick={() => handleEmergencyHealClient("free_camp")}
                 className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs font-mono transition-all border border-slate-700 cursor-pointer"
               >
-                🏕️ HỒI SINH TẠI TRẠI (MIỄN PHÍ)
+                🏕️ {isEn ? "CAMP REVIVAL (FREE)" : "HỒI SINH TẠI TRẠI (MIỄN PHÍ)"}
               </button>
             </div>
           </div>
@@ -430,7 +435,7 @@ export function WorldClient({
             }`}
           >
             <Swords className="w-3.5 h-3.5" />
-            <span>Săn Quái</span>
+            <span>{t.battle.huntTab}</span>
           </button>
 
           <button
@@ -443,7 +448,7 @@ export function WorldClient({
             }`}
           >
             <ShoppingBag className="w-3.5 h-3.5" />
-            <span>Cửa Hàng & Thợ Rèn</span>
+            <span>{t.battle.blacksmithTab}</span>
           </button>
 
           <button
@@ -456,7 +461,7 @@ export function WorldClient({
             }`}
           >
             <Backpack className="w-3.5 h-3.5" />
-            <span>Túi Đồ ({playerState.inventory.length}/16)</span>
+            <span>{t.battle.inventoryTab} ({playerState.inventory.length}/16)</span>
           </button>
 
           <button
@@ -469,7 +474,7 @@ export function WorldClient({
             }`}
           >
             <Trophy className="w-3.5 h-3.5" />
-            <span>Bảng Xếp Hạng</span>
+            <span>{t.battle.leaderboardTab}</span>
           </button>
         </div>
       </nav>

@@ -3,6 +3,7 @@
 import { Check, X } from "lucide-react";
 import type { PlayerProps } from "../types";
 import type { TrueFalseContent, TrueFalseUserAnswer, StatementItem } from "./schema";
+import { useLanguage } from "@/lib/i18n/useLanguage";
 
 export function TrueFalsePlayer({
   content,
@@ -10,6 +11,7 @@ export function TrueFalsePlayer({
   onChange,
   disabled = false,
 }: PlayerProps<TrueFalseContent, TrueFalseUserAnswer>) {
+  const { t, isEn } = useLanguage();
   // Chuẩn hóa danh sách nhận định
   const rawStatements = content?.statements;
   const statements: StatementItem[] =
@@ -47,16 +49,16 @@ export function TrueFalsePlayer({
       {/* 1. Phần đề bài / Câu dẫn */}
       <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg space-y-1.5">
         <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20 inline-block">
-          Câu hỏi Đúng / Sai
+          {t.questionTypes.true_false}
         </span>
 
         <h2 className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug font-sans">
-          {content?.prompt || "Đọc các nhận định sau đây và chọn Đúng hoặc Sai:"}
+          {content?.prompt || (isEn ? "Evaluate the following statements as True or False:" : "Đọc các nhận định sau đây và chọn Đúng hoặc Sai:")}
         </h2>
 
         {!isSingle && (
           <p className="text-[11px] text-slate-400 font-mono">
-            Tiến độ: <span className="text-cyan-400 font-bold">{answeredCount}</span>/{statements.length} nhận định đã trả lời
+            {isEn ? `Progress: ` : `Tiến độ: `}<span className="text-cyan-400 font-bold">{answeredCount}</span>/{statements.length} {isEn ? "statements answered" : "nhận định đã trả lời"}
           </p>
         )}
 
@@ -104,7 +106,7 @@ export function TrueFalsePlayer({
                 <Check className="w-5 h-5 stroke-[3]" />
               </div>
               <span className="text-xs sm:text-sm font-black tracking-wider font-mono">
-                ĐÚNG
+                {isEn ? "TRUE" : "ĐÚNG"}
               </span>
             </button>
 
@@ -129,7 +131,7 @@ export function TrueFalsePlayer({
                 <X className="w-5 h-5 stroke-[3]" />
               </div>
               <span className="text-xs sm:text-sm font-black tracking-wider font-mono">
-                SAI
+                {isEn ? "FALSE" : "SAI"}
               </span>
             </button>
           </div>
@@ -169,7 +171,7 @@ export function TrueFalsePlayer({
                     }`}
                   >
                     <Check className="w-3 h-3 stroke-[3]" />
-                    <span>ĐÚNG</span>
+                    <span>{isEn ? "TRUE" : "ĐÚNG"}</span>
                   </button>
 
                   <button
@@ -183,7 +185,7 @@ export function TrueFalsePlayer({
                     }`}
                   >
                     <X className="w-3 h-3 stroke-[3]" />
-                    <span>SAI</span>
+                    <span>{isEn ? "FALSE" : "SAI"}</span>
                   </button>
                 </div>
               </div>

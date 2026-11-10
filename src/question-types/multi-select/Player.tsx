@@ -3,6 +3,7 @@
 import { CheckSquare, Square } from "lucide-react";
 import type { PlayerProps } from "../types";
 import type { MultiSelectContent, MultiSelectUserAnswer } from "./schema";
+import { useLanguage } from "@/lib/i18n/useLanguage";
 
 const LABELS = ["A", "B", "C", "D", "E", "F"];
 
@@ -12,6 +13,7 @@ export function MultiSelectPlayer({
   onChange,
   disabled = false,
 }: PlayerProps<MultiSelectContent, MultiSelectUserAnswer>) {
+  const { t, isEn } = useLanguage();
   const options = content?.options || [];
   const selectedList = Array.isArray(value) ? value : [];
 
@@ -28,7 +30,7 @@ export function MultiSelectPlayer({
       {/* Tiêu đề câu hỏi */}
       <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg">
         <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 inline-block mb-1">
-          Chọn nhiều đáp án (Có thể chọn nhiều mục)
+          {t.questionTypes.multi_select} {isEn ? "(Select all that apply)" : "(Có thể chọn nhiều mục)"}
         </span>
         <h2 className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug font-sans">
           {content?.prompt || "..."}

@@ -22,6 +22,8 @@ import { getScaledMonster, getRandomFarmMonster, MONSTER_REGISTRY, type MonsterD
 import { ITEM_REGISTRY } from "@/game-modes/survival/items";
 import { getQuestionType } from "@/question-types/registry";
 import { submitSurvivalAction, fleeSurvivalBattle, emergencyHealOrRevive } from "./actions";
+import { useLanguage } from "@/lib/i18n/useLanguage";
+import { localizeQuestion } from "@/lib/i18n/questions-translation";
 
 interface MonsterBattleArenaProps {
   sessionId: string;
@@ -46,6 +48,8 @@ export function MonsterBattleArena({
   onNextQuestion,
   onClose,
 }: MonsterBattleArenaProps) {
+  const { t, language, isEn } = useLanguage();
+
   // 1. Quái vật hiện tại trong đấu trường
   const [monsterDef, setMonsterDef] = useState<MonsterDef>(() => {
     if (initialMonsterId && MONSTER_REGISTRY[initialMonsterId]) {
@@ -53,6 +57,8 @@ export function MonsterBattleArena({
     }
     return getRandomFarmMonster(true);
   });
+
+  const monsterName = (t.monsters as any)?.[monsterDef.id] || monsterDef.name;
 
   const scaledMonster = getScaledMonster(monsterDef.id, clock.dayNumber, !clock.isDay);
   const [monsterCurrentHp, setMonsterCurrentHp] = useState<number>(() => {
@@ -84,7 +90,8 @@ export function MonsterBattleArena({
 
   // Câu hỏi hiện tại
   const question = questions[currentQIndex % Math.max(1, questions.length)];
-  const typeDef = question ? getQuestionType(question.type) : null;
+  const localizedQuestion = question ? localizeQuestion(question, language) : null;
+  const typeDef = localizedQuestion ? getQuestionType(localizedQuestion.type) : null;
   const PlayerComponent = typeDef?.Player;
 
   // Lấy trang bị của nhân vật
@@ -376,10 +383,10 @@ export function MonsterBattleArena({
             className="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold font-mono flex items-center gap-1.5 transition-all cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>🏃 Rút Lui</span>
+            <span>🏃 {t.battle.fleeBtn}</span>
           </button>
           <span className="text-[10px] text-slate-500 hidden md:inline font-mono">
-            (-15 HP &amp; -50 Điểm rank)
+            (-15 HP &amp; -50 {t.common.score})
           </span>
         </div>
 
@@ -387,8 +394,8 @@ export function MonsterBattleArena({
         <div className="flex items-center gap-2 sm:gap-4 text-xs font-mono">
           <div className="flex items-center gap-1.5 text-amber-300 bg-amber-500/15 px-3 py-1.5 rounded-xl border border-amber-500/30 font-bold shadow-sm">
             <Coins className="w-4 h-4 text-amber-400" />
-            <span>Số Xu Hiện Có: <span className="text-amber-200">{playerCoins} Xu</span></span>
-            <span className="text-[10px] text-amber-400/70 hidden sm:inline font-normal">(Bảo lưu 100%)</span>
+            <span>{t.battle.currentCoins}: <span className="text-amber-200">{playerCoins} {t.common.coins}</span></span>
+            <span className="text-[10px] text-amber-400/70 hidden sm:inline font-normal">({isEn ? "100% Kept" : "Bảo lưu 100%"})</span>
           </div>
 
           {playerState?.streak > 0 && (
@@ -399,7 +406,7 @@ export function MonsterBattleArena({
           )}
 
           <div className="text-slate-400 hidden lg:block text-[11px]">
-            Ngày {clock.dayNumber} · {clock.isDay ? "☀️ Ngày" : "🌙 Đêm"}
+            {t.common.day} {clock.dayNumber} · {clock.isDay ? ("☀️ " + (isEn ? "Day" : "Ngày")) : ("🌙 " + (isEn ? "Night" : "Đêm"))}
           </div>
         </div>
       </div>
@@ -411,9 +418,11 @@ export function MonsterBattleArena({
             <div className="w-14 h-14 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center justify-center mx-auto">
               <AlertTriangle className="w-7 h-7" />
             </div>
-            <h3 className="font-bold text-white text-lg">Xác Nhận Rút Lui Khỏi Trận?</h3>
+            <h3 className="font-bold text-white text-lg">{t.battle.fleeConfirm}</h3>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Trong lúc quay đầu tháo chạy, <strong>{monsterDef.name}</strong> sẽ đuổi theo cào bạn mất máu (khoảng 15 HP) và bạn bị <strong>trừ 50 Điểm Rank</strong>!
+              {isEn
+                ? `While retreating, ${monsterName} will chase and scratch you (-15 HP) and you will lose 50 Rank Points!`
+                : `Trong lúc quay đầu tháo chạy, ${monsterName} sẽ đuổi theo cào bạn mất máu (khoảng 15 HP) và bạn bị trừ 50 Điểm Rank!`}
             </p>
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button
@@ -421,7 +430,7 @@ export function MonsterBattleArena({
                 onClick={() => setShowFleeConfirm(false)}
                 className="py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-semibold transition-colors"
               >
-                Chiến tiếp!
+                {t.battle.keepFighting}
               </button>
               <button
                 type="button"
@@ -429,7 +438,7 @@ export function MonsterBattleArena({
                 onClick={handleFlee}
                 className="py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all"
               >
-                {isFleeing ? <Loader2 className="w-4 h-4 animate-spin" /> : "Vẫn Rút Lui"}
+                {isFleeing ? <Loader2 className="w-4 h-4 animate-spin" /> : t.battle.stillFlee}
               </button>
             </div>
           </div>
@@ -445,9 +454,9 @@ export function MonsterBattleArena({
             </div>
 
             <div>
-              <h3 className="font-black text-white text-xl">Bạn Đang Hết Sinh Lực!</h3>
+              <h3 className="font-black text-white text-xl">{t.battle.emergencyTitle}</h3>
               <p className="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
-                Đừng lo, <strong>toàn bộ {playerCoins} Xu của bạn được bảo lưu 100%</strong>! Hãy chọn phương án tiếp sức sinh lực bên dưới để tiếp tục:
+                {t.battle.emergencyDesc}
               </p>
             </div>
 
@@ -457,7 +466,7 @@ export function MonsterBattleArena({
                 <div className="p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/40 space-y-2">
                   <p className="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
                     <Package className="w-4 h-4" />
-                    <span>Dùng vật phẩm hồi phục có sẵn trong túi:</span>
+                    <span>{isEn ? "Use recovery item from backpack:" : "Dùng vật phẩm hồi phục có sẵn trong túi:"}</span>
                   </p>
                   <div className="grid grid-cols-2 gap-2">
                     {healingItems.map((item: any) => {
@@ -491,11 +500,11 @@ export function MonsterBattleArena({
                     🧪
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-white">Mua Bình Máu Cấp Cứu (+50 HP)</p>
-                    <p className="text-[11px] text-slate-400">Giá hạt dẻ tân thủ: chỉ 10 Xu · Hồi máu đánh tiếp</p>
+                    <p className="text-xs font-bold text-white">{t.battle.emergencyBuy}</p>
+                    <p className="text-[11px] text-slate-400">{isEn ? "Starter price: only 10 Coins · Heal and keep fighting" : "Giá hạt dẻ tân thủ: chỉ 10 Xu · Hồi máu đánh tiếp"}</p>
                   </div>
                 </div>
-                <span className="text-xs font-mono font-bold text-amber-300 shrink-0">10 Xu</span>
+                <span className="text-xs font-mono font-bold text-amber-300 shrink-0">10 {t.common.coins}</span>
               </button>
 
               {/* Tùy chọn 3: Hồi sinh miễn phí tại trại */}
@@ -510,11 +519,11 @@ export function MonsterBattleArena({
                     🏕️
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-white">Hồi Sinh Miễn Phí Về Lều Trại (+100 HP)</p>
-                    <p className="text-[11px] text-slate-400">Hồi đầy 100% sinh lực · Giữ nguyên 100% Xu kiếm được</p>
+                    <p className="text-xs font-bold text-white">{t.battle.reviveFree}</p>
+                    <p className="text-[11px] text-slate-400">{isEn ? "Recover 100% HP · Keep 100% of your earned Coins" : "Hồi đầy 100% sinh lực · Giữ nguyên 100% Xu kiếm được"}</p>
                   </div>
                 </div>
-                <span className="text-xs font-mono font-bold text-emerald-400 shrink-0">Miễn Phí</span>
+                <span className="text-xs font-mono font-bold text-emerald-400 shrink-0">{isEn ? "Free" : "Miễn Phí"}</span>
               </button>
             </div>
           </div>
@@ -535,7 +544,7 @@ export function MonsterBattleArena({
           <div className="px-3 py-1.5 rounded-xl bg-slate-900/85 border border-slate-800 backdrop-blur-sm space-y-1 shadow">
             <div className="flex items-center justify-between text-xs font-mono">
               <span className="font-bold text-white flex items-center gap-1.5 truncate">
-                <span>🛡️ Bạn</span>
+                <span>🛡️ {isEn ? "You" : "Bạn"}</span>
                 <span className="text-[10px] text-amber-400 font-semibold hidden sm:inline">
                   (+{weaponDef?.atk || 25} ATK)
                 </span>
@@ -555,7 +564,7 @@ export function MonsterBattleArena({
           <div className="px-3 py-1.5 rounded-xl bg-slate-900/85 border border-slate-800 backdrop-blur-sm space-y-1 shadow">
             <div className="flex items-center justify-between text-xs font-mono">
               <span className="font-bold text-rose-400 flex items-center gap-1.5 truncate">
-                <span>{monsterDef.avatar} {monsterDef.name}</span>
+                <span>{monsterDef.avatar} {monsterName}</span>
                 <span className="text-[10px] text-slate-400 hidden sm:inline">
                   (ATK {scaledMonster.atk})
                 </span>
@@ -723,7 +732,7 @@ export function MonsterBattleArena({
             )}
 
             <span className="text-[10px] font-mono font-bold text-rose-300 bg-slate-950/80 px-2 py-0.5 rounded-full border border-slate-800">
-              {monsterDef.name}
+              {monsterName}
             </span>
           </div>
         </div>
@@ -734,15 +743,15 @@ export function MonsterBattleArena({
       {/* ============================================================== */}
       <div className="flex-1 min-h-0 w-full bg-slate-900/95 border-t border-slate-800 flex flex-col justify-between p-2 sm:p-3.5 overflow-hidden shadow-2xl">
         <div className="flex-1 min-h-0 overflow-y-auto max-w-5xl xl:max-w-6xl mx-auto w-full flex flex-col justify-center px-1">
-          {PlayerComponent && question ? (
+          {PlayerComponent && localizedQuestion ? (
             <PlayerComponent
-              content={question.content}
+              content={localizedQuestion.content}
               value={userAnswer}
               onChange={(val) => setUserAnswer(val)}
               disabled={submitting || monsterAnim === "dead" || isOutOfHp}
             />
           ) : (
-            <div className="p-4 text-center text-slate-400 text-xs">Đang tải câu hỏi...</div>
+            <div className="p-4 text-center text-slate-400 text-xs">{t.common.loadingShort}</div>
           )}
         </div>
 
@@ -756,17 +765,17 @@ export function MonsterBattleArena({
           {submitting ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Đang tung đòn tấn công...</span>
+              <span>{t.battle.attackingBtn}</span>
             </>
           ) : isOutOfHp ? (
             <>
               <Heart className="w-4 h-4 text-rose-500" />
-              <span>HẾT MÁU! HÃY DÙNG BÌNH MÁU ĐỂ HỒI PHỤC</span>
+              <span>{t.battle.outOfHpWarning}</span>
             </>
           ) : (
             <>
               <Swords className="w-4 h-4" />
-              <span>VUNG KIẾM TẤN CÔNG (ENTER)</span>
+              <span>{t.battle.attackBtn}</span>
             </>
           )}
         </button>

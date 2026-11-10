@@ -14,6 +14,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { upgradeToPlus } from "./actions";
+import { useLanguage } from "@/lib/i18n/useLanguage";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 interface PricingClientProps {
   isLoggedIn: boolean;
@@ -27,6 +29,7 @@ export function PricingClient({
   planExpiresAt,
 }: PricingClientProps) {
   const router = useRouter();
+  const { t, isEn } = useLanguage();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -64,19 +67,21 @@ export function PricingClient({
           </Link>
 
           <div className="flex items-center gap-3 text-xs font-mono font-bold">
+            <LanguageSwitcher />
+
             {isLoggedIn ? (
               <Link
                 href="/dashboard"
                 className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors"
               >
-                Vào Bàn Làm Việc
+                {t.nav.dashboard}
               </Link>
             ) : (
               <Link
                 href="/login"
                 className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors shadow-sm"
               >
-                Đăng Nhập
+                {t.common.login}
               </Link>
             )}
           </div>
@@ -89,17 +94,18 @@ export function PricingClient({
         <div className="text-center space-y-4 pt-6">
           <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3.5 py-1.5 rounded-full border border-amber-500/20 inline-flex items-center gap-1.5 shadow-sm">
             <Sparkles className="w-3.5 h-3.5" />
-            NÂNG TẦM TRẢI NGHIỆM LỚP HỌC VỚI FOGGO PLUS
+            {isEn ? "ELEVATE YOUR CLASSROOM WITH FOGGO PLUS" : "NÂNG TẦM TRẢI NGHIỆM LỚP HỌC VỚI FOGGO PLUS"}
           </span>
 
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white leading-tight">
-            Mở Khóa Toàn Bộ Sức Mạnh Của <br className="hidden sm:inline" />
-            <span className="text-amber-400">Hòn Đảo Sinh Tồn Tri Thức</span>
+            {isEn ? "Unlock the Full Power of the " : "Mở Khóa Toàn Bộ Sức Mạnh Của "}<br className="hidden sm:inline" />
+            <span className="text-amber-400">{isEn ? "Knowledge Survival Island" : "Hòn Đảo Sinh Tồn Tri Thức"}</span>
           </h1>
 
           <p className="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Dành cho giáo viên hiện đại muốn tạo thế giới học tập không giới hạn cho
-            học sinh: đầy đủ 8 dạng câu hỏi, phân tích độ khó chi tiết và không giới hạn phòng chơi.
+            {isEn
+              ? "For educators who want unlimited quiz worlds: all 8 question types, detailed difficulty metrics, and no room capacity bottlenecks."
+              : "Dành cho giáo viên hiện đại muốn tạo thế giới học tập không giới hạn cho học sinh: đầy đủ 8 dạng câu hỏi, phân tích độ khó chi tiết và không giới hạn phòng chơi."}
           </p>
 
           {/* Toggle Chu Kỳ Thanh Toán */}
@@ -114,7 +120,7 @@ export function PricingClient({
                     : "text-slate-400 hover:text-white"
                 }`}
               >
-                Hàng Tháng
+                {isEn ? "Monthly" : "Hàng Tháng"}
               </button>
 
               <button

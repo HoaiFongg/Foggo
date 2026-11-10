@@ -2754,6 +2754,7 @@ jobs:
 - [x] Kiểm tra và củng cố bảo mật toàn diện (scripts/security-audit.ts): Duy trì phiên tự động qua refresh token @supabase/ssr, băm SHA-256 mã khôi phục kèm timingSafeEqual, chặn triệt để lộ answer_key ở client, vô hiệu hóa leo thang đặc quyền qua user_metadata, bảo vệ route /admin tại edge middleware
 - [x] Tắt biểu tượng chữ N (Next.js Dev Indicator) ở góc dưới bên trái và thiết lập hệ sinh thái loading Bé Slime siêu dễ thương toàn trang: Hoạt họa squishy bounce Bé Slime, bóng thoại đáng yêu xoay vòng, NavigationProgressBar laser 0ms kèm pet pill, World loading sàn đấu và Dashboard loading skeleton
 - [x] Hệ thống đa ngôn ngữ song ngữ Tiếng Việt 🇻🇳 & English 🇬🇧: Xây dựng Zustand store i18n phản ứng 0ms, lưu trữ localStorage & cookie foggo_lang, nút chuyển đổi LanguageSwitcher (🇻🇳 VI ⇋ 🇬🇧 EN), hỗ trợ song ngữ toàn bộ NavigationHeader, Landing Page, Battle Arena và hiệu ứng Bé Slime loading
+- [x] Chuyển đổi ngôn ngữ động toàn diện cho Ngân Hàng Câu Hỏi & Đấu Trường Săn Quái: Xây dựng engine dịch thuật hai chiều (`src/lib/i18n/questions-translation.ts`) cho toàn bộ câu hỏi trong DB; giữ nguyên 100% ID phương án và cơ chế chấm điểm server-side; hỗ trợ chuyển ngữ tức thì cho Đấu Trường Săn Quái, Bảng điều khiển Dashboard, Danh sách bộ đề, Trình soạn thảo bộ đề, Khám phá cộng đồng, Bảng giá và toàn bộ 8 dạng câu hỏi Player; nạp sẵn bộ câu hỏi Tiếng Anh chuẩn Tin học 7 vào cơ sở dữ liệu.
 
 ### Trước khi thu tiền
 - [x] Thanh toán + webhook hoạt động, test kỹ

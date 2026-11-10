@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Sparkles, CheckCircle2, Gift, Loader2, Coins, CalendarDays, Lock } from "lucide-react";
 import { claimDailyLoginReward } from "@/app/dashboard/actions";
 import { DAILY_REWARDS_CONFIG } from "@/lib/daily-rewards-config";
+import { useLanguage } from "@/lib/i18n/useLanguage";
 
 interface DailyLoginStreakCardProps {
   initialStreakData: {
@@ -14,6 +15,7 @@ interface DailyLoginStreakCardProps {
 }
 
 export function DailyLoginStreakCard({ initialStreakData }: DailyLoginStreakCardProps) {
+  const { t, isEn } = useLanguage();
   const [streakData, setStreakData] = useState(initialStreakData);
   const [isClaiming, setIsClaiming] = useState(false);
   const [claimNotice, setClaimNotice] = useState<string | null>(null);
@@ -55,14 +57,14 @@ export function DailyLoginStreakCard({ initialStreakData }: DailyLoginStreakCard
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">
-                Điểm Danh 7 Ngày Nhận Quà Chuỗi
+                {t.dashboard.dailyStreakTitle}
               </h3>
               <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 font-mono text-[10px] font-bold">
-                Chuỗi: {streakData.streakCount}/7 ngày
+                {isEn ? `Streak: ${streakData.streakCount}/7 days` : `Chuỗi: ${streakData.streakCount}/7 ngày`}
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Đăng nhập mỗi ngày để nhận Vàng, Đom Đóm và trang bị hiếm cho nhân vật!
+              {t.dashboard.dailyStreakSubtitle}
             </p>
           </div>
         </div>
@@ -82,12 +84,12 @@ export function DailyLoginStreakCard({ initialStreakData }: DailyLoginStreakCard
           ) : isAlreadyClaimedToday ? (
             <>
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>ĐÃ NHẬN HÔM NAY</span>
+              <span>{isEn ? "CLAIMED TODAY" : "ĐÃ NHẬN HÔM NAY"}</span>
             </>
           ) : (
             <>
               <Sparkles className="w-4 h-4" />
-              <span>ĐIỂM DANH NHẬN QUÀ</span>
+              <span>{isEn ? "CLAIM REWARD" : "ĐIỂM DANH NHẬN QUÀ"}</span>
             </>
           )}
         </button>
@@ -96,8 +98,10 @@ export function DailyLoginStreakCard({ initialStreakData }: DailyLoginStreakCard
       {/* Thanh tiến độ chuỗi 7 ngày */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
-          <span>Tiến độ nhận quà tuần:</span>
-          <span className="text-amber-300 font-bold">{streakData.streakCount % 7}/7 mốc hoàn thành</span>
+          <span>{isEn ? "Weekly reward progress:" : "Tiến độ nhận quà tuần:"}</span>
+          <span className="text-amber-300 font-bold">
+            {isEn ? `${streakData.streakCount % 7}/7 milestones` : `${streakData.streakCount % 7}/7 mốc hoàn thành`}
+          </span>
         </div>
         <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
           <div
@@ -137,14 +141,14 @@ export function DailyLoginStreakCard({ initialStreakData }: DailyLoginStreakCard
             >
               {isDay7 && (
                 <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[9px] font-mono font-black uppercase tracking-wider shadow-sm">
-                  RƯƠNG VIP
+                  {isEn ? "VIP CHEST" : "RƯƠNG VIP"}
                 </div>
               )}
 
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                    Ngày {r.day}
+                    {t.common.day} {r.day}
                   </span>
                   {isClaimed ? (
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -160,25 +164,25 @@ export function DailyLoginStreakCard({ initialStreakData }: DailyLoginStreakCard
                 </div>
 
                 <p className="text-xs font-bold text-white text-center line-clamp-1 mb-0.5">
-                  +{r.coins} Vàng
+                  +{r.coins} {t.common.gold}
                 </p>
                 <p className="text-[10px] text-slate-400 text-center font-mono line-clamp-1">
-                  +{r.fireflies} Đom Đóm
+                  +{r.fireflies} {t.common.fireflies}
                 </p>
               </div>
 
               <div className="mt-2.5 pt-2 border-t border-slate-800/60 text-center">
                 {isClaimed ? (
                   <span className="text-[10px] font-mono font-bold text-emerald-400 flex items-center justify-center gap-1">
-                    ✓ Đã nhận
+                    ✓ {t.dashboard.streakClaimed}
                   </span>
                 ) : isTodayTarget ? (
                   <span className="text-[10px] font-mono font-black text-amber-300 animate-pulse uppercase">
-                    Nhận ngay!
+                    {isEn ? "Claim!" : "Nhận ngay!"}
                   </span>
                 ) : (
                   <span className="text-[10px] font-mono text-slate-500">
-                    Chờ ngày
+                    {t.dashboard.streakLocked}
                   </span>
                 )}
               </div>

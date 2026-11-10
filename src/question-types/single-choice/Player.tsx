@@ -2,6 +2,7 @@
 
 import type { PlayerProps } from "../types";
 import type { SingleChoiceContent, SingleChoiceUserAnswer } from "./schema";
+import { useLanguage } from "@/lib/i18n/useLanguage";
 
 const OPTION_THEMES = [
   {
@@ -34,6 +35,7 @@ export function SingleChoicePlayer({
   onChange,
   disabled = false,
 }: PlayerProps<SingleChoiceContent, SingleChoiceUserAnswer>) {
+  const { t } = useLanguage();
   const options = content?.options || [];
 
   return (
@@ -41,7 +43,7 @@ export function SingleChoicePlayer({
       {/* Tiêu đề câu hỏi */}
       <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg">
         <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20 inline-block mb-1">
-          Trắc nghiệm 1 đáp án
+          {t.questionTypes.single_choice}
         </span>
         <h2 className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug font-sans">
           {content?.prompt || "..."}

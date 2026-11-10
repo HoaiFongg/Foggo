@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { Link2, Unlink, Check } from "lucide-react";
 import type { PlayerProps } from "../types";
 import type { DragMatchContent, DragMatchUserAnswer } from "./schema";
+import { useLanguage } from "@/lib/i18n/useLanguage";
 
 const COLORS = [
   "border-amber-400 bg-amber-500/10 text-amber-300",
@@ -22,6 +23,7 @@ export function DragMatchPlayer({
   onChange,
   disabled = false,
 }: PlayerProps<DragMatchContent, DragMatchUserAnswer>) {
+  const { t, isEn } = useLanguage();
   const pairs = content?.pairs || [];
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
 
@@ -94,15 +96,15 @@ export function DragMatchPlayer({
       {/* Tiêu đề câu hỏi */}
       <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg">
         <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 inline-block mb-1">
-          Ghép cặp tương ứng
+          {t.questionTypes.drag_match}
         </span>
         <h2 className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug font-sans">
           {content?.prompt || "..."}
         </h2>
         <p className="text-[11px] text-slate-400 mt-1 font-mono">
           {selectedLeft
-            ? "Đã chọn vế A. Hãy chạm vào vế B tương ứng bên phải để nối!"
-            : "Chạm vào một mục ở Cột A, sau đó chạm vào mục tương ứng ở Cột B."}
+            ? (isEn ? "Left item selected. Tap matching Right item to link!" : "Đã chọn vế A. Hãy chạm vào vế B tương ứng bên phải để nối!")
+            : (isEn ? "Tap an item in Column A, then tap the matching item in Column B." : "Chạm vào một mục ở Cột A, sau đó chạm vào mục tương ứng ở Cột B.")}
         </p>
 
         {content?.image_url && (

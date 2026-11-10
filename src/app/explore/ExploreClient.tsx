@@ -16,6 +16,8 @@ import { duplicateQuestionSet } from "./actions";
 
 import { NavigationHeader } from "@/components/NavigationHeader";
 import type { Profile } from "@/types/database";
+import { useLanguage } from "@/lib/i18n/useLanguage";
+import { localizeQuestionSet } from "@/lib/i18n/questions-translation";
 
 interface ExploreClientProps {
   initialSets: any[];
@@ -34,6 +36,7 @@ const SUBJECT_FILTERS = [
 
 export function ExploreClient({ initialSets, profile = null }: ExploreClientProps) {
   const router = useRouter();
+  const { t, language, isEn } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("Tất cả");
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
@@ -84,16 +87,23 @@ export function ExploreClient({ initialSets, profile = null }: ExploreClientProp
 
   const displaySets = useMemo(() => {
     const combined = [
-      ...initialSets.map((s) => ({
-        id: s.id,
-        title: s.title,
-        description: s.description,
-        subject: s.subject || "Tổng hợp",
-        grade: s.grade,
-        questionsCount: s.questions?.length || 0,
-        author: s.profiles?.display_name || "Giáo viên",
+      ...initialSets.map((s) => {
+        const loc = localizeQuestionSet(s, language);
+        return {
+          id: s.id,
+          title: loc.title,
+          description: loc.description,
+          subject: s.subject ? (isEn && s.subject === "Tổng hợp" ? "General" : s.subject) : (isEn ? "General" : "Tổng hợp"),
+          grade: s.grade,
+          questionsCount: s.questions?.length || 0,
+          author: s.profiles?.display_name || (isEn ? "Teacher" : "Giáo viên"),
+        };
+      }),
+      ...sampleSets.map((s) => ({
+        ...s,
+        title: isEn ? (s.id === "sample_1" ? "Foggo Survival Codex: Forest Flora & Fauna" : s.id === "sample_2" ? "Grade 6 Math: Magical Fractions & Algebra" : "English Vocabulary: Island Explorer Quest") : s.title,
+        description: isEn ? "Practice questions, hotspot weak-point tapping, and survival skill mastery." : s.description,
       })),
-      ...sampleSets,
     ];
 
     return combined.filter((s) => {
@@ -101,10 +111,10 @@ export function ExploreClient({ initialSets, profile = null }: ExploreClientProp
         s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         s.description?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchSubject =
-        selectedSubject === "Tất cả" || s.subject === selectedSubject;
+        selectedSubject === "Tất cả" || selectedSubject === "All" || s.subject === selectedSubject;
       return matchSearch && matchSubject;
     });
-  }, [initialSets, sampleSets, searchQuery, selectedSubject]);
+  }, [initialSets, sampleSets, searchQuery, selectedSubject, language, isEn]);
 
   async function handleDuplicate(setId: string) {
     if (setId.startsWith("sample_")) {
@@ -143,7 +153,7 @@ export function ExploreClient({ initialSets, profile = null }: ExploreClientProp
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tìm kiếm theo chủ đề, tên bài học, môn học..."
+              placeholder={isEn ? "Search by subject, lesson topic, or set title..." : "Tìm kiếm theo chủ đề, tên bài học, môn học..."}
               className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 font-sans text-sm"
             />
           </div>
