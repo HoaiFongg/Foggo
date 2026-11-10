@@ -704,7 +704,7 @@ export function MonsterBattleArena({
                       : "/sprites/slime_dead_clean.png"
                   }
                   alt="Slime Sprite"
-                  className={`max-w-full max-h-full object-contain filter drop-shadow-md select-none transition-transform ${
+                  className={`max-w-full max-h-full object-contain filter drop-shadow-md select-none transition-transform pixelated ${
                     slimeFrame === 4 ? "-translate-y-4" : ""
                   }`}
                   draggable={false}
@@ -713,9 +713,11 @@ export function MonsterBattleArena({
               </div>
             ) : (
               <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex flex-col items-center justify-end">
-                <span className="text-5xl sm:text-6xl filter drop-shadow-lg select-none">
-                  {monsterDef.avatar}
-                </span>
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-500/20 via-slate-900 to-slate-950 border-2 border-rose-500/40 flex items-center justify-center text-4xl shadow-lg shadow-rose-500/20">
+                  <span className="filter drop-shadow-lg select-none">
+                    {monsterDef.avatar}
+                  </span>
+                </div>
                 <div className="w-16 h-2.5 bg-black/40 rounded-full blur-[2px] mt-0.5" />
               </div>
             )}

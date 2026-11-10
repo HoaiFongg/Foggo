@@ -108,43 +108,138 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/* Mô phỏng gameplay sinh tồn */}
-        <div className="mt-16 max-w-4xl mx-auto rounded-3xl p-1 bg-gradient-to-b from-amber-500/20 to-slate-800/20 shadow-2xl">
-          <div className="bg-slate-950/90 rounded-[22px] p-6 sm:p-8 border border-slate-800/80 backdrop-blur-xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+        {/* Mô phỏng gameplay RPG sinh tồn trực quan */}
+        <div className="mt-16 max-w-4xl mx-auto rounded-3xl p-1 bg-gradient-to-b from-amber-500/30 via-slate-800/40 to-slate-900/60 shadow-2xl">
+          <div className="bg-slate-950/95 rounded-[22px] p-6 sm:p-8 border border-slate-800/80 backdrop-blur-xl space-y-6">
+            {/* Header thanh trạng thái RPG */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
               <div className="flex items-center gap-2 text-xs font-mono text-amber-400 font-bold">
-                <SunMedium className="w-4 h-4" />
-                <span>ĐỒNG HỒ ĐẢO FOGGO · NGÀY 1 (BAN NGÀY)</span>
+                <SunMedium className="w-4 h-4 text-amber-400" />
+                <span>ĐẢO FOGGO · ĐẤU TRƯỜNG SĂN QUÁI RPG</span>
               </div>
-              <div className="flex items-center gap-4 text-xs font-mono">
-                <span className="text-rose-400 font-bold">❤️ HP 100/100</span>
-                <span className="text-amber-300 font-bold">🍗 ĐÓI 100/100</span>
-                <span className="text-amber-400 font-bold">🪙 30 XU</span>
+              <div className="flex items-center gap-3 text-xs font-mono">
+                <span className="text-rose-400 font-bold bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20">
+                  ❤️ HP 100/100
+                </span>
+                <span className="text-blue-400 font-bold bg-blue-500/10 px-2.5 py-1 rounded-lg border border-blue-500/20">
+                  🛡️ GIÁP -24%
+                </span>
+                <span className="text-amber-300 font-bold bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
+                  🪙 30 XU
+                </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-              <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800">
-                <span className="text-2xl mb-2 block">🌲</span>
-                <h4 className="font-bold text-white text-sm">Hái Lượm & Chế Tạo</h4>
-                <p className="text-xs text-slate-400 mt-1">
-                  Trả lời câu hỏi để chặt gỗ rừng, đẽo đá cuội và rèn kiếm săn quái vật.
+            {/* Sân đấu Pixel Art (Battle Stage Mockup) */}
+            <div className="relative rounded-2xl bg-gradient-to-b from-slate-900 via-slate-900/80 to-slate-950 border border-slate-800 p-6 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-amber-500/5 via-transparent to-transparent pointer-events-none" />
+
+              {/* Nhân vật thám hiểm */}
+              <div className="flex flex-col items-center gap-2 z-10">
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-700/10 border-2 border-amber-500/40 flex items-center justify-center text-4xl shadow-lg shadow-amber-500/15 animate-bounce">
+                    🦊
+                  </div>
+                  <span className="absolute -top-2 -right-2 px-1.5 py-0.5 rounded-md bg-amber-500 text-slate-950 font-mono text-[9px] font-black uppercase">
+                    Lv.5
+                  </span>
+                </div>
+                <div className="text-center">
+                  <span className="font-bold text-xs text-white block">Nhà Thám Hiểm</span>
+                  <div className="w-24 bg-slate-800 h-1.5 rounded-full mt-1 overflow-hidden">
+                    <div className="bg-rose-500 h-full w-full rounded-full" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Hiệu ứng Combat & Streak */}
+              <div className="flex flex-col items-center justify-center gap-1.5 z-10 text-center">
+                <span className="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-xs font-bold flex items-center gap-1 shadow-sm">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>TRẢ LỜI ĐÚNG · TẤN CÔNG!</span>
+                </span>
+                <span className="text-xl sm:text-2xl font-black font-mono text-amber-300 drop-shadow-[0_2px_10px_rgba(245,158,11,0.5)]">
+                  ⚔️ -25 SÁT THƯƠNG
+                </span>
+                <span className="text-[11px] font-mono text-slate-400">
+                  Chuỗi x3 (+24% sát thương thưởng)
+                </span>
+              </div>
+
+              {/* Quái vật Slime */}
+              <div className="flex flex-col items-center gap-2 z-10">
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-700/10 border-2 border-emerald-500/40 flex items-center justify-center text-4xl shadow-lg shadow-emerald-500/15 animate-pulse">
+                    🟢
+                  </div>
+                  <span className="absolute -top-2 -right-2 px-1.5 py-0.5 rounded-md bg-emerald-500 text-slate-950 font-mono text-[9px] font-black uppercase">
+                    Quái
+                  </span>
+                </div>
+                <div className="text-center">
+                  <span className="font-bold text-xs text-emerald-300 block">Slime Rừng Xanh</span>
+                  <div className="w-24 bg-slate-800 h-1.5 rounded-full mt-1 overflow-hidden">
+                    <div className="bg-emerald-400 h-full w-[35%] rounded-full" />
+                  </div>
+                  <span className="text-[9px] font-mono text-slate-400">10/30 HP</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bảng câu hỏi tương tác mẫu */}
+            <div className="space-y-3 pt-2 text-left">
+              <div className="flex items-center justify-between text-xs font-mono text-slate-400">
+                <span className="text-amber-400 font-bold uppercase tracking-wider">
+                  Câu hỏi 3/10 · Tin học &amp; Kỹ năng số
+                </span>
+                <span>Thời gian: 25s</span>
+              </div>
+              <h4 className="font-bold text-white text-sm sm:text-base leading-snug">
+                Hành động nào sau đây là an toàn nhất khi nhận được tin nhắn kèm liên kết lạ từ người không quen?
+              </h4>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300">
+                  <span className="font-bold text-amber-400 mr-2 font-mono">A.</span> Bấm ngay vào liên kết để kiểm tra
+                </div>
+                <div className="p-3 rounded-xl bg-emerald-500/15 border-2 border-emerald-500 text-xs text-emerald-200 font-bold shadow-sm flex items-center justify-between">
+                  <div>
+                    <span className="font-bold text-emerald-400 mr-2 font-mono">B.</span> Không bấm và báo cáo tin nhắn rác
+                  </div>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                </div>
+                <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300">
+                  <span className="font-bold text-amber-400 mr-2 font-mono">C.</span> Chuyển tiếp tin nhắn cho bạn bè
+                </div>
+                <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300">
+                  <span className="font-bold text-amber-400 mr-2 font-mono">D.</span> Nhập thông tin để nhận quà
+                </div>
+              </div>
+            </div>
+
+            {/* 3 Trụ Cột Lối Chơi Hiện Đại */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-800/80 text-left">
+              <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-1.5">
+                <span className="text-2xl block">⚔️</span>
+                <h4 className="font-bold text-white text-xs sm:text-sm">Săn Quái Theo Lượt</h4>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Trả lời đúng để tung kiếm chém quái; trả lời sai sẽ bị quái đánh trả. Đánh bại con này quái khác xuất hiện liên hoàn.
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800">
-                <span className="text-2xl mb-2 block">⚔️</span>
-                <h4 className="font-bold text-white text-sm">Săn Thú & Đánh Trùm</h4>
-                <p className="text-xs text-slate-400 mt-1">
-                  Đánh bại Heo Rừng Chúa, Golem Đá và Phù Thủy Đầm Lầy để đoạt kho báu.
+              <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-1.5">
+                <span className="text-2xl block">🏪</span>
+                <h4 className="font-bold text-white text-xs sm:text-sm">Thợ Rèn &amp; Tiệm Đồ</h4>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Tích lũy xu để trang bị Kiếm, Mũ, Giáp, Khiên (giảm đến 60% sát thương) và mua bình máu cấp cứu khi hết sinh lực.
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800">
-                <span className="text-2xl mb-2 block">🌙</span>
-                <h4 className="font-bold text-white text-sm">Sống Sót Qua Đêm</h4>
-                <p className="text-xs text-slate-400 mt-1">
-                  Xây dựng hàng rào và giữ lửa trại rực sáng để đẩy lùi đợt quái đêm.
+              <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-1.5">
+                <span className="text-2xl block">🏆</span>
+                <h4 className="font-bold text-white text-xs sm:text-sm">Đấu Trường Lớp &amp; Bãi Solo</h4>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Tự luyện 24/7 lấy ngẫu nhiên câu hỏi trường &amp; lớp, hoặc gia nhập hầm ngục tranh tài bảng xếp hạng trực tiếp cùng lớp học.
                 </p>
               </div>
             </div>

@@ -2747,6 +2747,7 @@ jobs:
 - [x] Script mô phỏng bot (độ chính xác 40/60/80/95%) + playtest với lớp thật + cân bằng
 - [x] Bảng xếp hạng + báo cáo chi tiết + xuất file CSV
 - [x] Giao diện dùng tốt trên điện thoại + Responsive Navigation Bar cho mọi phân quyền
+- [x] Chuẩn hóa giao diện chuyên nghiệp đẳng cấp Big Tech (Google/Vercel/Linear) kết hợp phong cách Retro Pixel Art: Landing page mockup trực quan, Header glassmorphism & role chip, Điểm danh 7 ngày kèm thanh tiến độ tuần và rương VIP, Bảng xếp hạng bục huy chương 🥇🥈🥉, đấu trường và thẻ săn quái pixelated
 
 ### Trước khi thu tiền
 - [x] Thanh toán + webhook hoạt động, test kỹ

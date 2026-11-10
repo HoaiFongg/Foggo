@@ -532,42 +532,70 @@ export function WorldClient({
                 return (
                   <div
                     key={m.id}
-                    className={`p-5 rounded-3xl border flex flex-col justify-between transition-all ${
+                    className={`p-5 rounded-3xl border flex flex-col justify-between transition-all hover:scale-[1.01] ${
                       m.isBoss
-                        ? "bg-gradient-to-b from-amber-950/40 to-slate-900 border-amber-500/40 shadow-xl"
-                        : "bg-slate-900/80 border-slate-800"
+                        ? "bg-gradient-to-b from-amber-950/40 via-slate-900 to-slate-950 border-amber-500/50 shadow-xl shadow-amber-500/10 ring-1 ring-amber-500/30"
+                        : "bg-slate-900/80 border-slate-800 hover:border-slate-700"
                     }`}
                   >
                     <div>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-3xl">{m.avatar}</span>
-                        {m.isBoss && (
-                          <span className="text-[10px] font-mono font-black text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-500/30 uppercase">
-                            TRÙM KHU VỰC
-                          </span>
+                        {m.id === "slime" ? (
+                          <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center p-1">
+                            <img
+                              src="/sprites/slime_idle_1_clean.png"
+                              alt="Slime"
+                              className="w-10 h-10 object-contain pixelated animate-pulse"
+                            />
+                          </div>
+                        ) : (
+                          <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center text-2xl ${
+                            m.isBoss
+                              ? "bg-amber-500/20 border-amber-500/40 text-3xl"
+                              : "bg-slate-950 border-slate-800"
+                          }`}>
+                            <span>{m.avatar}</span>
+                          </div>
                         )}
+
+                        <span
+                          className={`text-[9px] font-mono font-black px-2 py-0.5 rounded-full border uppercase tracking-wider ${
+                            m.isBoss
+                              ? "text-amber-300 bg-amber-500/20 border-amber-500/40 animate-pulse"
+                              : m.id === "slime"
+                              ? "text-emerald-300 bg-emerald-500/15 border-emerald-500/30"
+                              : m.id === "wolf"
+                              ? "text-blue-300 bg-blue-500/15 border-blue-500/30"
+                              : "text-amber-300 bg-amber-500/15 border-amber-500/30"
+                          }`}
+                        >
+                          {m.isBoss ? "👑 TRÙM KHU VỰC" : m.id === "slime" ? "CẤP 1 · DỄ" : m.id === "wolf" ? "CẤP 2 · VỪA" : "CẤP 3 · KHÓ"}
+                        </span>
                       </div>
-                      <h3 className="font-black text-white text-base mb-1">
-                        {m.name}
+
+                      <h3 className="font-black text-white text-base mb-1 flex items-center gap-1.5">
+                        <span>{m.name}</span>
                       </h3>
                       <p className="text-xs text-slate-400 leading-snug line-clamp-2 mb-3">
                         {m.description}
                       </p>
                     </div>
 
-                    <div className="space-y-3 pt-3 border-t border-slate-800">
-                      <div className="flex items-center justify-between text-xs font-mono">
-                        <span className="text-slate-400">❤️ Máu:</span>
-                        <span className="font-bold text-rose-400">{m.hp} HP</span>
-                      </div>
-                      <div className="flex items-center justify-between text-xs font-mono">
-                        <span className="text-slate-400">⚔️ Công:</span>
-                        <span className="font-bold text-amber-400">{m.atk} ATK</span>
+                    <div className="space-y-3 pt-3 border-t border-slate-800/80">
+                      <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                        <div className="flex items-center justify-between p-1.5 rounded-lg bg-slate-950 border border-slate-800/80">
+                          <span className="text-slate-400">❤️ Máu:</span>
+                          <span className="font-bold text-rose-400">{m.hp}</span>
+                        </div>
+                        <div className="flex items-center justify-between p-1.5 rounded-lg bg-slate-950 border border-slate-800/80">
+                          <span className="text-slate-400">⚔️ Công:</span>
+                          <span className="font-bold text-amber-400">+{m.atk}</span>
+                        </div>
                       </div>
 
                       {isBossLairLocked ? (
-                        <div className="p-2 rounded-xl bg-slate-950/80 border border-slate-800 text-center text-[11px] text-slate-500 font-mono">
-                          Khóa! Cần hạ 5 quái để mở hang trùm ({monstersKilled}/5).
+                        <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-center text-[11px] text-slate-400 font-mono">
+                          🔒 Khóa! Cần hạ 5 quái thường ({monstersKilled}/5).
                         </div>
                       ) : (
                         <button
@@ -575,12 +603,12 @@ export function WorldClient({
                           onClick={() => startAction("hunt", m.id, m.name)}
                           className={`w-full py-2.5 rounded-xl font-bold font-mono text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                             m.isBoss
-                              ? "bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20"
-                              : "bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200"
+                              ? "bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 shadow-md shadow-amber-500/25 active:scale-95"
+                              : "bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 border border-slate-700/60 active:scale-95"
                           }`}
                         >
                           <Swords className="w-3.5 h-3.5" />
-                          <span>Tấn Công</span>
+                          <span>Khiêu Chiến</span>
                         </button>
                       )}
                     </div>
@@ -1008,19 +1036,57 @@ export function WorldClient({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800">
-                  {initialLeaderboard.map((p, idx) => (
-                    <tr
-                      key={p.id}
-                      className={p.id === initialPlayer.id ? "bg-amber-500/10 font-bold" : ""}
-                    >
-                      <td className="py-3 px-4 text-amber-400">#{idx + 1}</td>
-                      <td className="py-3 px-4 text-white">{p.nickname}</td>
-                      <td className="py-3 px-4 text-right text-amber-300">{p.gold}</td>
-                      <td className="py-3 px-4 text-right text-emerald-400 font-bold">
-                        {p.score}
-                      </td>
-                    </tr>
-                  ))}
+                  {initialLeaderboard.map((p, idx) => {
+                    const isSelf = p.id === initialPlayer.id;
+                    const isTop1 = idx === 0;
+                    const isTop2 = idx === 1;
+                    const isTop3 = idx === 2;
+
+                    return (
+                      <tr
+                        key={p.id}
+                        className={`transition-colors ${
+                          isSelf
+                            ? "bg-amber-500/15 font-bold border-l-4 border-amber-400"
+                            : isTop1
+                            ? "bg-amber-500/5"
+                            : "hover:bg-slate-800/40"
+                        }`}
+                      >
+                        <td className="py-3 px-4 font-bold font-mono">
+                          {isTop1 ? (
+                            <span className="inline-flex items-center gap-1 text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-lg border border-amber-500/30">
+                              🥇 Top 1
+                            </span>
+                          ) : isTop2 ? (
+                            <span className="inline-flex items-center gap-1 text-slate-200 bg-slate-700/40 px-2 py-0.5 rounded-lg border border-slate-600">
+                              🥈 Top 2
+                            </span>
+                          ) : isTop3 ? (
+                            <span className="inline-flex items-center gap-1 text-amber-500 bg-amber-900/30 px-2 py-0.5 rounded-lg border border-amber-700/40">
+                              🥉 Top 3
+                            </span>
+                          ) : (
+                            <span className="text-slate-400">#{idx + 1}</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2">
+                            <span className="text-white font-semibold">{p.nickname}</span>
+                            {isSelf && (
+                              <span className="px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 text-[9px] font-mono font-black uppercase">
+                                Bạn
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-right text-amber-300 font-mono font-bold">{p.gold} Xu</td>
+                        <td className="py-3 px-4 text-right text-emerald-400 font-bold font-mono">
+                          {p.score} Điểm
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
