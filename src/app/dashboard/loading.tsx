@@ -26,10 +26,12 @@ export default function DashboardLoading() {
 
       {/* Nội dung chính Skeleton */}
       <main className="max-w-6xl mx-auto w-full px-4 py-8 space-y-6 flex-1">
-        {/* Banner thông báo đang tải */}
-        <div className="flex items-center justify-center gap-2 py-2 text-xs font-mono text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-2xl animate-pulse">
-          <Sparkles className="w-4 h-4 text-amber-400 animate-spin" />
-          <span>Đang đồng bộ tiến trình nhân vật, trường lớp và kho báu...</span>
+        {/* Banner thông báo bé slime đang tải */}
+        <div className="flex items-center justify-center gap-2.5 py-2.5 px-4 text-xs font-mono text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl shadow-sm">
+          <div className="w-5 h-5 shrink-0 pixelated animate-bounce">
+            <img src="/sprites/slime_idle_1_clean.png" alt="Slime" className="w-full h-full object-contain pixelated" />
+          </div>
+          <span className="font-semibold">Bé Slime đang chuẩn bị kho báu và hành trình hôm nay cho bạn nè... ✨</span>
         </div>
 
         {/* Card hồ sơ người dùng skeleton */}
@@ -68,3 +70,4 @@ export default function DashboardLoading() {
     </div>
   );
 }
+

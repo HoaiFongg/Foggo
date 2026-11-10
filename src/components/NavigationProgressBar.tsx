@@ -67,11 +67,18 @@ export function NavigationProgressBar() {
         <div className="h-full w-full bg-gradient-to-r from-amber-500 via-emerald-400 to-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.8)] animate-loading-bar" />
       </div>
 
-      {/* Pill thông báo góc trên bên phải mượt mà */}
-      <div className="fixed top-3 right-4 z-[9999] flex items-center gap-2 bg-slate-900/90 border border-amber-500/30 text-amber-300 px-3 py-1.5 rounded-full shadow-2xl backdrop-blur-md text-xs font-mono font-medium animate-pulse">
-        <Flame className="w-3.5 h-3.5 text-amber-400 animate-spin" />
-        <span>Đang thắp đèn lồng...</span>
+      {/* Pill thông báo góc trên bên phải siêu dễ thương với Bé Slime */}
+      <div className="fixed top-3 right-4 z-[9999] flex items-center gap-2.5 bg-slate-900/95 border border-emerald-500/40 text-emerald-300 px-3.5 py-1.5 rounded-full shadow-[0_4px_20px_rgba(16,185,129,0.25)] backdrop-blur-md text-xs font-mono font-medium animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="relative w-4 h-4 shrink-0 pixelated animate-bounce">
+          <img
+            src="/sprites/slime_idle_1_clean.png"
+            alt="Slime"
+            className="w-full h-full object-contain pixelated"
+          />
+        </div>
+        <span>Bé Slime đang mở đường... ✨</span>
       </div>
     </div>
   );
 }
+
