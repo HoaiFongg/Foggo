@@ -2750,6 +2750,7 @@ jobs:
 - [x] Chuẩn hóa giao diện chuyên nghiệp đẳng cấp Big Tech (Google/Vercel/Linear) kết hợp phong cách Retro Pixel Art: Landing page mockup trực quan, Header glassmorphism & role chip, Điểm danh 7 ngày kèm thanh tiến độ tuần và rương VIP, Bảng xếp hạng bục huy chương 🥇🥈🥉, đấu trường và thẻ săn quái pixelated
 - [x] Tài khoản kiểm thử thực chiến tự động (Học sinh: hocsinh_test, Giáo viên: giaovien_test@foggo.vn) lưu tại TEST_ACCOUNTS.md, script chạy kiểm thử gameplay: scripts/test-account-runner.ts
 - [x] Sửa triệt để lỗi truy vấn Bảng Quản trị Admin (/admin): Chỉ định tường minh Foreign Key `schools:school_id(name)` và `classes:class_id(name)` để giải quyết lỗi PGRST201, hiển thị đầy đủ danh sách Học sinh, Giáo viên và Trường học
+- [x] Kiểm thử toàn diện 31 bài test logic, chức năng & điều hướng hệ thống (scripts/full-system-test.ts): 100% test cases đạt chuẩn bao gồm HTTP Routes, Auth RBAC, Điểm danh 7 ngày, 8 dạng câu hỏi, Săn quái và Admin
 
 ### Trước khi thu tiền
 - [x] Thanh toán + webhook hoạt động, test kỹ
