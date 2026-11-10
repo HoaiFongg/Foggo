@@ -22,3 +22,4 @@ drop trigger if exists trg_protect_profile_system_fields on public.profiles;
 create trigger trg_protect_profile_system_fields
   before update on public.profiles
   for each row execute function public.protect_profile_system_fields();
+

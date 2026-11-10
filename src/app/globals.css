@@ -70,3 +70,32 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.4);
 }
+
+/* Ẩn triệt để biểu tượng Dev Indicator ("chữ N" màu đen ở góc dưới bên trái của Next.js) */
+[data-nextjs-toast],
+[data-nextjs-dev-tools-button],
+[data-next-badge],
+nextjs-portal,
+div[data-nextjs-route-announcer],
+#next-logo-badge,
+button[aria-label="Next.js Dev Tools"],
+[data-nextjs-dev-overlay] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Hiệu ứng tia sáng loading chạy ngang đỉnh màn hình */
+@keyframes loadingBar {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(0%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-loading-bar {
+  animation: loadingBar 1.6s ease-in-out infinite;
+}

@@ -215,6 +215,12 @@ erDiagram
     - **Bảo vệ mã khôi phục học sinh:** Mã bí mật sinh ngẫu nhiên `randomBytes(12)` không chứa ký tự dễ nhầm lẫn (`0/O`, `1/I`), chỉ lưu bản băm SHA-256 (`recovery_code_hash`) trong cơ sở dữ liệu. Hàm so sánh dùng `timingSafeEqual` chống tấn công đo thời gian (Timing Attack). Khi khôi phục mật khẩu thành công, mã cũ tự động bị hủy và sinh mã mới.
     - **Chống gian lận lộ đáp án:** Client học sinh chỉ nhận `id, type, content, points` (tuyệt đối không chọn `answer_key`). Chấm điểm 100% tại Server Action (`src/app/world/[id]/actions.ts`).
     - **Chống leo thang đặc quyền (Privilege Escalation):** Loại bỏ việc tin cậy `user.user_metadata?.role` tại client; chỉ cấp quyền SuperAdmin cho email hệ thống (`hoaifongg@gmail.com`) hoặc `app_metadata` bảo mật; thêm `/admin` vào `PROTECTED` middleware; thiết lập trigger `trg_protect_profile_system_fields` tại PostgreSQL để ngăn chặn người dùng thường tự ý sửa `role`, `plan`, `fireflies`.
+17. **Hiệu ứng Loading Toàn Trang & Tắt Chữ N (Next.js Dev Indicator):**
+    - **Tắt biểu tượng chữ 'N' góc dưới bên trái:** Cấu hình `devIndicators: false` trong [`next.config.ts`](file:///d:/Project/Foggo/next.config.ts) kết hợp quy tắc ẩn triệt để CSS trong [`src/app/globals.css`](file:///d:/Project/Foggo/src/app/globals.css) (`[data-nextjs-toast]`, `[data-nextjs-dev-tools-button]`, `[data-next-badge]`, `nextjs-portal`, `button[aria-label="Next.js Dev Tools"]`).
+    - **Thanh Progress Bar laser đỉnh màn hình:** [`src/components/NavigationProgressBar.tsx`](file:///d:/Project/Foggo/src/components/NavigationProgressBar.tsx) phản hồi ngay 0ms khi click link, chạy tia laser gradient amber-emerald và pill *"Đang thắp đèn lồng..."*.
+    - **Màn hình Loading chuyển Route:** [`src/app/loading.tsx`](file:///d:/Project/Foggo/src/app/loading.tsx) đèn lồng phát sáng, [`src/app/world/[id]/loading.tsx`](file:///d:/Project/Foggo/src/app/world/[id]/loading.tsx) skeleton sàn đấu săn quái, [`src/app/dashboard/loading.tsx`](file:///d:/Project/Foggo/src/app/dashboard/loading.tsx) skeleton 7 ngày nhận quà.
+    - **Component Loading dùng chung:** [`src/components/ui/LoadingOverlay.tsx`](file:///d:/Project/Foggo/src/components/ui/LoadingOverlay.tsx) cho các tác vụ xử lý bất đồng bộ.
+
 
 
 

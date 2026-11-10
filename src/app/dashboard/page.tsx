@@ -380,11 +380,10 @@ export default async function DashboardPage() {
 
                           <div className="flex items-center gap-2 shrink-0">
                             <span
-                              className={`px-2 py-0.5 rounded text-[10px] font-mono font-medium ${
-                                w.status === "open"
-                                  ? "bg-emerald-500/10 text-emerald-400"
-                                  : "bg-slate-800 text-slate-400"
-                              }`}
+                              className={`px-2 py-0.5 rounded text-[10px] font-mono font-medium ${w.status === "open"
+                                ? "bg-emerald-500/10 text-emerald-400"
+                                : "bg-slate-800 text-slate-400"
+                                }`}
                             >
                               {w.status === "open" ? "Mở" : "Đóng"}
                             </span>
@@ -766,11 +765,10 @@ export default async function DashboardPage() {
                           <div className="flex items-center gap-2 mb-1">
                             <p className="text-xs font-semibold text-white truncate">{s.title}</p>
                             <span
-                              className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
-                                isSolo
-                                  ? "bg-emerald-500/10 text-emerald-400"
-                                  : "bg-amber-500/10 text-amber-400"
-                              }`}
+                              className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${isSolo
+                                ? "bg-emerald-500/10 text-emerald-400"
+                                : "bg-amber-500/10 text-amber-400"
+                                }`}
                             >
                               {isSolo ? "Solo Farm Tại Nhà" : "Đấu Trường Lớp"}
                             </span>
