@@ -2755,6 +2755,12 @@ jobs:
 - [x] Tắt biểu tượng chữ N (Next.js Dev Indicator) ở góc dưới bên trái và thiết lập hệ sinh thái loading Bé Slime siêu dễ thương toàn trang: Hoạt họa squishy bounce Bé Slime, bóng thoại đáng yêu xoay vòng, NavigationProgressBar laser 0ms kèm pet pill, World loading sàn đấu và Dashboard loading skeleton
 - [x] Hệ thống đa ngôn ngữ song ngữ Tiếng Việt 🇻🇳 & English 🇬🇧: Xây dựng Zustand store i18n phản ứng 0ms, lưu trữ localStorage & cookie foggo_lang, nút chuyển đổi LanguageSwitcher (🇻🇳 VI ⇋ 🇬🇧 EN), hỗ trợ song ngữ toàn bộ NavigationHeader, Landing Page, Battle Arena và hiệu ứng Bé Slime loading
 - [x] Chuyển đổi ngôn ngữ động toàn diện cho Ngân Hàng Câu Hỏi, Thế Giới Chơi & Đấu Trường Săn Quái: Xây dựng engine dịch thuật tự động đệ quy (`autoTranslateViToEn` trong `src/lib/i18n/questions-translation.ts`) hỗ trợ người dùng quốc tế/người Mỹ làm bất kỳ đề thi tiếng Việt nào của giáo viên mà không cần công cụ dịch ngoài; giữ nguyên 100% ID phương án và cơ chế chấm điểm server-side; hỗ trợ chuyển ngữ tức thì cho toàn bộ 4 tab Thế giới sinh tồn RPG (Săn Quái, Thợ Rèn, Túi Đồ, Bảng Xếp Hạng), thanh Header tích hợp LanguageSwitcher, bảng quái vật & trang bị (`game-translations.ts`), Đấu Trường Săn Quái, Bảng điều khiển Dashboard, Danh sách bộ đề, Trình soạn thảo bộ đề, Khám phá cộng đồng, Bảng giá và toàn bộ 8 dạng câu hỏi Player; nạp sẵn bộ câu hỏi Tiếng Anh chuẩn Tin học 7 vào cơ sở dữ liệu.
+- [x] Thiết kế lại Giao diện Xác thực (Auth Hub) 2 phần Đăng Nhập ⇋ Đăng Ký siêu bắt mắt & Thân thiện với người mới:
+  - Cập nhật và xác thực thông tin tài khoản Superadmin tối cao (`Email: hoaifongg@gmail.com` | `Mật khẩu: Admin@123456`) đồng bộ trực tiếp vào Supabase Auth và lưu vĩnh viễn tại `TEST_ACCOUNTS.md`.
+  - Ẩn hoàn toàn nút Đăng nhập bằng Google và liên kết Quên mật khẩu theo đúng yêu cầu bảo mật và trải nghiệm gọn gàng.
+  - Xây dựng component xác thực hợp nhất `src/app/(auth)/AuthUnifiedClient.tsx` với 2 tab chuyển đổi mượt mà (Đăng Nhập ⇋ Đăng Ký), hiệu ứng ánh sáng đèn lồng hổ phách ấm, đom đóm bay lơ lửng, hỗ trợ chuyển ngữ tức thì qua `LanguageSwitcher` (VI ⇋ EN).
+  - Tích hợp 2 thẻ vai trò trực quan trong Tab Đăng Ký: Học sinh (30s không cần email, tự động sinh mã khôi phục bí mật) và Giáo viên (đăng ký qua email công tác), có nút ẩn/hiện mật khẩu chống gõ nhầm và danh mục trường lớp mở rộng.
+  - Đảm bảo 100% 56/56 unit test và 31/31 integration test đạt chuẩn, Next.js build Turbopack thành công tuyệt đối.
 
 ### Trước khi thu tiền
 - [x] Thanh toán + webhook hoạt động, test kỹ

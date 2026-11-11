@@ -226,3 +226,4 @@ export function localizeWorldTitle(title: string, language: "vi" | "en"): string
   if (title === "Hầm Ngục Lớp Học") return "Classroom Arena";
   return title;
 }
+

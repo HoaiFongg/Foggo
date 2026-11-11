@@ -19,10 +19,10 @@
 | Đường dẫn (Route) | File thực thi | Quyền truy cập | Chức năng chính |
 |---|---|---|---|
 | `/` | `src/app/page.tsx` | Công khai | Landing page giới thiệu Foggo, CTA vào chơi |
-| `/login` | `src/app/(auth)/login/page.tsx` | Công khai | Đăng nhập bằng Email hoặc Tên đăng nhập học sinh |
-| `/register` | `src/app/(auth)/register/page.tsx` | Công khai | Đăng ký tài khoản Giáo viên (cần email) |
-| `/register/student` | `src/app/(auth)/register/student/page.tsx` | Công khai | Đăng ký Học sinh KHÔNG CẦN EMAIL (User + Pass + Mã khôi phục) |
-| `/register/recovery-code` | `src/app/(auth)/register/recovery-code/page.tsx` | Công khai | Hiển thị mã khôi phục bí mật sau khi học sinh đăng ký |
+| `/login` | `src/app/(auth)/login/page.tsx`, `AuthUnifiedClient.tsx` | Công khai | Hub xác thực hợp nhất 2 tab (Đăng nhập ⇋ Đăng ký), hỗ trợ chuyển ngữ VI/EN, ẩn Google OAuth & Quên mật khẩu |
+| `/register` | `src/app/(auth)/register/page.tsx`, `AuthUnifiedClient.tsx` | Công khai | Tab Đăng ký tân thủ: Chọn Học sinh (không cần email) hoặc Giáo viên (cần email) |
+| `/register/student` | `src/app/(auth)/register/student/page.tsx` | Công khai | Điểm vào trực tiếp đăng ký Học sinh trên nền Auth Hub hợp nhất |
+| `/register/recovery-code` | `src/app/(auth)/register/recovery-code/page.tsx` | Công khai | Hiển thị và tải file mã khôi phục bí mật sau khi học sinh đăng ký |
 | `/dashboard` | `src/app/dashboard/page.tsx`, `DailyLoginStreakCard.tsx`, `actions.ts` | User đã đăng nhập | Phân quyền: Giáo viên quản trị bộ đề & phòng; Học sinh có Hub Thám Hiểm (Trường, Lớp, Tài nguyên, Điểm danh 7 ngày nhận quà, Bãi Farm Solo 24/7, Đấu trường Lớp, Trang bị & Lịch sử) |
 | `/dashboard/sets` | `src/app/dashboard/sets/page.tsx` | Teacher, Admin | Danh sách bộ câu hỏi, Import/Export Excel, Xóa bộ đề (Học sinh bị ẩn) |
 | `/dashboard/sets/new` | `src/app/dashboard/sets/new/page.tsx` | Teacher, Admin | Khởi tạo nhanh bộ đề mới (tiêu đề, môn, lớp) |
@@ -106,7 +106,7 @@ erDiagram
 - **Hàm `requireUser(roles?: UserRole[])`:**
   - Kiểm tra session đăng nhập qua cookie server.
   - Tự động nhận diện Superadmin qua email `hoaifongg@gmail.com` hoặc metadata `role=admin` và thăng cấp `admin` + gói `plus`.
-  - Quản trị viên (`admin`) tự động có toàn quyền như Giáo viên + Học sinh mà không bao giờ bị chặn 403 / redirect.
+  - Quản trị viên (``) tự động có toàn quyền như Giáo viên + Học sinh mà không bao giờ bị chặn 403 / redirect.
 - **Tệp đăng nhập/đăng ký:**
   - `src/app/(auth)/actions.ts`: Đăng nhập (hỗ trợ cả username & email), Đăng xuất, Đăng ký GV.
   - `src/app/(auth)/student-actions.ts`: Đăng ký học sinh qua Admin API `admin.auth.admin.createUser`, gán domain nội bộ `@student.foggo.vn`, bypass email confirmation.

@@ -39,8 +39,12 @@ Tài khoản tối cao có toàn quyền quản lý học sinh, duyệt giáo vi
 
 | Thông tin | Giá trị đăng nhập |
 |---|---|
-| **Email** | `hoaifongg@gmail.com` |
+| **Hình thức đăng nhập** | Bằng Email |
+| **Email (Tên đăng nhập)** | `hoaifongg@gmail.com` |
+| **Mật khẩu** | `Admin@123456` |
+| **Tên hiển thị** | `Phạm Nguyễn Hoài Phong (Admin)` |
 | **Vai trò (Role)** | `admin` (Superadmin tối cao) |
+| **Gói dịch vụ** | `plus` |
 
 ---
 
