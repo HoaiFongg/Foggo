@@ -21,6 +21,11 @@ import {
   Award,
   Layers,
   UserCheck,
+  Eye,
+  EyeOff,
+  Copy,
+  Check,
+  Key,
 } from "lucide-react";
 import {
   updateUserRole,
@@ -28,6 +33,7 @@ import {
   verifySchool,
   awardFireflies,
   resetStudentRecoveryCode,
+  adminUpdateUserPassword,
 } from "./actions";
 import type { UserRole, UserPlan } from "@/types/database";
 
@@ -63,6 +69,51 @@ export function AdminClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [alertInfo, setAlertInfo] = useState<string | null>(null);
+
+  // Hiển thị và quản trị mật khẩu
+  const [revealedPasswords, setRevealedPasswords] = useState<Record<string, boolean>>({});
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [passwordModalUser, setPasswordModalUser] = useState<{ id: string; name: string } | null>(null);
+  const [newPasswordInput, setNewPasswordInput] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+
+  function toggleRevealPassword(userId: string) {
+    setRevealedPasswords((prev) => ({ ...prev, [userId]: !prev[userId] }));
+  }
+
+  function copyPassword(userId: string, pw: string) {
+    navigator.clipboard.writeText(pw);
+    setCopiedId(userId);
+    setTimeout(() => setCopiedId(null), 2000);
+  }
+
+  async function handleSaveNewPassword() {
+    if (!passwordModalUser || !newPasswordInput || newPasswordInput.length < 6) {
+      alert("Mật khẩu mới phải có tối thiểu 6 ký tự");
+      return;
+    }
+    setChangingPassword(true);
+    const res = await adminUpdateUserPassword({
+      targetUserId: passwordModalUser.id,
+      newPassword: newPasswordInput,
+    });
+    setChangingPassword(false);
+
+    if (res?.error) {
+      alert(res.error);
+      return;
+    }
+
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === passwordModalUser.id ? { ...u, managed_password: newPasswordInput } : u
+      )
+    );
+    setRevealedPasswords((prev) => ({ ...prev, [passwordModalUser.id]: true }));
+    setAlertInfo(`Đã cập nhật mật khẩu cho "${passwordModalUser.name}" thành công!`);
+    setPasswordModalUser(null);
+    setNewPasswordInput("");
+  }
 
   // Phân loại danh sách
   const teachers = useMemo(
@@ -371,6 +422,7 @@ export function AdminClient({
                   <tr>
                     <th className="py-3 px-4">Giáo viên</th>
                     <th className="py-3 px-4">Tài khoản / Email</th>
+                    <th className="py-3 px-4">Mật khẩu</th>
                     <th className="py-3 px-4">Trường học</th>
                     <th className="py-3 px-4">Gói dịch vụ</th>
                     <th className="py-3 px-4">Vai trò</th>
@@ -380,7 +432,7 @@ export function AdminClient({
                 <tbody className="divide-y divide-slate-800/60">
                   {filteredTeachers.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-8 text-center text-slate-500 text-xs">
+                      <td colSpan={7} className="py-8 text-center text-slate-500 text-xs">
                         Không tìm thấy giáo viên nào phù hợp.
                       </td>
                     </tr>
@@ -396,7 +448,46 @@ export function AdminClient({
                           </div>
                         </td>
                         <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">
-                          {t.username || "Tài khoản Google/Email"}
+                          {t.email || t.username || "Tài khoản Google/Email"}
+                        </td>
+                        <td className="py-3 px-4 font-mono text-[11px]">
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className={`px-2 py-0.5 rounded font-bold ${
+                                revealedPasswords[t.id]
+                                  ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
+                                  : "bg-slate-950 text-slate-500"
+                              }`}
+                            >
+                              {revealedPasswords[t.id] ? t.managed_password || "Chưa lưu" : "••••••••"}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => toggleRevealPassword(t.id)}
+                              className="p-1 hover:bg-slate-800 text-slate-400 hover:text-white rounded transition-colors cursor-pointer"
+                              title={revealedPasswords[t.id] ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                            >
+                              {revealedPasswords[t.id] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                            </button>
+                            {t.managed_password && (
+                              <button
+                                type="button"
+                                onClick={() => copyPassword(t.id, t.managed_password)}
+                                className="p-1 hover:bg-slate-800 text-slate-400 hover:text-emerald-400 rounded transition-colors cursor-pointer"
+                                title="Sao chép mật khẩu"
+                              >
+                                {copiedId === t.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => setPasswordModalUser({ id: t.id, name: t.display_name || t.email || "Giáo viên" })}
+                              className="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-semibold cursor-pointer"
+                              title="Đặt hoặc đổi mật khẩu"
+                            >
+                              Đổi MK
+                            </button>
+                          </div>
                         </td>
                         <td className="py-3 px-4 text-slate-300">
                           {t.schools?.name || "Chưa gắn trường"}
@@ -472,6 +563,7 @@ export function AdminClient({
                   <tr>
                     <th className="py-3 px-4">Học sinh</th>
                     <th className="py-3 px-4">Tên đăng nhập (Username)</th>
+                    <th className="py-3 px-4">Mật khẩu</th>
                     <th className="py-3 px-4">Trường / Lớp</th>
                     <th className="py-3 px-4">Cấp độ & XP</th>
                     <th className="py-3 px-4">Đom Đóm</th>
@@ -482,7 +574,7 @@ export function AdminClient({
                 <tbody className="divide-y divide-slate-800/60">
                   {filteredStudents.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-8 text-center text-slate-500 text-xs">
+                      <td colSpan={8} className="py-8 text-center text-slate-500 text-xs">
                         Không tìm thấy học sinh nào phù hợp.
                       </td>
                     </tr>
@@ -494,6 +586,45 @@ export function AdminClient({
                         </td>
                         <td className="py-3 px-4 text-emerald-400 font-mono text-[11px] font-bold">
                           {s.username || "Chưa có username"}
+                        </td>
+                        <td className="py-3 px-4 font-mono text-[11px]">
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className={`px-2 py-0.5 rounded font-bold ${
+                                revealedPasswords[s.id]
+                                  ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
+                                  : "bg-slate-950 text-slate-500"
+                              }`}
+                            >
+                              {revealedPasswords[s.id] ? s.managed_password || "Chưa lưu" : "••••••••"}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => toggleRevealPassword(s.id)}
+                              className="p-1 hover:bg-slate-800 text-slate-400 hover:text-white rounded transition-colors cursor-pointer"
+                              title={revealedPasswords[s.id] ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                            >
+                              {revealedPasswords[s.id] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                            </button>
+                            {s.managed_password && (
+                              <button
+                                type="button"
+                                onClick={() => copyPassword(s.id, s.managed_password)}
+                                className="p-1 hover:bg-slate-800 text-slate-400 hover:text-emerald-400 rounded transition-colors cursor-pointer"
+                                title="Sao chép mật khẩu"
+                              >
+                                {copiedId === s.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => setPasswordModalUser({ id: s.id, name: s.display_name || s.username || "Học sinh" })}
+                              className="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-semibold cursor-pointer"
+                              title="Đặt hoặc đổi mật khẩu"
+                            >
+                              Đổi MK
+                            </button>
+                          </div>
                         </td>
                         <td className="py-3 px-4 text-slate-300">
                           {s.schools?.name || "Chưa gắn trường"}{" "}
@@ -641,6 +772,49 @@ export function AdminClient({
           </div>
         )}
       </main>
+
+      {/* Modal Đặt / Đổi Mật Khẩu Dành Cho Admin */}
+      {passwordModalUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-3xl bg-slate-900 border border-slate-700 p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
+              <Key className="w-4 h-4" />
+              <span>Đổi Mật Khẩu Người Dùng</span>
+            </div>
+            <p className="text-xs text-slate-300">
+              Đặt mật khẩu mới cho <strong className="text-white">{passwordModalUser.name}</strong>:
+            </p>
+            <input
+              type="text"
+              value={newPasswordInput}
+              onChange={(e) => setNewPasswordInput(e.target.value)}
+              placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)..."
+              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-amber-500 font-mono"
+              autoFocus
+            />
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setPasswordModalUser(null);
+                  setNewPasswordInput("");
+                }}
+                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                disabled={changingPassword || newPasswordInput.length < 6}
+                onClick={handleSaveNewPassword}
+                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold disabled:opacity-50 cursor-pointer"
+              >
+                {changingPassword ? "Đang lưu..." : "Lưu mật khẩu"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

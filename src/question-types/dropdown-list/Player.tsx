@@ -81,8 +81,8 @@ export function DropdownListPlayer({
         )}
       </div>
 
-      {/* 2. KHỐI NHẬN ĐỊNH BÊN DƯỚI (CÓ DANH SÁCH SỔ XUỐNG KHI NHẤN VÀO) */}
-      <div className="p-3 sm:p-4 rounded-2xl bg-slate-950 border border-slate-800 text-slate-100 text-xs sm:text-sm leading-relaxed shadow-lg relative max-h-[36vh] overflow-y-auto">
+      {/* 2. KHỐI NHẬN ĐỊNH BÊN DƯỚI (CÓ DANH SÁCH SỔ XUỐNG KHI NHẤN VÀO - KHÔNG GIỚI HẠN KHUNG) */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 text-slate-100 text-xs sm:text-sm md:text-base leading-relaxed shadow-lg relative">
         {(() => {
           let slotCounter = 0;
 

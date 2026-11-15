@@ -151,3 +151,34 @@ export async function resetStudentRecoveryCode({
   revalidatePath("/admin");
   return { success: true, newCode };
 }
+
+export async function adminUpdateUserPassword({
+  targetUserId,
+  newPassword,
+}: {
+  targetUserId: string;
+  newPassword: string;
+}) {
+  await verifyAdminCaller();
+  if (!newPassword || newPassword.length < 6) {
+    return { error: "Mật khẩu mới tối thiểu 6 ký tự" };
+  }
+
+  const adminClient = createAdminClient();
+
+  // Cập nhật mật khẩu trong Supabase Auth đồng thời lưu managed_password vào metadata để admin quản trị
+  const { error } = await adminClient.auth.admin.updateUserById(targetUserId, {
+    password: newPassword,
+    user_metadata: {
+      managed_password: newPassword,
+      last_password_reset_at: new Date().toISOString(),
+    },
+  });
+
+  if (error) {
+    return { error: error.message || "Không thể cập nhật mật khẩu người dùng" };
+  }
+
+  revalidatePath("/admin");
+  return { success: true, password: newPassword };
+}

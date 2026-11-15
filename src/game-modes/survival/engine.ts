@@ -1011,3 +1011,45 @@ export function applyRevive(state: SurvivalPlayerState): SurvivalPlayerState {
   return nextState;
 }
 
+/**
+ * Bán lại vật phẩm trong túi đồ (đặc biệt là vật phẩm săn quái) để đổi lấy Xu (Coins)
+ */
+export function applySellItem(
+  state: SurvivalPlayerState,
+  slotIndex: number,
+  sellQty?: number
+): { state: SurvivalPlayerState; success: boolean; coinsEarned: number; message: string } {
+  const nextState = { ...state, inventory: [...state.inventory] };
+  const targetSlot = nextState.inventory.find((s) => s.slotIndex === slotIndex);
+
+  if (!targetSlot) {
+    return {
+      state,
+      success: false,
+      coinsEarned: 0,
+      message: "Không tìm thấy vật phẩm trong ô này để bán",
+    };
+  }
+
+  const itemDef = getItemDef(targetSlot.itemId);
+  const unitPrice = itemDef?.sellPrice && itemDef.sellPrice > 0 ? itemDef.sellPrice : 1;
+  const countToSell = Math.min(targetSlot.qty, sellQty && sellQty > 0 ? sellQty : targetSlot.qty);
+  const coinsEarned = unitPrice * countToSell;
+
+  if (targetSlot.qty > countToSell) {
+    targetSlot.qty -= countToSell;
+  } else {
+    nextState.inventory = nextState.inventory.filter((s) => s.slotIndex !== slotIndex);
+  }
+
+  nextState.coins = (nextState.coins || 0) + coinsEarned;
+
+  return {
+    state: nextState,
+    success: true,
+    coinsEarned,
+    message: `Đã bán ${countToSell}x ${itemDef?.name || targetSlot.itemId} và nhận được +${coinsEarned} Xu 🪙!`,
+  };
+}
+
+

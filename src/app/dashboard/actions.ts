@@ -136,3 +136,133 @@ export async function claimDailyLoginReward() {
   };
 }
 
+/**
+ * Đổi tên hiển thị nhân vật của học sinh
+ */
+export async function updateStudentDisplayName(newDisplayName: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Phiên đăng nhập đã hết hạn" };
+  }
+
+  const trimmed = newDisplayName.trim();
+  if (trimmed.length < 2 || trimmed.length > 40) {
+    return { error: "Tên hiển thị phải từ 2 đến 40 ký tự" };
+  }
+
+  const adminClient = createAdminClient();
+  const { error } = await adminClient
+    .from("profiles")
+    .update({ display_name: trimmed })
+    .eq("id", user.id);
+
+  if (error) {
+    return { error: error.message || "Không thể cập nhật tên" };
+  }
+
+  await adminClient.auth.admin.updateUserById(user.id, {
+    user_metadata: {
+      ...user.user_metadata,
+      display_name: trimmed,
+    },
+  });
+
+  revalidatePath("/dashboard");
+  return { success: true, displayName: trimmed };
+}
+
+/**
+ * Cập nhật trường học và lớp học của học sinh để kết nối bạn bè cùng trường cùng lớp
+ */
+export async function updateStudentSchoolClass({
+  schoolName,
+  province,
+  className,
+}: {
+  schoolName: string;
+  province: string;
+  className: string;
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Phiên đăng nhập đã hết hạn" };
+  }
+
+  const adminClient = createAdminClient();
+  let schoolId: string | null = null;
+  let classId: string | null = null;
+
+  if (schoolName.trim() && province.trim()) {
+    const { data: school } = await adminClient
+      .from("schools")
+      .select("id")
+      .ilike("name", schoolName.trim())
+      .eq("province", province.trim())
+      .maybeSingle();
+
+    if (school) {
+      schoolId = school.id;
+    } else {
+      const { data: newSchool } = await adminClient
+        .from("schools")
+        .insert({
+          name: schoolName.trim(),
+          province: province.trim(),
+          status: "pending",
+        })
+        .select("id")
+        .single();
+      schoolId = newSchool?.id || null;
+    }
+
+    if (schoolId && className.trim()) {
+      const currentYear = `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`;
+      const { data: classRoom } = await adminClient
+        .from("classes")
+        .select("id")
+        .eq("school_id", schoolId)
+        .ilike("name", className.trim())
+        .eq("school_year", currentYear)
+        .maybeSingle();
+
+      if (classRoom) {
+        classId = classRoom.id;
+      } else {
+        const { data: newClass } = await adminClient
+          .from("classes")
+          .insert({
+            name: className.trim(),
+            school_id: schoolId,
+            school_year: currentYear,
+          })
+          .select("id")
+          .single();
+        classId = newClass?.id || null;
+      }
+    }
+  }
+
+  const { error } = await adminClient
+    .from("profiles")
+    .update({
+      school_id: schoolId,
+      class_id: classId,
+    })
+    .eq("id", user.id);
+
+  if (error) {
+    return { error: error.message || "Không thể cập nhật trường lớp" };
+  }
+
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+

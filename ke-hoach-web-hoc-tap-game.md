@@ -2761,6 +2761,18 @@ jobs:
   - Xây dựng component xác thực hợp nhất `src/app/(auth)/AuthUnifiedClient.tsx` với 2 tab chuyển đổi mượt mà (Đăng Nhập ⇋ Đăng Ký), hiệu ứng ánh sáng đèn lồng hổ phách ấm, đom đóm bay lơ lửng, hỗ trợ chuyển ngữ tức thì qua `LanguageSwitcher` (VI ⇋ EN).
   - Tích hợp 2 thẻ vai trò trực quan trong Tab Đăng Ký: Học sinh (30s không cần email, tự động sinh mã khôi phục bí mật) và Giáo viên (đăng ký qua email công tác), có nút ẩn/hiện mật khẩu chống gõ nhầm và danh mục trường lớp mở rộng.
   - Đảm bảo 100% 56/56 unit test và 31/31 integration test đạt chuẩn, Next.js build Turbopack thành công tuyệt đối.
+- [x] Tối ưu hóa hiệu năng, trải nghiệm thi đấu, bảo mật quản trị và tính năng học tập mở rộng:
+  - **Phản hồi siêu tốc & Bảng xem lại kiến thức**: Tối ưu độ trễ server action với `Promise.all` song song; rút ngắn hoạt họa tấn công xuống 150ms cho cảm giác mượt mà tức thì; tự động hiển thị **Bảng Xem Lại Kiến Thức & Đáp Án Đúng** (`Learning Review Card`) định dạng chuẩn theo 8 dạng câu hỏi kèm giải thích chi tiết khi học sinh làm sai để ghi nhớ bài học.
+  - **Xóa giới hạn khung câu hỏi danh sách thả xuống (`dropdown_list`)**: Loại bỏ `max-h-[36vh]` và `overflow-y-auto` chật hẹp, mở rộng không gian văn bản để câu hỏi hiển thị thông suốt, không bị che khuất.
+  - **Kéo thả ghép nối trực quan (`drag_match`)**: Triển khai HTML5 Drag-and-Drop thực tế cho phép kéo trực tiếp các thẻ từ Cột B (phải) thả sang Cột A (trái) với hiệu ứng viền phát sáng và huy hiệu ghép đôi trực quan, kèm click-to-match dự phòng.
+  - **Quản trị mật khẩu Giáo viên & Học sinh cho Admin (`/admin`)**: Bổ sung cột "Mật khẩu" với nút ẩn/hiện (`••••••••` ⇋ chữ rõ), nút copy 1-click và modal "Đổi MK" trực tiếp thông qua Supabase Auth Admin API.
+  - **Dọn dẹp thanh Taskbar Admin**: Loại bỏ các nút điều hướng thừa ("Học sinh", "Giáo viên") trên thanh NavigationHeader khi đăng nhập quyền Admin vì đã có sẵn trong bảng quản trị.
+  - **Tinh gọn ngôn từ, giao diện chuyên nghiệp & giáo dục**: Loại bỏ hoàn toàn các câu từ rườm rà, vô nghĩa hoặc trẻ con trên màn hình loading, sảnh thế giới và mô tả quái vật; chỉ giữ biểu tượng Bé Slime nảy nhảy sạch sẽ cùng phụ đề chuẩn mực.
+  - **Mở rộng kho đồ lên 30 ô & Tính năng bán lại vật phẩm**: Cập nhật `MAX_INVENTORY_SLOTS = 30`, bổ sung chức năng bán vật phẩm thu được từ quái (thịt sống, chất nhầy slime, ...) lấy Xu (Coins) ngay trong túi đồ với nút "Bán +X🪙".
+  - **Xem lịch sử làm bài của học sinh**: Cung cấp mục "Lịch Sử Làm Bài & Luyện Tập" chi tiết hiển thị số câu đã làm, số câu đúng/sai, tỉ lệ chính xác %, quái đã hạ và nút vào luyện tập lại.
+  - **Chức năng đổi tên của học sinh**: Tích hợp modal "✏️ Đổi tên" ngay tại Hero Profile Card trên Dashboard, cập nhật tức thì vào hồ sơ Supabase.
+  - **Kết nối cùng trường và cùng lớp**: Bổ sung khu vực "Bạn Cùng Lớp & Cùng Trường" hiển thị danh sách bạn học cùng lớp/trường và modal "Chọn Trường & Lớp" linh hoạt.
+  - **Báo cáo tỉ lệ làm sai câu nào nhiều và bao nhiêu phần trăm**: Trong `/dashboard/reports/[id]`, phân tích và hiển thị trực quan phần trăm làm sai (`X% làm sai`), số lượt sai, thanh so sánh tỉ lệ đúng/sai và bộ lọc sắp xếp "Sai nhiều nhất trước".
 
 ### Trước khi thu tiền
 - [x] Thanh toán + webhook hoạt động, test kỹ

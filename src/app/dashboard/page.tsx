@@ -49,6 +49,8 @@ export default async function DashboardPage() {
   let openClassWorld: any = null;
   let mySoloFarmSession: any = null;
   let myRecentPlayedWorlds: any[] = [];
+  let classmates: any[] = [];
+  let studentQuizHistory: any[] = [];
   let totalScore = 0;
   let currentGold = 0;
   let currentHp = 100;
@@ -78,15 +80,74 @@ export default async function DashboardPage() {
       if (c) studentClassName = c.name;
     }
 
-    // 2. Lấy danh sách các thế giới đã tham gia
-    const { data: playerSessions } = await supabase
-      .from("session_players")
-      .select("*, game_sessions(*)")
-      .eq("user_id", user.id)
-      .order("updated_at", { ascending: false });
+    // 2. Lấy danh sách bạn cùng lớp / cùng trường
+    if (profile?.class_id) {
+      const { data: cm } = await supabase
+        .from("profiles")
+        .select("id, display_name, role")
+        .eq("class_id", profile.class_id)
+        .order("display_name", { ascending: true });
+      if (cm) {
+        classmates = cm.map((m) => ({
+          id: m.id,
+          displayName: m.display_name || "Học sinh",
+          role: m.role || "student",
+          className: studentClassName,
+          schoolName: studentSchoolName,
+        }));
+      }
+    } else if (profile?.school_id) {
+      const { data: cm } = await supabase
+        .from("profiles")
+        .select("id, display_name, role")
+        .eq("school_id", profile.school_id)
+        .order("display_name", { ascending: true });
+      if (cm) {
+        classmates = cm.map((m) => ({
+          id: m.id,
+          displayName: m.display_name || "Học sinh",
+          role: m.role || "student",
+          schoolName: studentSchoolName,
+        }));
+      }
+    }
+
+    // 3. Lấy danh sách các thế giới đã tham gia & Lịch sử làm bài
+    const [{ data: playerSessions }, { data: userAnswers }] = await Promise.all([
+      supabase
+        .from("session_players")
+        .select("*, game_sessions(*)")
+        .eq("user_id", user.id)
+        .order("updated_at", { ascending: false }),
+      supabase
+        .from("session_answers")
+        .select("session_id, is_correct, points_awarded, created_at")
+        .eq("user_id", user.id),
+    ]);
 
     if (playerSessions && playerSessions.length > 0) {
       myRecentPlayedWorlds = playerSessions.slice(0, 5);
+
+      // Xây dựng lịch sử làm bài chi tiết
+      studentQuizHistory = playerSessions.map((p) => {
+        const sAnswers = (userAnswers || []).filter((a) => a.session_id === p.session_id);
+        const total = sAnswers.length;
+        const correct = sAnswers.filter((a) => a.is_correct || (a.points_awarded && a.points_awarded > 0)).length;
+        const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+        return {
+          sessionId: p.session_id,
+          title: p.game_sessions?.title || "Phòng luyện tập",
+          score: p.score ?? 0,
+          gold: p.gold ?? 0,
+          monstersKilled: p.state?.monstersKilled ?? 0,
+          totalQuestions: total,
+          correctAnswers: correct,
+          accuracyPct: accuracy,
+          playedAt: p.updated_at || p.created_at,
+          kind: p.game_sessions?.kind || "solo",
+          status: p.game_sessions?.status || "closed",
+        };
+      });
 
       // Tìm phòng lớp đang mở
       const classOpen = playerSessions.find(
@@ -168,6 +229,8 @@ export default async function DashboardPage() {
         totalDefensePercent={totalDefensePercent}
         weaponAtk={weaponAtk}
         streakData={streakData}
+        classmates={classmates}
+        studentQuizHistory={studentQuizHistory}
       />
     </div>
   );

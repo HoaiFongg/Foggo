@@ -9,7 +9,7 @@ export const SURVIVAL_CONFIG = {
   MAX_HUNGER: 100,
   INITIAL_GOLD: 50,
   BASE_ATK: 12,
-  MAX_INVENTORY_SLOTS: 16,
+  MAX_INVENTORY_SLOTS: 30,
   MAX_STACK_SIZE: 20,
 
   // Quy tắc đói & mất máu

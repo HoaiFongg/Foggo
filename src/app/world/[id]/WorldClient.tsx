@@ -250,6 +250,22 @@ export function WorldClient({
     }
   }
 
+  // Bán vật phẩm trong túi đồ đổi lấy Xu
+  async function handleSellItem(slotIndex: number, e?: React.MouseEvent) {
+    if (e) e.stopPropagation();
+    const res = await performSurvivalItemAction({
+      sessionId,
+      action: "sell_item",
+      slotIndex,
+    });
+    if (res.state) {
+      handleUpdatePlayerState(res.state);
+      showToast(res.message);
+    } else {
+      alert(res.error || res.message);
+    }
+  }
+
   // Mua đồ Thợ rèn
   async function handleBlacksmith(action: "buy_gear" | "repair" | "enhance", itemId: string) {
     const res = await performSurvivalItemAction({
@@ -467,7 +483,7 @@ export function WorldClient({
             }`}
           >
             <Backpack className="w-3.5 h-3.5" />
-            <span>{t.battle.inventoryTab} ({playerState.inventory.length}/16)</span>
+            <span>{t.battle.inventoryTab} ({playerState.inventory.length}/30)</span>
           </button>
 
           <button
@@ -493,12 +509,12 @@ export function WorldClient({
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
-                  <span>{isEn ? "🌲 Deep Forest Zone (Forest)" : "🌲 Vùng Rừng Xanh (Forest)"}</span>
+                  <span>{isEn ? "🌲 Forest Practice Zone" : "🌲 Vùng Rừng Xanh"}</span>
                 </h2>
                 <p className="text-xs text-slate-400">
                   {isEn
-                    ? "Answer questions correctly to strike monsters with your sword. Defeat beasts to collect coins and meat!"
-                    : "Trả lời đúng câu hỏi để vung kiếm tấn công quái vật. Đánh bại quái để thu thập xu và thịt!"}
+                    ? "Practice answering questions to defeat target monsters and collect rewards."
+                    : "Luyện tập trả lời câu hỏi, chinh phục mục tiêu và tích lũy phần thưởng."}
                 </p>
               </div>
               {playerState.streak > 0 && (
@@ -516,16 +532,16 @@ export function WorldClient({
               <div>
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-mono text-[10px] font-bold uppercase tracking-wider">
-                    {isEn ? "Turn-based RPG Combat · Infinite Monster Waves" : "Săn Quái RPG Theo Lượt · Quái Xuất Hiện Bất Tận"}
+                    {isEn ? "Self-paced Practice · Continuous Questions" : "Luyện Tập Tự Do · Câu Hỏi Bất Tận"}
                   </span>
                 </div>
                 <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
-                  <span>{isEn ? "⚔️ Infinite Monster Arena" : "⚔️ Đấu Trường Săn Quái Bất Tận"}</span>
+                  <span>{isEn ? "⚔️ Continuous Practice Arena" : "⚔️ Sàn Đấu Luyện Tập Bất Tận"}</span>
                 </h3>
                 <p className="text-xs text-slate-300 max-w-xl leading-relaxed mt-1">
                   {isEn
-                    ? "Defeat one monster and the next spawns instantly! Characters strike when you answer correctly, monsters counterattack when wrong. You can flee (-15 HP & -50 rank score)."
-                    : "Đánh bại con này quái khác sẽ lập tức xuất hiện! Nhân vật lao lên chém khi bạn trả lời đúng, quái phản công khi sai. Có quyền rút lui (bị cào -15 HP & trừ 50 điểm rank)."}
+                    ? "Continuous question practice. Answer correctly to accumulate score and gold coins."
+                    : "Chế độ luyện tập liên tục. Trả lời đúng để tích lũy điểm và xu thưởng."}
                 </p>
               </div>
 
@@ -959,19 +975,19 @@ export function WorldClient({
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
-                  <span>{isEn ? `🎒 Survival Backpack (${playerState.inventory.length}/16 slots)` : `🎒 Túi Đồ Sinh Tồn (${playerState.inventory.length}/16 ô)`}</span>
+                  <span>{isEn ? `🎒 Survival Backpack (${playerState.inventory.length}/30 slots)` : `🎒 Túi Đồ Sinh Tồn (${playerState.inventory.length}/30 ô)`}</span>
                 </h2>
                 <p className="text-xs text-slate-400">
                   {isEn
-                    ? "Tap weapons/armor/helmets/shields to equip; tap food/potions to consume."
-                    : "Chạm vào vũ khí/giáp/mũ/khiên để trang bị, chạm thức ăn/bình máu để sử dụng ngay."}
+                    ? "Tap gear to equip, food to consume, or sell monster drops for coins."
+                    : "Chạm để trang bị/sử dụng hoặc nhấn 'Bán' để đổi chiến lợi phẩm săn quái lấy Xu!"}
                 </p>
               </div>
             </div>
 
-            {/* Lưới 16 ô ba lô */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-              {Array.from({ length: 16 }).map((_, idx) => {
+            {/* Lưới 30 ô ba lô */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-10 gap-2.5">
+              {Array.from({ length: 30 }).map((_, idx) => {
                 const slot = playerState.inventory.find((s) => s.slotIndex === idx);
                 const itemDef = slot ? getItemDef(slot.itemId) : null;
                 const locItem = itemDef ? localizeItemDef(itemDef, language) : null;
@@ -991,6 +1007,7 @@ export function WorldClient({
                   itemDef.category
                 );
                 const canEat = itemDef.category === "food" || itemDef.category === "consumable";
+                const totalSellPrice = (itemDef.sellPrice && itemDef.sellPrice > 0 ? itemDef.sellPrice : 1) * slot.qty;
 
                 return (
                   <div
@@ -999,7 +1016,7 @@ export function WorldClient({
                       if (isEquippable) handleEquipItem(slot.slotIndex);
                       else if (canEat) handleEatItem(itemDef.id);
                     }}
-                    className={`aspect-square p-2.5 rounded-2xl border flex flex-col justify-between transition-all select-none ${
+                    className={`aspect-square p-2 rounded-2xl border flex flex-col justify-between transition-all select-none ${
                       isEquippable
                         ? "bg-slate-900 border-amber-500/40 hover:border-amber-400 cursor-pointer shadow-md hover:scale-[1.02]"
                         : canEat
@@ -1015,7 +1032,7 @@ export function WorldClient({
                     }
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-lg">
+                      <span className="text-base sm:text-lg">
                         {itemDef.category === "food"
                           ? "🍖"
                           : itemDef.category === "weapon"
@@ -1030,26 +1047,36 @@ export function WorldClient({
                           ? "🧪"
                           : "🪵"}
                       </span>
-                      <span className="text-xs font-mono font-bold text-amber-300">
+                      <span className="text-[11px] font-mono font-bold text-amber-300">
                         x{slot.qty}
                       </span>
                     </div>
 
                     <div className="truncate">
-                      <span className="text-[11px] font-bold text-white block truncate">
+                      <span className="text-[10px] font-bold text-white block truncate">
                         {locItem?.name || itemDef.name}
                       </span>
                       {isEquippable && (
-                        <span className="text-[9px] font-mono font-bold text-amber-400 block">
+                        <span className="text-[8px] font-mono font-bold text-amber-400 block">
                           [{isEn ? "Equip" : "Trang bị"}]
                         </span>
                       )}
                       {canEat && (
-                        <span className="text-[9px] font-mono font-bold text-emerald-400 block">
+                        <span className="text-[8px] font-mono font-bold text-emerald-400 block">
                           [{isEn ? "Use" : "Dùng"}]
                         </span>
                       )}
                     </div>
+
+                    {/* Nút bán vật phẩm để đổi lấy Xu */}
+                    <button
+                      type="button"
+                      onClick={(e) => handleSellItem(slot.slotIndex, e)}
+                      className="w-full py-0.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/30 text-amber-300 border border-amber-500/25 text-[9px] font-mono font-bold flex items-center justify-center gap-0.5 cursor-pointer transition-colors active:scale-95"
+                      title={isEn ? `Sell for +${totalSellPrice} Coins` : `Bán lấy +${totalSellPrice} Xu`}
+                    >
+                      <span>Bán +{totalSellPrice}🪙</span>
+                    </button>
                   </div>
                 );
               })}

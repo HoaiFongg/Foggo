@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -16,6 +16,7 @@ import {
   HelpCircle,
   Clock,
   Sparkles,
+  AlertTriangle,
 } from "lucide-react";
 
 interface ReportClientProps {
@@ -65,27 +66,44 @@ export function ReportClient({
     };
   }, [players, answers]);
 
-  // Phân tích độ khó từng câu hỏi
+  const [sortMode, setSortMode] = useState<"wrong" | "index">("wrong");
+
+  // Phân tích độ khó và tỉ lệ làm sai từng câu hỏi
   const questionStats = useMemo(() => {
     const rawQuestions = session?.question_sets?.questions || [];
-    return rawQuestions.map((q: any, idx: number) => {
+    const list = rawQuestions.map((q: any, idx: number) => {
       const qAnswers = answers.filter((a) => a.question_id === q.id);
       const total = qAnswers.length;
       const correct = qAnswers.filter((a) => (a.score_ratio || 0) >= 0.5).length;
+      const wrong = total - correct;
       const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+      const wrongPct = total > 0 ? Math.round((wrong / total) * 100) : 0;
 
       return {
         id: q.id,
         index: idx + 1,
         type: q.type,
         prompt: q.content?.prompt || "Câu hỏi không có tiêu đề",
+        explanation: q.content?.explanation || null,
         totalAnswers: total,
         correctAnswers: correct,
+        wrongAnswers: wrong,
         accuracyPct: pct,
-        isHard: total >= 2 && pct < 50,
+        wrongPct: wrongPct,
+        isHard: total >= 1 && wrongPct >= 50,
       };
     });
-  }, [session, answers]);
+
+    if (sortMode === "wrong") {
+      return [...list].sort((a, b) => b.wrongPct - a.wrongPct || b.wrongAnswers - a.wrongAnswers);
+    }
+    return list;
+  }, [session, answers, sortMode]);
+
+  // Các câu có tỉ lệ sai nhiều nhất
+  const topWrongQuestions = useMemo(() => {
+    return questionStats.filter((q: any) => q.totalAnswers > 0 && q.wrongPct > 0).slice(0, 3);
+  }, [questionStats]);
 
   // Hàm xuất CSV
   function handleExportCsv() {
@@ -278,16 +296,70 @@ export function ReportClient({
           </div>
         </section>
 
-        {/* Phân tích độ khó câu hỏi (Hardest Questions) */}
+        {/* Phân tích độ khó & Tỉ lệ làm sai câu hỏi */}
         <section className="space-y-4">
-          <div>
-            <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
-              <span>Phân Tích Độ Khó Bộ Câu Hỏi ({questionStats.length} câu)</span>
-            </h2>
-            <p className="text-xs text-slate-400">
-              Tỉ lệ trả lời chính xác giúp giáo viên nhận biết phần kiến thức học sinh hay làm sai.
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-400" />
+                <span>Phân Tích Tỉ Lệ Làm Sai & Độ Khó ({questionStats.length} câu)</span>
+              </h2>
+              <p className="text-xs text-slate-400">
+                Thống kê chi tiết phần trăm làm sai của từng câu hỏi để hỗ trợ ôn tập trọng tâm.
+              </p>
+            </div>
+
+            {/* Bộ chuyển đổi sắp xếp */}
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 self-start sm:self-auto">
+              <button
+                type="button"
+                onClick={() => setSortMode("wrong")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                  sortMode === "wrong"
+                    ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                🔥 Sai nhiều nhất trước
+              </button>
+              <button
+                type="button"
+                onClick={() => setSortMode("index")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                  sortMode === "index"
+                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Theo thứ tự câu
+              </button>
+            </div>
           </div>
+
+          {/* Top câu hỏi sai nhiều nhất */}
+          {topWrongQuestions.length > 0 && (
+            <div className="p-4 rounded-2xl bg-rose-950/20 border border-rose-500/30">
+              <span className="text-xs font-mono font-bold text-rose-300 uppercase tracking-wider block mb-2">
+                ⚠️ Top câu hỏi học sinh làm sai nhiều nhất:
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {topWrongQuestions.map((tq: any) => (
+                  <div key={tq.id} className="p-2.5 rounded-xl bg-slate-950/80 border border-rose-500/30">
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span className="font-bold text-white">Câu {tq.index}</span>
+                      <span className="font-mono font-black text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded-full">
+                        {tq.wrongPct}% sai
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-300 line-clamp-1">{tq.prompt}</p>
+                    <span className="text-[10px] text-slate-500 font-mono mt-1 block">
+                      {tq.wrongAnswers}/{tq.totalAnswers} lượt trả lời sai
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {questionStats.map((q: any) => (
@@ -303,10 +375,16 @@ export function ReportClient({
                   <span className="text-xs font-mono font-bold text-amber-400">
                     Câu {q.index} · Dạng: {q.type}
                   </span>
-                  {q.isHard && (
-                    <span className="text-[10px] font-mono font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/30 uppercase">
-                      HỌC SINH HAY SAI
+                  {q.isHard ? (
+                    <span className="text-[10px] font-mono font-bold text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded-full border border-rose-500/40 uppercase">
+                      ⚠️ Tỉ lệ sai cao: {q.wrongPct}%
                     </span>
+                  ) : q.totalAnswers > 0 ? (
+                    <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                      Tỉ lệ sai: {q.wrongPct}%
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-mono text-slate-500">Chưa có lượt làm</span>
                   )}
                 </div>
 
@@ -314,33 +392,37 @@ export function ReportClient({
                   {q.prompt}
                 </p>
 
-                <div className="space-y-1.5 pt-2 border-t border-slate-800">
+                {q.explanation && (
+                  <p className="text-xs text-amber-300/90 bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl mb-3">
+                    💡 <strong>Giải thích:</strong> {q.explanation}
+                  </p>
+                )}
+
+                <div className="space-y-2 pt-2 border-t border-slate-800">
                   <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-slate-400">Tỉ lệ chính xác:</span>
-                    <span
-                      className={`font-black ${
-                        q.accuracyPct >= 70
-                          ? "text-emerald-400"
-                          : q.accuracyPct >= 50
-                          ? "text-amber-400"
-                          : "text-rose-400"
-                      }`}
-                    >
-                      {q.accuracyPct}% ({q.correctAnswers}/{q.totalAnswers} lượt)
+                    <span className="text-rose-400 font-bold">
+                      Tỉ lệ làm sai: {q.wrongPct}% ({q.wrongAnswers} lượt)
+                    </span>
+                    <span className="text-emerald-400 font-bold">
+                      Tỉ lệ đúng: {q.accuracyPct}% ({q.correctAnswers} lượt)
                     </span>
                   </div>
 
-                  <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                  {/* Thanh so sánh tỉ lệ đúng / sai */}
+                  <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden flex">
                     <div
-                      className={`h-full rounded-full transition-all duration-300 ${
-                        q.accuracyPct >= 70
-                          ? "bg-emerald-500"
-                          : q.accuracyPct >= 50
-                          ? "bg-amber-500"
-                          : "bg-rose-500"
-                      }`}
+                      className="h-full bg-emerald-500 transition-all duration-300"
                       style={{ width: `${q.accuracyPct}%` }}
+                      title={`Đúng: ${q.accuracyPct}%`}
                     />
+                    <div
+                      className="h-full bg-rose-500 transition-all duration-300"
+                      style={{ width: `${q.wrongPct}%` }}
+                      title={`Sai: ${q.wrongPct}%`}
+                    />
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-mono text-right">
+                    Tổng số lượt trả lời: {q.totalAnswers}
                   </div>
                 </div>
               </div>

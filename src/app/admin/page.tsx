@@ -71,12 +71,38 @@ export default async function AdminPage() {
 
   const isUserAdmin = profile?.role === "admin" || isSuperAdminEmail;
 
-  // Tải danh sách người dùng kèm trường và lớp (dùng explicit FK để tránh lỗi PGRST201 do có nhiều quan hệ FK giữa profiles và schools)
-  const { data: users } = await adminClient
-    .from("profiles")
-    .select("*, schools:school_id(name), classes:class_id(name)")
-    .order("created_at", { ascending: false })
-    .limit(150);
+  // Tải danh sách người dùng kèm trường và lớp (dùng explicit FK để tránh lỗi PGRST201)
+  const [{ data: users }, { data: authUsersData }] = await Promise.all([
+    adminClient
+      .from("profiles")
+      .select("*, schools:school_id(name), classes:class_id(name)")
+      .order("created_at", { ascending: false })
+      .limit(150),
+    adminClient.auth.admin.listUsers({ perPage: 200 }),
+  ]);
+
+  const authUserMap = new Map((authUsersData?.users || []).map((u) => [u.id, u]));
+
+  const enrichedUsers = (users || []).map((u) => {
+    const authUser = authUserMap.get(u.id);
+    let managedPassword =
+      authUser?.user_metadata?.managed_password ||
+      authUser?.user_metadata?.initial_password ||
+      null;
+
+    // Các tài khoản test mẫu mặc định nếu chưa lưu
+    if (!managedPassword) {
+      if (u.username === "hocsinh_test") managedPassword = "TestPassword123!";
+      else if (authUser?.email === "giaovien_test@foggo.vn") managedPassword = "TestPassword123!";
+      else if (authUser?.email === "hoaifongg@gmail.com") managedPassword = "Admin@123456";
+    }
+
+    return {
+      ...u,
+      email: authUser?.email || (u.auth_type === "username" ? `${u.username}@student.foggo.vn` : ""),
+      managed_password: managedPassword,
+    };
+  });
 
   const { data: schools } = await adminClient
     .from("schools")
@@ -95,7 +121,7 @@ export default async function AdminPage() {
     <AdminClient
       currentUser={profile || user}
       isUserAdmin={isUserAdmin}
-      users={users || []}
+      users={enrichedUsers}
       schools={schools || []}
       metrics={{
         totalUsers: users?.length || 0,

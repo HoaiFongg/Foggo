@@ -35,7 +35,7 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     maxCoins: 8,
     isBoss: false,
     avatar: "💧",
-    description: "Khối sinh vật nhầy nhụa chậm chạp trườn qua bụi cỏ, dễ đối phó nhất.",
+    description: "Mục tiêu sơ cấp - Thích hợp ôn tập kiến thức nền tảng.",
     lootTable: [
       { itemId: "slime_gel", chance: 0.7, minQty: 1, maxQty: 2 },
       { itemId: "herb", chance: 0.3, minQty: 1, maxQty: 1 },
@@ -51,7 +51,7 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     maxCoins: 9,
     isBoss: false,
     avatar: "🐺",
-    description: "Chú sói nhỏ nhanh nhẹn ẩn mình sau những lùm cây ven rừng.",
+    description: "Mục tiêu nhanh nhẹn - Thử thách phản xạ cơ bản.",
     lootTable: [
       { itemId: "raw_meat", chance: 0.6, minQty: 1, maxQty: 1 },
       { itemId: "leather", chance: 0.3, minQty: 1, maxQty: 1 },
@@ -67,7 +67,7 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     maxCoins: 12,
     isBoss: false,
     avatar: "🐺",
-    description: "Kẻ săn mồi nguy hiểm với đôi mắt rực sáng trong màn sương.",
+    description: "Mục tiêu tiêu chuẩn - Đòi hỏi độ chính xác ổn định.",
     lootTable: [
       { itemId: "raw_meat", chance: 0.8, minQty: 1, maxQty: 2 },
       { itemId: "leather", chance: 0.5, minQty: 1, maxQty: 1 },
@@ -83,7 +83,7 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     maxCoins: 12,
     isBoss: false,
     avatar: "🕷️",
-    description: "Loài nhện độc chăng tơ rình mồi trong bóng tối sương mờ.",
+    description: "Mục tiêu tầm trung - Đòi hỏi trả lời câu hỏi liên tục.",
     lootTable: [
       { itemId: "slime_gel", chance: 0.5, minQty: 1, maxQty: 2 },
       { itemId: "herb", chance: 0.4, minQty: 1, maxQty: 1 },
@@ -99,7 +99,7 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     maxCoins: 14,
     isBoss: false,
     avatar: "🐗",
-    description: "Sinh vật hung tợn thích húc ngã người lạ xâm nhập lãnh thổ.",
+    description: "Mục tiêu nâng cao - Lượng máu và sát thương lớn.",
     lootTable: [
       { itemId: "raw_meat", chance: 0.9, minQty: 1, maxQty: 2 },
       { itemId: "apple", chance: 0.4, minQty: 1, maxQty: 2 },
@@ -116,7 +116,7 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     maxCoins: 18,
     isBoss: false,
     avatar: "👺",
-    description: "Tên yêu tinh tinh quái thích cướp giật hành lý của người thám hiểm.",
+    description: "Mục tiêu cơ động - Thử thách độ chuẩn xác của câu trả lời.",
     lootTable: [
       { itemId: "wood", chance: 0.8, minQty: 2, maxQty: 4 },
       { itemId: "stone", chance: 0.6, minQty: 1, maxQty: 3 },
@@ -134,7 +134,7 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     isBoss: true,
     avatar: "👑🐗",
     phases: 2,
-    description: "Chúa tể Rừng Xanh sở hữu cặp ngà vàng khổng lồ và sức mạnh càn quét.",
+    description: "Thử thách trùm khu vực - Yêu cầu trả lời chuỗi câu hỏi chuẩn xác.",
     weakSpotDescription: "Lõi sương mù ở giữa trán",
     lootTable: [
       { itemId: "gold_tusk", chance: 1.0, minQty: 1, maxQty: 1 },

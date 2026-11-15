@@ -87,7 +87,7 @@ export const en: Translations = {
     soloFarmBtn: "Enter Hunting Ground Now",
     arenaTitle: "Classroom Arena",
     arenaBadge: "Class Arena",
-    arenaDesc: "Hosted live by your teachers. Compete with classmates to dispel fog and climb the leaderboard.",
+    arenaDesc: "Classroom learning arena hosted by your teacher.",
     arenaBtn: "Enter Classroom Arena",
     equipmentTitle: "Current Character Equipment",
     historyTitle: "Recent Adventure History",
@@ -95,7 +95,7 @@ export const en: Translations = {
     // Extended fields
     adminRole: "Administrator",
     teacherRole: "Teacher",
-    adminDesc: "Oversee all survival dungeons, question sets, and system user permissions.",
+    adminDesc: "System administration and user management.",
     teacherDesc: "Host survival dungeons and manage question sets for students.",
     openDungeonBtn: "Open Dungeon",
     createSetBtn: "Create Question Set",

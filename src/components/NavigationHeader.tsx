@@ -95,26 +95,6 @@ export function NavigationHeader({
               </Link>
             )}
 
-            {isAdmin && (
-              <Link
-                href="/admin?tab=students"
-                className="px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-900 transition-all shrink-0 font-mono text-xs border border-transparent"
-              >
-                <Users className="w-3.5 h-3.5 text-emerald-400" />
-                <span>{t.nav.students}</span>
-              </Link>
-            )}
-
-            {isAdmin && (
-              <Link
-                href="/admin?tab=teachers"
-                className="px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-900 transition-all shrink-0 font-mono text-xs border border-transparent"
-              >
-                <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
-                <span>{t.nav.teachers}</span>
-              </Link>
-            )}
-
             {isTeacherOrAdmin && (
               <Link
                 href="/explore"

@@ -17,6 +17,10 @@ import {
   PlusCircle,
   Home,
   Package,
+  XCircle,
+  Check,
+  ArrowRight,
+  BookOpen,
 } from "lucide-react";
 import { getScaledMonster, getRandomFarmMonster, MONSTER_REGISTRY, type MonsterDef } from "@/game-modes/survival/monsters";
 import { ITEM_REGISTRY } from "@/game-modes/survival/items";
@@ -87,6 +91,12 @@ export function MonsterBattleArena({
   const [showFleeConfirm, setShowFleeConfirm] = useState(false);
   const [isFleeing, setIsFleeing] = useState(false);
   const [healingLoading, setHealingLoading] = useState(false);
+  const [reviewData, setReviewData] = useState<{
+    isCorrect: boolean;
+    correctAnswerDisplay?: string;
+    explanation?: string | null;
+    message?: string;
+  } | null>(null);
 
   // Câu hỏi hiện tại
   const question = questions[currentQIndex % Math.max(1, questions.length)];
@@ -187,8 +197,9 @@ export function MonsterBattleArena({
       return;
     }
 
-    // 1. NẾU TRẢ LỜI ĐÚNG -> NHÂN VẬT LAO LÊN TẤN CÔNG QUÁI
+    // 1. NẾU TRẢ LỜI ĐÚNG -> NHÂN VẬT LAO LÊN TẤN CÔNG QUÁI (PHẢN HỒI NHANH 150MS)
     if (res.isCorrect) {
+      setReviewData(null);
       const damageDealt = res.huntResult?.damageDealt ?? 25;
       const isKill = res.huntResult?.result === "kill";
 
@@ -212,7 +223,7 @@ export function MonsterBattleArena({
 
         setTimeout(() => {
           setHeroAnim("idle");
-        }, 300);
+        }, 150);
 
         if (isKill || nextHp <= 0) {
           setTimeout(() => {
@@ -235,14 +246,14 @@ export function MonsterBattleArena({
               spawnNextMonster();
               onNextQuestion();
               setUserAnswer(null);
-            }, 1400);
-          }, 350);
+            }, 600);
+          }, 200);
         } else {
-          // QUÁI CÒN SỐNG -> PHẢN CÔNG
+          // QUÁI CÒN SỐNG -> PHẢN CÔNG NHANH
           setTimeout(() => {
             if (monsterDef.id === "slime") {
               setSlimeFrame(3);
-              setTimeout(() => setSlimeFrame(4), 100);
+              setTimeout(() => setSlimeFrame(4), 60);
             }
             setMonsterAnim("jump");
 
@@ -260,7 +271,7 @@ export function MonsterBattleArena({
                 setTimeout(() => {
                   setSlimeFrame(1);
                   setMonsterAnim("idle");
-                }, 200);
+                }, 100);
               } else {
                 setMonsterAnim("idle");
               }
@@ -270,18 +281,18 @@ export function MonsterBattleArena({
                 if (res.state) onStateUpdate(res.state);
                 onNextQuestion();
                 setUserAnswer(null);
-              }, 400);
-            }, 300);
-          }, 500);
+              }, 150);
+            }, 150);
+          }, 150);
         }
-      }, 350);
+      }, 150);
     } else {
-      // 2. TRẢ LỜI SAI -> QUÁI ĐÁNH TRẢ
+      // 2. TRẢ LỜI SAI -> QUÁI PHẢN CÔNG & LẬP TỨC HIỆN ĐÁP ÁN ĐÚNG ĐỂ HỌC SINH ÔN TẬP
       setBattleNotice(isEn ? `❌ Incorrect answer! ${monsterName} counterattacks!` : `❌ Trả lời chưa chính xác! ${monsterDef.name} phản công!`);
 
       if (monsterDef.id === "slime") {
         setSlimeFrame(3);
-        setTimeout(() => setSlimeFrame(4), 100);
+        setTimeout(() => setSlimeFrame(4), 60);
       }
       setMonsterAnim("jump");
 
@@ -299,7 +310,7 @@ export function MonsterBattleArena({
           setTimeout(() => {
             setSlimeFrame(1);
             setMonsterAnim("idle");
-          }, 200);
+          }, 100);
         } else {
           setMonsterAnim("idle");
         }
@@ -307,10 +318,16 @@ export function MonsterBattleArena({
         setTimeout(() => {
           setHeroAnim("idle");
           if (res.state) onStateUpdate(res.state);
-          onNextQuestion();
-          setUserAnswer(null);
-        }, 400);
-      }, 350);
+
+          // Cung cấp bảng ôn tập và hiển thị rõ ràng đáp án đúng cho học sinh
+          setReviewData({
+            isCorrect: false,
+            correctAnswerDisplay: (res as any).correctAnswerDisplay || "Xem lại bài giảng",
+            explanation: res.explanation || null,
+            message: res.message,
+          });
+        }, 150);
+      }, 150);
     }
   };
 
@@ -744,11 +761,58 @@ export function MonsterBattleArena({
       </div>
 
       {/* ============================================================== */}
-      {/* 3. BẢNG CÂU HỎI & NÚT TẤN CÔNG (DÀN TRẢI ĐỀU, KHÔNG CẦN CUỘN) */}
+      {/* 3. BẢNG CÂU HỎI & NÚT TẤN CÔNG HOẶC BẢNG ĐÁP ÁN ĐÚNG           */}
       {/* ============================================================== */}
-      <div className="flex-1 min-h-0 w-full bg-slate-900/95 border-t border-slate-800 flex flex-col justify-between p-2 sm:p-3.5 overflow-hidden shadow-2xl">
+      <div className="flex-1 min-h-0 w-full bg-slate-900/95 border-t border-slate-800 flex flex-col justify-between p-2 sm:p-3.5 shadow-2xl">
         <div className="flex-1 min-h-0 overflow-y-auto max-w-5xl xl:max-w-6xl mx-auto w-full flex flex-col justify-center px-1">
-          {PlayerComponent && localizedQuestion ? (
+          {reviewData ? (
+            /* BẢNG XEM LẠI ĐÁP ÁN ĐÚNG CHO HỌC SINH */
+            <div className="w-full max-w-2xl mx-auto p-4 sm:p-5 rounded-3xl bg-slate-950 border-2 border-rose-500/50 shadow-2xl space-y-3.5 animate-in fade-in zoom-in-95 my-auto">
+              <div className="flex items-center gap-2.5 text-rose-400 font-mono font-bold text-xs sm:text-sm">
+                <XCircle className="w-5 h-5 shrink-0 text-rose-500" />
+                <span>
+                  {isEn
+                    ? "Incorrect Answer — Review & Learn:"
+                    : "Câu trả lời chưa chính xác — Hãy xem lại để học đáp án đúng:"}
+                </span>
+              </div>
+
+              {/* Ô hiển thị đáp án đúng */}
+              <div className="p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/40">
+                <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400 mb-1 flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5" />
+                  <span>{isEn ? "Correct Answer:" : "Đáp án đúng:"}</span>
+                </p>
+                <p className="text-xs sm:text-sm md:text-base font-bold text-emerald-200">
+                  {reviewData.correctAnswerDisplay}
+                </p>
+              </div>
+
+              {/* Lời giải thích nếu có */}
+              {reviewData.explanation && (
+                <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-xs text-slate-300 leading-relaxed">
+                  <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 mb-0.5">
+                    {isEn ? "💡 Explanation:" : "💡 Lời giải thích:"}
+                  </p>
+                  <p>{reviewData.explanation}</p>
+                </div>
+              )}
+
+              {/* Nút tiếp tục sang câu tiếp theo */}
+              <button
+                type="button"
+                onClick={() => {
+                  setReviewData(null);
+                  onNextQuestion();
+                  setUserAnswer(null);
+                }}
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black font-mono text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
+              >
+                <span>{isEn ? "Continue Battle ➔" : "Đã hiểu, Tiếp tục chiến đấu ➔"}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          ) : PlayerComponent && localizedQuestion ? (
             <PlayerComponent
               content={localizedQuestion.content}
               value={userAnswer}
@@ -760,30 +824,32 @@ export function MonsterBattleArena({
           )}
         </div>
 
-        {/* Nút hành động Tấn Công */}
-        <button
-          type="button"
-          disabled={userAnswer === null || submitting || monsterAnim === "dead" || isOutOfHp}
-          onClick={handleAttack}
-          className="mt-1.5 sm:mt-2 w-full max-w-5xl xl:max-w-6xl mx-auto py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black font-mono text-xs sm:text-sm transition-all shadow-lg active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer shrink-0"
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>{t.battle.attackingBtn}</span>
-            </>
-          ) : isOutOfHp ? (
-            <>
-              <Heart className="w-4 h-4 text-rose-500" />
-              <span>{t.battle.outOfHpWarning}</span>
-            </>
-          ) : (
-            <>
-              <Swords className="w-4 h-4" />
-              <span>{t.battle.attackBtn}</span>
-            </>
-          )}
-        </button>
+        {/* Nút hành động Tấn Công (chỉ hiển thị khi đang làm bài) */}
+        {!reviewData && (
+          <button
+            type="button"
+            disabled={userAnswer === null || submitting || monsterAnim === "dead" || isOutOfHp}
+            onClick={handleAttack}
+            className="mt-1.5 sm:mt-2 w-full max-w-5xl xl:max-w-6xl mx-auto py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black font-mono text-xs sm:text-sm transition-all shadow-lg active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer shrink-0"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>{t.battle.attackingBtn}</span>
+              </>
+            ) : isOutOfHp ? (
+              <>
+                <Heart className="w-4 h-4 text-rose-500" />
+                <span>{t.battle.outOfHpWarning}</span>
+              </>
+            ) : (
+              <>
+                <Swords className="w-4 h-4" />
+                <span>{t.battle.attackBtn}</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );

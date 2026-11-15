@@ -13,10 +13,12 @@ import {
   applyNightDefense,
   applyRevive,
   applyFlee,
+  applySellItem,
   addItemToInventory,
   removeItemFromInventory,
   countItemInInventory,
 } from "../engine";
+import { SURVIVAL_CONFIG } from "../config";
 
 describe("Survival Game Engine Unit Tests", () => {
   describe("Clock & Day/Night Cycle", () => {
@@ -59,6 +61,35 @@ describe("Survival Game Engine Unit Tests", () => {
       const res = removeItemFromInventory(inv, "wood", 4);
       assert.equal(res.success, true);
       assert.equal(countItemInInventory(res.inventory, "wood"), 6);
+    });
+
+    test("giới hạn kho đồ mở rộng lên 30 ô", () => {
+      assert.equal(SURVIVAL_CONFIG.MAX_INVENTORY_SLOTS, 30);
+    });
+
+    test("bán vật phẩm thu được từ quái để nhận lại xu", () => {
+      const state = initSurvivalState(1000);
+      state.coins = 10;
+      state.inventory = [
+        { slotIndex: 0, itemId: "slime_gel", qty: 3 }, // slime_gel sellPrice = 4
+        { slotIndex: 1, itemId: "raw_meat", qty: 2 },  // raw_meat sellPrice = 4
+      ];
+
+      // Bán 1 cục slime_gel (1 * 4 = 4 xu)
+      const res1 = applySellItem(state, 0, 1);
+      assert.equal(res1.success, true);
+      assert.equal(res1.coinsEarned, 4);
+      assert.equal(res1.state.coins, 14);
+      assert.equal(res1.state.inventory[0].qty, 2);
+
+      // Bán toàn bộ 2 cục thịt sống (2 * 4 = 8 xu)
+      const res2 = applySellItem(res1.state, 1, 2);
+      assert.equal(res2.success, true);
+      assert.equal(res2.coinsEarned, 8);
+      assert.equal(res2.state.coins, 22);
+      // Slot 1 đã bán hết -> xóa khỏi inventory
+      assert.equal(res2.state.inventory.length, 1);
+      assert.equal(res2.state.inventory[0].itemId, "slime_gel");
     });
   });
 

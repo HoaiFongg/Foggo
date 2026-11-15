@@ -87,7 +87,7 @@ export const vi: Translations = {
     soloFarmBtn: "Vào Bãi Farm Quái Ngay",
     arenaTitle: "Hầm Ngục Lớp Học",
     arenaBadge: "Đấu Trường Trên Lớp",
-    arenaDesc: "Hầm ngục do thầy cô mở. Cùng các bạn trong lớp thi đua xua tan sương mù và leo bảng xếp hạng.",
+    arenaDesc: "Đấu trường học tập do giáo viên tổ chức cho lớp học.",
     arenaBtn: "Tham Gia Đấu Trường",
     equipmentTitle: "Trang Bị Nhân Vật Hiện Tại",
     historyTitle: "Các Chuyến Thám Hiểm Gần Đây",
@@ -95,7 +95,7 @@ export const vi: Translations = {
     // Extended fields
     adminRole: "Quản trị viên",
     teacherRole: "Giáo viên",
-    adminDesc: "Quản trị toàn bộ hầm ngục sinh tồn, bộ câu hỏi và người dùng hệ thống.",
+    adminDesc: "Quản trị người dùng và cấu hình hệ thống.",
     teacherDesc: "Khởi tạo hầm ngục sinh tồn và quản lý ngân hàng câu hỏi cho học sinh.",
     openDungeonBtn: "Mở hầm ngục",
     createSetBtn: "Tạo bộ câu hỏi",

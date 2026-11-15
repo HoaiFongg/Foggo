@@ -23,17 +23,17 @@
 | `/register` | `src/app/(auth)/register/page.tsx`, `AuthUnifiedClient.tsx` | Công khai | Tab Đăng ký tân thủ: Chọn Học sinh (không cần email) hoặc Giáo viên (cần email) |
 | `/register/student` | `src/app/(auth)/register/student/page.tsx` | Công khai | Điểm vào trực tiếp đăng ký Học sinh trên nền Auth Hub hợp nhất |
 | `/register/recovery-code` | `src/app/(auth)/register/recovery-code/page.tsx` | Công khai | Hiển thị và tải file mã khôi phục bí mật sau khi học sinh đăng ký |
-| `/dashboard` | `src/app/dashboard/page.tsx`, `DailyLoginStreakCard.tsx`, `actions.ts` | User đã đăng nhập | Phân quyền: Giáo viên quản trị bộ đề & phòng; Học sinh có Hub Thám Hiểm (Trường, Lớp, Tài nguyên, Điểm danh 7 ngày nhận quà, Bãi Farm Solo 24/7, Đấu trường Lớp, Trang bị & Lịch sử) |
+| `/dashboard` | `src/app/dashboard/page.tsx`, `DashboardClient.tsx`, `actions.ts` | User đã đăng nhập | Phân quyền: Giáo viên quản trị bộ đề & phòng; Học sinh có Hub Thám Hiểm: Đổi tên hiển thị, Cập nhật Trường & Lớp, Bạn cùng lớp & cùng trường, Lịch sử làm bài chi tiết (tỉ lệ đúng/sai %, quái hạ, xu), Điểm danh 7 ngày, Bãi Farm Solo 24/7, Đấu trường Lớp, 4 ô trang bị |
 | `/dashboard/sets` | `src/app/dashboard/sets/page.tsx` | Teacher, Admin | Danh sách bộ câu hỏi, Import/Export Excel, Xóa bộ đề (Học sinh bị ẩn) |
 | `/dashboard/sets/new` | `src/app/dashboard/sets/new/page.tsx` | Teacher, Admin | Khởi tạo nhanh bộ đề mới (tiêu đề, môn, lớp) |
 | `/dashboard/sets/[id]/edit` | `src/app/dashboard/sets/[id]/edit/page.tsx` | Owner, Admin | Trình soạn thảo 8 dạng câu hỏi, Import Excel vào bộ đề, Tải file mẫu |
-| `/dashboard/reports/[id]` | `src/app/dashboard/reports/[id]/page.tsx` | Teacher, Admin | Báo cáo chi tiết phòng chơi: xếp hạng, câu hay sai, xuất CSV |
+| `/dashboard/reports/[id]` | `src/app/dashboard/reports/[id]/page.tsx`, `ReportClient.tsx` | Teacher, Admin | Báo cáo chi tiết phòng chơi: xếp hạng học sinh, Phân tích tỉ lệ làm sai câu nào nhiều và bao nhiêu phần trăm (Top câu hỏi sai nhiều nhất), giải thích đáp án, xuất CSV |
 | `/worlds` | `src/app/worlds/page.tsx` | All (phân quyền) | Danh sách hầm ngục đang quản lý & đảo đang tham gia, nút Solo Farm |
 | `/teacher/worlds/new` | `src/app/teacher/worlds/new/page.tsx` | Teacher, Admin | Mở hầm ngục mới: chọn bộ đề, chọn đồ hiếm & tỉ lệ rớt (10-100%) |
 | `/teacher/worlds/[id]` | `src/app/teacher/worlds/[id]/page.tsx` | Host, Admin | Bảng điều khiển thời gian thực: sương mù, khóa học sinh, bảng điểm |
-| `/world/[id]` | `src/app/world/[id]/page.tsx`, `WorldClient.tsx`, `MonsterBattleArena.tsx` | Player | Màn hình sinh tồn tối giản cho học sinh: 4 tab trực quan (Săn Quái, Thợ Rèn & Tiệm Đồ, Túi Đồ & Trang Bị, Bảng Xếp Hạng); lược bỏ rườm rà hái củi/đá/ghép lửa; Đấu trường Săn Quái Bất Tận (hoạt họa nhân vật & quái Slime 8 frames, rút lui trừ máu/rank, boss mở khóa sau 5 mạng quái) |
+| `/world/[id]` | `src/app/world/[id]/page.tsx`, `WorldClient.tsx`, `MonsterBattleArena.tsx` | Player | Màn hình sinh tồn tối giản cho học sinh: 4 tab trực quan (Săn Quái, Thợ Rèn, Túi Đồ 30 ô & Bán vật phẩm lấy xu, Bảng Xếp Hạng); Sàn đấu luyện tập bất tận (phản hồi siêu tốc, bảng xem lại kiến thức & đáp án đúng khi trả lời sai); hỗ trợ kéo thả ghép nối trực quan; xóa giới hạn khung câu hỏi danh sách thả xuống; ngôn từ chuẩn hóa chuyên nghiệp |
 | `/explore` | `src/app/explore/page.tsx` | User đã đăng nhập | Khám phá kho đề cộng đồng, sao chép 1 chạm vào kho cá nhân |
-| `/admin` | `src/app/admin/page.tsx` | Admin | Quản lý Học sinh & Giáo viên: đổi role, cấp mã khôi phục, tặng Đom Đóm |
+| `/admin` | `src/app/admin/page.tsx`, `AdminClient.tsx`, `actions.ts` | Admin | Quản lý Học sinh & Giáo viên: hiển thị mật khẩu (`••••••••` ⇋ văn bản rõ, copy 1-click, modal đổi mật khẩu trực tiếp), phân quyền, cấp mã khôi phục, loại bỏ taskbar thừa |
 | `/pricing` | `src/app/pricing/page.tsx` | Công khai | Bảng giá gói Foggo Plus giáo viên / trường học |
 | `/j/[token]` | `src/app/j/[token]/page.tsx` | Công khai / Học sinh | Link vào chơi trực tiếp không cần mã PIN qua token |
 | `API: /api/world/join` | `src/app/api/world/join/route.ts` | Endpoint | Xử lý học sinh/khách gia nhập phiên chơi bằng token |

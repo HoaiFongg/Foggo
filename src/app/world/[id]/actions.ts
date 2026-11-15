@@ -17,9 +17,11 @@ import {
   applyNightDefense,
   applyRevive,
   applyFlee,
+  applySellItem,
   type SurvivalPlayerState,
 } from "@/game-modes/survival/engine";
 import { SURVIVAL_CONFIG } from "@/game-modes/survival/config";
+import { formatCorrectAnswerForReview } from "@/question-types/format-answer";
 
 /**
  * Trả lời câu hỏi và thực hiện hành động sinh tồn
@@ -51,34 +53,43 @@ export async function submitSurvivalAction({
     return { error: "Phiên đăng nhập đã hết hạn" };
   }
 
-  // 1. Tải câu hỏi từ database (đáp án đúng answer_key CHỈ nằm ở server)
   const adminClient = createAdminClient();
-  const { data: question } = await adminClient
-    .from("questions")
-    .select("id, type, answer_key, points, explanation")
-    .eq("id", questionId)
-    .single();
+
+  // Tải đồng thời câu hỏi và nhân vật để tối ưu tốc độ phản hồi cực nhanh
+  const [qResult, playerResult] = await Promise.all([
+    adminClient
+      .from("questions")
+      .select("id, type, content, answer_key, points, explanation")
+      .eq("id", questionId)
+      .single(),
+    supabase
+      .from("session_players")
+      .select("*")
+      .eq("session_id", sessionId)
+      .eq("user_id", user.id)
+      .single(),
+  ]);
+
+  const question = qResult.data;
+  const player = playerResult.data;
 
   if (!question) {
     return { error: "Không tìm thấy câu hỏi" };
+  }
+
+  if (!player) {
+    return { error: "Không tìm thấy nhân vật trong thế giới này" };
   }
 
   // 2. Chấm điểm server-side
   const scoreRatio = gradeQuestion(question.type, answer, question.answer_key);
   const isSuccess = scoreRatio >= 0.5;
   const pointsAwarded = Math.round(question.points * scoreRatio);
-
-  // 3. Tải nhân vật của người chơi trong thế giới này
-  const { data: player } = await supabase
-    .from("session_players")
-    .select("*")
-    .eq("session_id", sessionId)
-    .eq("user_id", user.id)
-    .single();
-
-  if (!player) {
-    return { error: "Không tìm thấy nhân vật trong thế giới này" };
-  }
+  const correctAnswerDisplay = formatCorrectAnswerForReview(
+    question.type,
+    question.content,
+    question.answer_key
+  );
 
   const nowSec = Math.floor(Date.now() / 1000);
   const rawCoins = Number.isFinite(player.state?.coins)
@@ -144,43 +155,41 @@ export async function submitSurvivalAction({
     message = defendResult.message;
   }
 
-  // 4. Lưu lượt trả lời vào session_answers bằng adminClient
-  await adminClient.from("session_answers").upsert(
-    {
+  // 4, 5, 6: Thực hiện đồng thời lưu kết quả vào CSDL để tăng tốc độ phản hồi tối đa
+  await Promise.all([
+    adminClient.from("session_answers").upsert(
+      {
+        session_id: sessionId,
+        player_id: player.id,
+        question_id: question.id,
+        answer,
+        score_ratio: scoreRatio,
+        points_awarded: pointsAwarded,
+      },
+      { onConflict: "player_id,question_id" }
+    ),
+    adminClient
+      .from("session_players")
+      .update({
+        score: Number.isFinite(state.score) ? state.score : 0,
+        gold: Number.isFinite(state.coins) ? state.coins : 0,
+        state,
+        state_version: (player.state_version || 0) + 1,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", player.id),
+    adminClient.from("survival_events").insert({
       session_id: sessionId,
       player_id: player.id,
-      question_id: question.id,
-      answer,
-      score_ratio: scoreRatio,
-      points_awarded: pointsAwarded,
-    },
-    { onConflict: "player_id,question_id" }
-  );
-
-  // 5. Cập nhật nhân vật session_players
-  await adminClient
-    .from("session_players")
-    .update({
-      score: Number.isFinite(state.score) ? state.score : 0,
-      gold: Number.isFinite(state.coins) ? state.coins : 0,
-      state,
-      state_version: (player.state_version || 0) + 1,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", player.id);
-
-  // 6. Ghi nhật ký survival_events
-  await adminClient.from("survival_events").insert({
-    session_id: sessionId,
-    player_id: player.id,
-    type: actionType,
-    payload: {
-      targetId,
-      scoreRatio,
-      isSuccess,
-      message,
-    },
-  });
+      type: actionType,
+      payload: {
+        targetId,
+        scoreRatio,
+        isSuccess,
+        message,
+      },
+    }),
+  ]);
 
   return {
     success: true,
@@ -189,6 +198,7 @@ export async function submitSurvivalAction({
     message,
     state,
     explanation: question.explanation,
+    correctAnswerDisplay,
     huntResult,
     gatherResult,
     exploreResult,
@@ -198,18 +208,20 @@ export async function submitSurvivalAction({
 }
 
 /**
- * Hành động tiêu thụ / mua đồ không cần câu hỏi (Ăn, Thợ rèn, Hồi sinh)
+ * Hành động tiêu thụ / mua đồ không cần câu hỏi (Ăn, Thợ rèn, Hồi sinh, Bán đồ)
  */
 export async function performSurvivalItemAction({
   sessionId,
   action,
   itemId,
   slotIndex,
+  sellQty,
 }: {
   sessionId: string;
-  action: "eat" | "buy_gear" | "repair" | "enhance" | "revive" | "equip";
+  action: "eat" | "buy_gear" | "repair" | "enhance" | "revive" | "equip" | "sell_item";
   itemId?: string;
   slotIndex?: number;
+  sellQty?: number;
 }) {
   const supabase = await createClient();
   const {
@@ -262,6 +274,10 @@ export async function performSurvivalItemAction({
   } else if (action === "revive") {
     state = applyRevive(state);
     message = "Bạn đã hồi sinh tại đống lửa trại an toàn!";
+  } else if (action === "sell_item" && typeof slotIndex === "number") {
+    const res = applySellItem(state, slotIndex, sellQty);
+    state = res.state;
+    message = res.message;
   } else if (["buy_gear", "repair", "enhance"].includes(action) && itemId) {
     const res = applyBlacksmith(state, action as any, itemId);
     state = res.state;

@@ -145,39 +145,39 @@ export const ITEM_TRANSLATIONS_EN: Record<string, TranslatedEntity> = {
 export const MONSTER_TRANSLATIONS_EN: Record<string, TranslatedEntity> = {
   slime: {
     name: "Forest Slime",
-    description: "A slow, gelatinous creature crawling through bushes, easiest to face.",
+    description: "Beginner target - Ideal for foundational knowledge review.",
   },
   baby_wolf: {
     name: "Mist Wolf Pup",
-    description: "A nimble young wolf hiding behind bushes along the forest edge.",
+    description: "Agile target - Basic reaction and review challenge.",
   },
   wolf: {
     name: "Deep Forest Wolf",
-    description: "A dangerous predator with glowing eyes hidden inside the mist.",
+    description: "Standard target - Requires consistent accuracy.",
   },
   mist_spider: {
     name: "Poisonous Mist Spider",
-    description: "A venomous spider weaving webs in the dim, misty shadows.",
+    description: "Mid-tier target - Tests continuous correct answers.",
   },
   wild_boar: {
     name: "Tusked Wild Boar",
-    description: "A ferocious beast that violently charges at strangers entering its territory.",
+    description: "Advanced target - High endurance and damage.",
   },
   forest_goblin: {
     name: "Forest Goblin",
-    description: "A nimble goblin lurking behind ancient trees with poisoned daggers.",
+    description: "Mobile target - Challenges answer precision.",
   },
   boar_king: {
     name: "King Boar",
-    description: "Ruler of the Green Forest boasting massive golden tusks and destructive charge power.",
+    description: "Regional Boss - Requires a solid answer streak to defeat.",
   },
   skeleton: {
     name: "Shadow Skeleton",
-    description: "Ancient warriors reanimated under the night mist.",
+    description: "Underground target - Ancient trial challenge.",
   },
   stone_gargoyle: {
     name: "Stone Gargoyle",
-    description: "A petrified stone gargoyle awakened by ancient magic.",
+    description: "Fortified target - Heavy defense challenge.",
   },
 };
 
