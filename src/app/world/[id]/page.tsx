@@ -43,6 +43,25 @@ export default async function WorldPage({ params }: WorldPageProps) {
     redirect(`/j/${session.join_token}`);
   }
 
+  // 3.1. Đảm bảo an toàn sinh tồn cho nhân vật (tránh trường hợp session cũ bị kẹt ngày hoặc ngất)
+  const nowSec = Math.floor(Date.now() / 1000);
+  const rawState = player.state && typeof player.state === "object" ? player.state : {};
+  if (
+    (rawState.playSec && rawState.playSec > 480) ||
+    (rawState.hp !== undefined && rawState.hp <= 0) ||
+    !rawState.lastTickTimestamp
+  ) {
+    const safeState = {
+      ...rawState,
+      playSec: Math.min(rawState.playSec || 0, 480),
+      hp: Math.max(rawState.hp || 0, 100),
+      hunger: Math.max(rawState.hunger || 0, 100),
+      lastTickTimestamp: nowSec,
+    };
+    player.state = safeState;
+    player.hp = safeState.hp;
+  }
+
   if (player.banned) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center px-4 text-center">

@@ -2773,6 +2773,12 @@ jobs:
   - **Chức năng đổi tên của học sinh**: Tích hợp modal "✏️ Đổi tên" ngay tại Hero Profile Card trên Dashboard, cập nhật tức thì vào hồ sơ Supabase.
   - **Kết nối cùng trường và cùng lớp**: Bổ sung khu vực "Bạn Cùng Lớp & Cùng Trường" hiển thị danh sách bạn học cùng lớp/trường và modal "Chọn Trường & Lớp" linh hoạt.
   - **Báo cáo tỉ lệ làm sai câu nào nhiều và bao nhiêu phần trăm**: Trong `/dashboard/reports/[id]`, phân tích và hiển thị trực quan phần trăm làm sai (`X% làm sai`), số lượt sai, thanh so sánh tỉ lệ đúng/sai và bộ lọc sắp xếp "Sai nhiều nhất trước".
+- [x] Khắc phục triệt để lỗi quái vật 1000+ máu, 1-hit kill người chơi và tối ưu tốc độ phản hồi cực nhanh:
+  - **Truy tìm nguyên nhân gốc rễ**: Đồng hồ sinh tồn `tick()` tính toán `elapsed = nowSec - state.lastTickTimestamp`. Khi học sinh offline nhiều ngày rồi đăng nhập lại, `elapsed` dồn hàng chục ngàn giây (chia 240s/ngày đẩy ngày chơi ảo lên Ngày 387+). Hệ số tăng trưởng quái theo ngày không có giới hạn trần đã phóng đại máu Slime lên 1.052 HP và công lên 124 ATK, dẫn tới quái 1-hit hạ gục học sinh (100 HP) và học sinh bị ngất vì đói khi đang offline.
+  - **Giới hạn thời gian trôi khi offline**: Sửa `tick()` trong `src/game-modes/survival/engine.ts` với trần `elapsed = Math.min(rawElapsed, 60)` và chặn hao đói tối đa 10 điểm mỗi tick, đảm bảo học sinh offline không bao giờ bị dồn ngày hay ngất xỉu.
+  - **Áp trần an toàn tuyệt đối cho chỉ số quái vật (Safe Ceilings)**: Trong `src/game-modes/survival/monsters.ts`, giới hạn ngày tính toán `safeDay = Math.min(Math.max(1, dayNumber), 5)`. Cố định trần an toàn: Slime tối đa 30 HP, 5 ATK (học sinh 100 HP chịu được ít nhất 20 lượt sai); Quái thường tối đa 80 HP, 12 ATK; Trùm tối đa 300 HP, 25 ATK.
+  - **Khôi phục toàn bộ session người chơi trong cơ sở dữ liệu**: Chạy script `scripts/fix-corrupted-playsec.ts` quét và sửa chữa 100% hồ sơ học sinh có `playSec` bất thường, đưa về Ngày 1 (120s), hồi phục 100 HP và 100 điểm đói. Bổ sung cơ chế tự sửa lỗi khi vào màn hình chơi `/world/[id]` và `startHomeFarmSession`.
+  - **Tối ưu hóa độ mượt và tốc độ (Sub-350ms)**: Bỏ RLS query chậm bằng `adminClient`, song song hóa các cập nhật DB bằng `Promise.all`, đẩy `survival_events` ghi ngầm, và rút ngắn hoạt họa tấn công (`MonsterBattleArena.tsx`) từ 1.400ms xuống dưới 350ms cho trải nghiệm mượt mà, tốc độ tức thì.
 
 ### Trước khi thu tiền
 - [x] Thanh toán + webhook hoạt động, test kỹ

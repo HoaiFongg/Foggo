@@ -222,7 +222,10 @@ export function getScaledMonster(
   isNight: boolean = false
 ): MonsterDef & { hp: number; atk: number } {
   const base = MONSTER_REGISTRY[monsterId] || MONSTER_REGISTRY.slime;
-  const dayFactor = Math.max(0, dayNumber - 1);
+
+  // Giới hạn ngày tối đa là 5 (+40% HP/ATK) để đảm bảo game luôn cân bằng và thân thiện cho học sinh
+  const safeDay = Math.min(Math.max(1, dayNumber), 5);
+  const dayFactor = safeDay - 1;
 
   const hpScale = 1 + dayFactor * SURVIVAL_CONFIG.MONSTER_HP_GROWTH_PER_DAY;
   const atkScale = 1 + dayFactor * SURVIVAL_CONFIG.MONSTER_ATK_GROWTH_PER_DAY;
@@ -232,6 +235,22 @@ export function getScaledMonster(
 
   if (isNight) {
     scaledAtk = Math.round(scaledAtk * (1 + SURVIVAL_CONFIG.NIGHT_MONSTER_BUFF_RATIO));
+  }
+
+  // GIỚI HẠN TRẦN TUYỆT ĐỐI (SAFE CEILING) ĐỂ KHÔNG BAO GIỜ BỊ 1000 MÁU HAY 1 HIT CHẾT NGƯỜI CHƠI:
+  if (!base.isBoss) {
+    // Quái thường: Slime tối đa 30 máu, các quái rừng khác tối đa 80 máu
+    if (base.id === "slime") {
+      scaledHp = Math.min(scaledHp, 30);
+      scaledAtk = Math.min(scaledAtk, 5); // Tối đa 5 sát thương (người chơi 100 máu sống sót ít nhất 20 lượt sai)
+    } else {
+      scaledHp = Math.min(scaledHp, 80);
+      scaledAtk = Math.min(scaledAtk, 12); // Tối đa 12 sát thương
+    }
+  } else {
+    // Trùm khu vực: tối đa 300 máu, công tối đa 25
+    scaledHp = Math.min(scaledHp, 300);
+    scaledAtk = Math.min(scaledAtk, 25);
   }
 
   return {

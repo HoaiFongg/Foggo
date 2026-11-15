@@ -83,6 +83,30 @@ export async function startHomeFarmSession(): Promise<void> {
     (existingPlayer.game_sessions as any)?.kind === "solo" &&
     (existingPlayer.game_sessions as any)?.status === "open"
   ) {
+    // Làm mới lastTickTimestamp và giữ chỉ số sinh tồn an toàn cho học sinh khi đăng nhập lại
+    const nowSec = Math.floor(Date.now() / 1000);
+    const { data: pRec } = await adminClient
+      .from("session_players")
+      .select("state, hp")
+      .eq("session_id", existingPlayer.session_id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (pRec?.state) {
+      const fixedState = {
+        ...pRec.state,
+        lastTickTimestamp: nowSec,
+        playSec: Math.min(pRec.state.playSec || 0, 480), // Giữ chu kỳ ngày đêm ở mức cân bằng ban đầu (Ngày 1-2)
+        hp: Math.max(pRec.state.hp || 0, 100),
+        hunger: Math.max(pRec.state.hunger || 0, 100),
+      };
+      await adminClient
+        .from("session_players")
+        .update({ state: fixedState, hp: 100 })
+        .eq("session_id", existingPlayer.session_id)
+        .eq("user_id", user.id);
+    }
+
     redirect(`/world/${existingPlayer.session_id}`);
   }
 

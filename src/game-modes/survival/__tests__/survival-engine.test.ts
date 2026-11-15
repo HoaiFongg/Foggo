@@ -19,6 +19,7 @@ import {
   countItemInInventory,
 } from "../engine";
 import { SURVIVAL_CONFIG } from "../config";
+import { getScaledMonster } from "../monsters";
 
 describe("Survival Game Engine Unit Tests", () => {
   describe("Clock & Day/Night Cycle", () => {
@@ -107,6 +108,33 @@ describe("Survival Game Engine Unit Tests", () => {
       state.hunger = 0;
       const next = tick(state, 1040); // 40 giây khi đói = 0 -> mất 10 HP (4s/HP)
       assert.equal(next.hp, 90);
+    });
+
+    test("chống lỗi offline: học sinh nghỉ nhiều ngày không bị dồn hàng trăm ngày và không chết đói", () => {
+      const state = initSurvivalState(1000);
+      // Học sinh tắt máy 3 ngày = 259,200 giây
+      const next = tick(state, 1000 + 259200);
+      // Thời gian trôi qua chỉ tính tối đa 60s
+      assert.equal(next.playSec, 60);
+      assert.equal(next.hunger, 90);
+      assert.equal(next.hp, 100);
+    });
+  });
+
+  describe("Monster Balance & Safe Ceilings", () => {
+    test("quái vật không bao giờ vượt trần 1000 máu hay 1-hit kill học sinh dù ở Ngày 500", () => {
+      // Ngày 500 vào ban đêm
+      const slime = getScaledMonster("slime", 500, true);
+      assert.ok(slime.hp <= 30, `Slime HP phải <= 30, thực tế: ${slime.hp}`);
+      assert.ok(slime.atk <= 5, `Slime ATK phải <= 5, thực tế: ${slime.atk}`);
+
+      const wolf = getScaledMonster("wolf", 999, true);
+      assert.ok(wolf.hp <= 80, `Wolf HP phải <= 80, thực tế: ${wolf.hp}`);
+      assert.ok(wolf.atk <= 12, `Wolf ATK phải <= 12, thực tế: ${wolf.atk}`);
+
+      const boarKing = getScaledMonster("boar_king", 1000, true);
+      assert.ok(boarKing.hp <= 300, `Boss HP phải <= 300, thực tế: ${boarKing.hp}`);
+      assert.ok(boarKing.atk <= 25, `Boss ATK phải <= 25, thực tế: ${boarKing.atk}`);
     });
   });
 

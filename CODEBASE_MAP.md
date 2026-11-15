@@ -248,6 +248,14 @@ erDiagram
       - Bộ components hiển thị câu hỏi [`src/question-types/*/Player.tsx`](file:///d:/Project/Foggo/src/question-types/): Toàn bộ huy hiệu loại câu hỏi, hướng dẫn thao tác và nút bấm ĐÚNG / SAI tự động chuyển đổi theo ngôn ngữ người dùng.
       - [`scripts/seed-english-set.ts`](file:///d:/Project/Foggo/scripts/seed-english-set.ts): Bộ câu hỏi mẫu tiếng Anh chuẩn quốc tế ("Grade 7 CS & Digital Literacy (English)") được lưu trữ trực tiếp trong cơ sở dữ liệu Supabase với cờ `language: 'en'`.
       - [`src/components/ui/CuteSlimeLoading.tsx`](file:///d:/Project/Foggo/src/components/ui/CuteSlimeLoading.tsx): Bóng thoại Bé Slime chuyển đổi câu thoại siêu dễ thương theo ngôn ngữ đã chọn.
+19. **Khắc Phục Lỗi Quái 1000+ Máu (Monster Scaling Bug) & Tối Ưu Độ Trễ Phản Hồi:**
+    - **Cơ chế lỗi cũ:** `elapsed = nowSec - lastTickTimestamp` trong `engine.ts:tick()` dồn hàng ngàn giây khi học sinh offline lâu ngày, dẫn đến ngày chơi ảo nhảy lên `Day 387+` và công thức scale quái vật đẩy máu Slime lên 1.052 HP và công lên 124 ATK (1-hit kill).
+    - **3 tầng phòng thủ chống lỗi:**
+      1. `engine.ts:tick()`: Chặn `elapsed = Math.min(rawElapsed, 60)` và `hungerLoss = Math.min(10, ...)` chống dồn ngày và ngất xỉu khi offline.
+      2. `monsters.ts:getScaledMonster()`: Giới hạn ngày tính toán `safeDay = Math.min(Math.max(1, dayNumber), 5)`, áp trần cứng Slime max 30 HP, 5 ATK; quái thường max 80 HP, 12 ATK; boss max 300 HP, 25 ATK.
+      3. `page.tsx` & `WorldClient.tsx`: Tự động khôi phục `playSec: Math.min(playSec, 480)` và `hp: 100` khi người chơi tải màn hình bãi farm.
+    - **Tối ưu tốc độ phản hồi:** Dùng `adminClient` bỏ qua RLS overhead, ghi `survival_events` ở chế độ ngầm (`void Promise.resolve(...).catch(...)`), song song hóa `Promise.all` và rút ngắn hoạt họa turn-based chiến đấu (`MonsterBattleArena.tsx`) từ 1.400ms xuống dưới 350ms.
+
 
 
 

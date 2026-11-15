@@ -197,7 +197,7 @@ export function MonsterBattleArena({
       return;
     }
 
-    // 1. NẾU TRẢ LỜI ĐÚNG -> NHÂN VẬT LAO LÊN TẤN CÔNG QUÁI (PHẢN HỒI NHANH 150MS)
+    // 1. NẾU TRẢ LỜI ĐÚNG -> NHÂN VẬT LAO LÊN TẤN CÔNG QUÁI (PHẢN HỒI SIÊU TỐC 80MS)
     if (res.isCorrect) {
       setReviewData(null);
       const damageDealt = res.huntResult?.damageDealt ?? 25;
@@ -223,7 +223,7 @@ export function MonsterBattleArena({
 
         setTimeout(() => {
           setHeroAnim("idle");
-        }, 150);
+        }, 100);
 
         if (isKill || nextHp <= 0) {
           setTimeout(() => {
@@ -246,14 +246,14 @@ export function MonsterBattleArena({
               spawnNextMonster();
               onNextQuestion();
               setUserAnswer(null);
-            }, 600);
-          }, 200);
+            }, 250);
+          }, 100);
         } else {
           // QUÁI CÒN SỐNG -> PHẢN CÔNG NHANH
           setTimeout(() => {
             if (monsterDef.id === "slime") {
               setSlimeFrame(3);
-              setTimeout(() => setSlimeFrame(4), 60);
+              setTimeout(() => setSlimeFrame(4), 50);
             }
             setMonsterAnim("jump");
 
@@ -271,7 +271,7 @@ export function MonsterBattleArena({
                 setTimeout(() => {
                   setSlimeFrame(1);
                   setMonsterAnim("idle");
-                }, 100);
+                }, 80);
               } else {
                 setMonsterAnim("idle");
               }
@@ -281,18 +281,18 @@ export function MonsterBattleArena({
                 if (res.state) onStateUpdate(res.state);
                 onNextQuestion();
                 setUserAnswer(null);
-              }, 150);
-            }, 150);
-          }, 150);
+              }, 120);
+            }, 100);
+          }, 100);
         }
-      }, 150);
+      }, 80);
     } else {
-      // 2. TRẢ LỜI SAI -> QUÁI PHẢN CÔNG & LẬP TỨC HIỆN ĐÁP ÁN ĐÚNG ĐỂ HỌC SINH ÔN TẬP
+      // 2. TRẢ LỜI SAI -> QUÁI PHẢN CÔNG NHANH & LẬP TỨC HIỆN ĐÁP ÁN ĐÚNG ĐỂ HỌC SINH ÔN TẬP
       setBattleNotice(isEn ? `❌ Incorrect answer! ${monsterName} counterattacks!` : `❌ Trả lời chưa chính xác! ${monsterDef.name} phản công!`);
 
       if (monsterDef.id === "slime") {
         setSlimeFrame(3);
-        setTimeout(() => setSlimeFrame(4), 60);
+        setTimeout(() => setSlimeFrame(4), 50);
       }
       setMonsterAnim("jump");
 
@@ -310,7 +310,7 @@ export function MonsterBattleArena({
           setTimeout(() => {
             setSlimeFrame(1);
             setMonsterAnim("idle");
-          }, 100);
+          }, 80);
         } else {
           setMonsterAnim("idle");
         }
@@ -326,8 +326,8 @@ export function MonsterBattleArena({
             explanation: res.explanation || null,
             message: res.message,
           });
-        }, 150);
-      }, 150);
+        }, 100);
+      }, 100);
     }
   };
 

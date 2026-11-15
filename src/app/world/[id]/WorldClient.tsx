@@ -81,10 +81,11 @@ export function WorldClient({
     const safeScore = Number.isFinite(raw.score)
       ? raw.score
       : (Number.isFinite(initialPlayer.score) ? initialPlayer.score : 0);
-    const safeHp = Number.isFinite(raw.hp) ? raw.hp : 100;
-    const safeMaxHp = Number.isFinite(raw.maxHp) ? raw.maxHp : 100;
-    const safeHunger = Number.isFinite(raw.hunger) ? raw.hunger : 100;
-    const safeMaxHunger = Number.isFinite(raw.maxHunger) ? raw.maxHunger : 100;
+    const safeHp = Number.isFinite(raw.hp) && raw.hp > 0 ? raw.hp : 100;
+    const safeMaxHp = Number.isFinite(raw.maxHp) && raw.maxHp > 0 ? raw.maxHp : 100;
+    const safeHunger = Number.isFinite(raw.hunger) && raw.hunger > 0 ? raw.hunger : 100;
+    const safeMaxHunger = Number.isFinite(raw.maxHunger) && raw.maxHunger > 0 ? raw.maxHunger : 100;
+    const safePlaySec = Math.min(Math.max(0, raw.playSec ?? 0), 480);
 
     return {
       hp: safeHp,
@@ -93,7 +94,7 @@ export function WorldClient({
       maxHunger: safeMaxHunger,
       coins: safeCoins,
       score: safeScore,
-      playSec: raw.playSec ?? 0,
+      playSec: safePlaySec,
       lastTickTimestamp: raw.lastTickTimestamp ?? Math.floor(Date.now() / 1000),
       streak: raw.streak ?? 0,
       currentZone: raw.currentZone ?? "forest",

@@ -55,14 +55,14 @@ export async function submitSurvivalAction({
 
   const adminClient = createAdminClient();
 
-  // Tải đồng thời câu hỏi và nhân vật để tối ưu tốc độ phản hồi cực nhanh
+  // Tải đồng thời câu hỏi và nhân vật qua adminClient để tối ưu tốc độ phản hồi cực nhanh
   const [qResult, playerResult] = await Promise.all([
     adminClient
       .from("questions")
       .select("id, type, content, answer_key, points, explanation")
       .eq("id", questionId)
       .single(),
-    supabase
+    adminClient
       .from("session_players")
       .select("*")
       .eq("session_id", sessionId)
@@ -155,7 +155,7 @@ export async function submitSurvivalAction({
     message = defendResult.message;
   }
 
-  // 4, 5, 6: Thực hiện đồng thời lưu kết quả vào CSDL để tăng tốc độ phản hồi tối đa
+  // Lưu kết quả làm bài & trạng thái nhân vật đồng thời
   await Promise.all([
     adminClient.from("session_answers").upsert(
       {
@@ -178,6 +178,10 @@ export async function submitSurvivalAction({
         updated_at: new Date().toISOString(),
       })
       .eq("id", player.id),
+  ]);
+
+  // Ghi nhật ký sự kiện ngầm (background) không chặn phản hồi của học sinh
+  void Promise.resolve(
     adminClient.from("survival_events").insert({
       session_id: sessionId,
       player_id: player.id,
@@ -188,8 +192,8 @@ export async function submitSurvivalAction({
         isSuccess,
         message,
       },
-    }),
-  ]);
+    })
+  ).catch(() => {});
 
   return {
     success: true,
@@ -232,7 +236,8 @@ export async function performSurvivalItemAction({
     return { error: "Phiên đăng nhập đã hết hạn" };
   }
 
-  const { data: player } = await supabase
+  const adminClient = createAdminClient();
+  const { data: player } = await adminClient
     .from("session_players")
     .select("*")
     .eq("session_id", sessionId)
@@ -284,7 +289,6 @@ export async function performSurvivalItemAction({
     message = res.message;
   }
 
-  const adminClient = createAdminClient();
   await adminClient
     .from("session_players")
     .update({
@@ -324,7 +328,8 @@ export async function emergencyHealOrRevive({
     return { error: "Phiên đăng nhập đã hết hạn" };
   }
 
-  const { data: player } = await supabase
+  const adminClient = createAdminClient();
+  const { data: player } = await adminClient
     .from("session_players")
     .select("*")
     .eq("session_id", sessionId)
@@ -374,7 +379,6 @@ export async function emergencyHealOrRevive({
     message = "Bạn đã hồi sinh miễn phí tại Trại! Toàn bộ Xu được bảo lưu nguyên vẹn.";
   }
 
-  const adminClient = createAdminClient();
   await adminClient
     .from("session_players")
     .update({
@@ -414,7 +418,8 @@ export async function fleeSurvivalBattle({
     return { error: "Phiên đăng nhập đã hết hạn" };
   }
 
-  const { data: player } = await supabase
+  const adminClient = createAdminClient();
+  const { data: player } = await adminClient
     .from("session_players")
     .select("*")
     .eq("session_id", sessionId)
@@ -446,7 +451,6 @@ export async function fleeSurvivalBattle({
   state = tick(state, nowSec);
   const fleeRes = applyFlee(state, monsterId);
 
-  const adminClient = createAdminClient();
   await adminClient
     .from("session_players")
     .update({

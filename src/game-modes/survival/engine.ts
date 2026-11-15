@@ -215,28 +215,35 @@ export function countItemInInventory(inventory: InventorySlot[], itemId: string)
 /**
  * Hàm tick() chạy ở server:
  * Cập nhật đói, mất máu do đói, tính thời gian chơi.
+ * Đã tối ưu an toàn: Giới hạn thời gian trôi qua tối đa 60s để học sinh không bị
+ * đói chết hoặc nhảy hàng trăm ngày sau khi tắt máy offline.
  */
 export function tick(state: SurvivalPlayerState, nowSec: number): SurvivalPlayerState {
   if (state.hp <= 0) {
     return state; // Người chơi đã ngất xỉu, cần bấm hồi sinh
   }
 
-  const elapsed = Math.max(0, nowSec - state.lastTickTimestamp);
-  if (elapsed <= 0) return state;
+  const rawElapsed = Math.max(0, nowSec - (state.lastTickTimestamp || nowSec));
+  if (rawElapsed <= 0) return state;
 
   const nextState = { ...state };
-  nextState.playSec += elapsed;
   nextState.lastTickTimestamp = nowSec;
 
-  // Trừ điểm đói: 1 điểm mỗi 6 giây
-  const hungerLoss = Math.floor(elapsed / SURVIVAL_CONFIG.HUNGER_TICK_SEC);
+  // QUAN TRỌNG: Giới hạn elapsed tối đa 60 giây mỗi lần tick.
+  // Khi học sinh offline hàng giờ hoặc hàng ngày rồi quay lại, thời gian nghỉ không bị tính dồn
+  // thành hàng trăm ngày làm quái tăng lên 1000 máu và đánh chết người chơi.
+  const elapsed = Math.min(rawElapsed, 60);
+  nextState.playSec += elapsed;
+
+  // Trừ điểm đói: 1 điểm mỗi 6 giây, tối đa 10 điểm đói mỗi lần tương tác
+  const hungerLoss = Math.min(10, Math.floor(elapsed / SURVIVAL_CONFIG.HUNGER_TICK_SEC));
   if (hungerLoss > 0) {
     nextState.hunger = Math.max(0, nextState.hunger - hungerLoss);
   }
 
-  // Nếu đói = 0: trừ 1 HP mỗi 4 giây
+  // Nếu đói = 0: trừ 1 HP mỗi 4 giây, tối đa 10 HP để tránh bị chết oan khi vừa quay lại
   if (nextState.hunger === 0) {
-    const starvingLoss = Math.floor(elapsed / SURVIVAL_CONFIG.STARVING_HP_LOSS_SEC);
+    const starvingLoss = Math.min(10, Math.floor(elapsed / SURVIVAL_CONFIG.STARVING_HP_LOSS_SEC));
     if (starvingLoss > 0) {
       nextState.hp = Math.max(0, nextState.hp - starvingLoss);
     }
