@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   Settings,
   User,
@@ -92,6 +93,21 @@ export function UserSettingsModal({
   const [recoveryCode, setRecoveryCode] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
   const [accountInfo, setAccountInfo] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Đóng modal khi nhấn phím Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (isOpen) {
@@ -123,7 +139,7 @@ export function UserSettingsModal({
     }
   }, [isOpen, initialTab, profile, currentSchoolName, currentClassName]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const role = profile?.role || accountInfo?.role || "student";
   const isAdmin = role === "admin";
@@ -275,11 +291,17 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
     URL.revokeObjectURL(url);
   }
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden ring-1 ring-amber-500/20">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-xl my-auto max-h-[85vh] flex flex-col shadow-2xl overflow-hidden ring-1 ring-amber-500/20 relative"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header Modal */}
-        <div className="px-6 py-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60 shrink-0">
+        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/70 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-sm shadow-amber-500/10">
               <Settings className="w-5 h-5 animate-[spin_12s_linear_infinite]" />
@@ -790,6 +812,8 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
+

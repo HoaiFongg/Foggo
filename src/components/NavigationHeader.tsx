@@ -41,7 +41,8 @@ export function NavigationHeader({
   const fireflies = profile?.fireflies ?? (isAdmin ? 9999 : 120);
 
   return (
-    <header className="border-b border-slate-800/80 bg-slate-950/85 backdrop-blur-xl sticky top-0 z-50 transition-all">
+    <>
+      <header className="border-b border-slate-800/80 bg-slate-950/85 backdrop-blur-xl sticky top-0 z-50 transition-all">
       <div className="w-full px-4 sm:px-8 lg:px-12 h-16 flex items-center justify-between gap-4">
         {/* Logo & Navigation */}
         <div className="flex items-center gap-4 sm:gap-8 min-w-0">
@@ -195,13 +196,14 @@ export function NavigationHeader({
           </div>
         </div>
       </div>
-
-      {/* Modal Cài Đặt Cá Nhân Toàn Hệ Thống */}
-      <UserSettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        profile={profile}
-      />
     </header>
+
+    {/* Modal Cài Đặt Cá Nhân Toàn Hệ Thống */}
+    <UserSettingsModal
+      isOpen={isSettingsOpen}
+      onClose={() => setIsSettingsOpen(false)}
+      profile={profile}
+    />
+  </>
   );
 }
