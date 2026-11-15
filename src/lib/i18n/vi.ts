@@ -33,6 +33,8 @@ export const vi: Translations = {
     search: "Tìm kiếm",
     all: "Tất cả",
     filter: "Bộ lọc",
+    settings: "Cài đặt",
+    personalSettings: "Cài đặt cá nhân",
     success: "Thành công",
     error: "Có lỗi xảy ra",
   },

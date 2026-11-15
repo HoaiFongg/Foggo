@@ -2779,6 +2779,14 @@ jobs:
   - **Áp trần an toàn tuyệt đối cho chỉ số quái vật (Safe Ceilings)**: Trong `src/game-modes/survival/monsters.ts`, giới hạn ngày tính toán `safeDay = Math.min(Math.max(1, dayNumber), 5)`. Cố định trần an toàn: Slime tối đa 30 HP, 5 ATK (học sinh 100 HP chịu được ít nhất 20 lượt sai); Quái thường tối đa 80 HP, 12 ATK; Trùm tối đa 300 HP, 25 ATK.
   - **Khôi phục toàn bộ session người chơi trong cơ sở dữ liệu**: Chạy script `scripts/fix-corrupted-playsec.ts` quét và sửa chữa 100% hồ sơ học sinh có `playSec` bất thường, đưa về Ngày 1 (120s), hồi phục 100 HP và 100 điểm đói. Bổ sung cơ chế tự sửa lỗi khi vào màn hình chơi `/world/[id]` và `startHomeFarmSession`.
   - **Tối ưu hóa độ mượt và tốc độ (Sub-350ms)**: Bỏ RLS query chậm bằng `adminClient`, song song hóa các cập nhật DB bằng `Promise.all`, đẩy `survival_events` ghi ngầm, và rút ngắn hoạt họa tấn công (`MonsterBattleArena.tsx`) từ 1.400ms xuống dưới 350ms cho trải nghiệm mượt mà, tốc độ tức thì.
+- [x] Quy hoạch toàn bộ cài đặt cá nhân vào biểu tượng Bánh Răng Cài Đặt (Settings Gear):
+  - **Xóa bỏ các nút bấm chỉnh sửa phân tán**: Loại bỏ các nút lẻ tẻ như "✏️ Đổi tên", "✏️ Cập nhật trường/lớp" trên Hero Profile Card và trang Dashboard để giữ giao diện sạch sẽ, chuyên nghiệp.
+  - **Tích hợp Bánh Răng Cài Đặt (⚙️) toàn hệ thống**: Bổ sung nút bánh răng cài đặt vào thanh điều hướng chính (`NavigationHeader.tsx`) cạnh avatar hồ sơ (truy cập từ mọi trang) và nút Bánh răng cài đặt nổi bật tại Hero Profile Card (`DashboardClient.tsx`).
+  - **Xây dựng Modal Cài Đặt Cá Nhân hợp nhất (`UserSettingsModal.tsx`)**:
+    - *Tab 1: Hồ Sơ (Profile)*: Xem avatar, vai trò (Học sinh/Giáo viên/Admin), tên đăng nhập/email, form đổi tên hiển thị (2-40 ký tự) kèm phản hồi thành công.
+    - *Tab 2: Trường & Lớp (School & Class)*: Danh mục 63 tỉnh/thành phố (`VIETNAM_PROVINCES`), gợi ý tên trường và nhập lớp học để tự động kết nối bạn bè và nhận đề thi của thầy cô.
+    - *Tab 3: Bảo Mật & Mật Khẩu (Security)*: Đổi mật khẩu mới (có mắt ẩn/hiện và xác nhận khớp), hiển thị mã khôi phục bí mật của học sinh kèm nút copy 1-chạm và tải file ghi nhớ backup (.txt).
+    - *Tab 4: Tùy Chọn & Hệ Thống (Preferences)*: Lựa chọn ngôn ngữ hiển thị (🇻🇳 Tiếng Việt ⇋ 🇬🇧 English), tra cứu số dư Đom Đóm/Vàng và nút Đăng xuất an toàn.
 
 ### Trước khi thu tiền
 - [x] Thanh toán + webhook hoạt động, test kỹ

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   Flame,
@@ -13,10 +14,12 @@ import {
   LayoutDashboard,
   Users,
   GraduationCap,
+  Settings,
 } from "lucide-react";
 import { logout } from "@/app/(auth)/actions";
 import { useLanguage } from "@/lib/i18n/useLanguage";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { UserSettingsModal } from "@/components/UserSettingsModal";
 import type { Profile } from "@/types/database";
 
 interface NavigationHeaderProps {
@@ -29,6 +32,7 @@ export function NavigationHeader({
   activeItem = "dashboard",
 }: NavigationHeaderProps) {
   const { t } = useLanguage();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const displayName = profile?.display_name || t.common.student;
   const role = profile?.role || "student";
   const isAdmin = role === "admin" || displayName.toLowerCase().includes("admin");
@@ -170,6 +174,15 @@ export function NavigationHeader({
               </span>
             </div>
 
+            <button
+              type="button"
+              onClick={() => setIsSettingsOpen(true)}
+              title={t.common.personalSettings}
+              className="p-2 rounded-xl text-slate-400 hover:text-amber-300 hover:bg-slate-900 border border-transparent hover:border-slate-800 transition-all cursor-pointer group"
+            >
+              <Settings className="w-4 h-4 group-hover:rotate-45 transition-transform duration-300 text-slate-400 group-hover:text-amber-400" />
+            </button>
+
             <form action={logout}>
               <button
                 type="submit"
@@ -182,6 +195,13 @@ export function NavigationHeader({
           </div>
         </div>
       </div>
+
+      {/* Modal Cài Đặt Cá Nhân Toàn Hệ Thống */}
+      <UserSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        profile={profile}
+      />
     </header>
   );
 }

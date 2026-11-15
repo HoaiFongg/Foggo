@@ -33,6 +33,8 @@ export const en: Translations = {
     search: "Search",
     all: "All",
     filter: "Filter",
+    settings: "Settings",
+    personalSettings: "Personal Settings",
     success: "Success",
     error: "An error occurred",
   },

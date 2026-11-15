@@ -255,6 +255,14 @@ erDiagram
       2. `monsters.ts:getScaledMonster()`: Giới hạn ngày tính toán `safeDay = Math.min(Math.max(1, dayNumber), 5)`, áp trần cứng Slime max 30 HP, 5 ATK; quái thường max 80 HP, 12 ATK; boss max 300 HP, 25 ATK.
       3. `page.tsx` & `WorldClient.tsx`: Tự động khôi phục `playSec: Math.min(playSec, 480)` và `hp: 100` khi người chơi tải màn hình bãi farm.
     - **Tối ưu tốc độ phản hồi:** Dùng `adminClient` bỏ qua RLS overhead, ghi `survival_events` ở chế độ ngầm (`void Promise.resolve(...).catch(...)`), song song hóa `Promise.all` và rút ngắn hoạt họa turn-based chiến đấu (`MonsterBattleArena.tsx`) từ 1.400ms xuống dưới 350ms.
+20. **Trung Tâm Cài Đặt Cá Nhân Bánh Răng (Personal Settings Gear & Modal):**
+    - [`src/components/UserSettingsModal.tsx`](file:///d:/Project/Foggo/src/components/UserSettingsModal.tsx): Modal hợp nhất toàn bộ tùy chọn cá nhân trong một giao diện duy nhất, chia thành 4 tab:
+      1. **Hồ Sơ (Profile):** Hiển thị avatar, vai trò, tên đăng nhập/email, form cập nhật Tên hiển thị (`updateStudentDisplayName`).
+      2. **Trường & Lớp (School & Class):** Chọn tỉnh/thành phố từ [`src/lib/constants/provinces.ts`](file:///d:/Project/Foggo/src/lib/constants/provinces.ts), nhập trường học và lớp học (`updateStudentSchoolClass`).
+      3. **Bảo Mật & Mật Khẩu (Security):** Đổi mật khẩu tài khoản trực tiếp (`updateOwnPassword`), tra cứu mã khôi phục bí mật của học sinh kèm nút sao chép và tải file sao lưu `.txt`.
+      4. **Tùy Chọn & Hệ Thống (Preferences):** Chuyển đổi ngôn ngữ hiển thị (VI / EN), xem số dư Đom Đóm / Vàng và nút Đăng xuất an toàn.
+    - **Điểm truy cập toàn cục:** Nút Bánh răng (`Settings` icon) được nhúng ngay cạnh avatar tại [`NavigationHeader.tsx`](file:///d:/Project/Foggo/src/components/NavigationHeader.tsx) (truy cập từ mọi trang) và nút Bánh răng cài đặt nổi bật tại Hero Profile Card [`DashboardClient.tsx`](file:///d:/Project/Foggo/src/app/dashboard/DashboardClient.tsx), xóa bỏ triệt để các nút chỉnh sửa phân tán trước đây.
+
 
 
 

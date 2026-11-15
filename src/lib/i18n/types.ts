@@ -33,6 +33,8 @@ export interface Translations {
     search: string;
     all: string;
     filter: string;
+    settings: string;
+    personalSettings: string;
     success: string;
     error: string;
   };

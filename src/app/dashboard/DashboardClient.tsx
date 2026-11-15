@@ -20,7 +20,6 @@ import {
   Coins,
   Flame,
   Heart,
-  Edit2,
   Users,
   CheckCircle2,
   XCircle,
@@ -29,9 +28,9 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/useLanguage";
 import { startHomeFarmSession } from "@/app/teacher/worlds/actions";
-import { updateStudentDisplayName, updateStudentSchoolClass } from "@/app/dashboard/actions";
 import { QuickJoinCard } from "@/components/QuickJoinCard";
 import { DailyLoginStreakCard } from "@/components/DailyLoginStreakCard";
+import { UserSettingsModal } from "@/components/UserSettingsModal";
 
 interface DashboardClientProps {
   user: any;
@@ -65,6 +64,8 @@ interface DashboardClientProps {
 }
 
 export function DashboardClient({
+  user,
+  profile,
   role,
   isAdmin,
   isTeacher,
@@ -90,75 +91,16 @@ export function DashboardClient({
   const { t, language } = useLanguage();
   const isEn = language === "en";
 
-  // State cho việc đổi tên
+  // State cho thông tin người dùng
   const [currentDisplayName, setCurrentDisplayName] = useState(displayName);
-  const [isRenameOpen, setIsRenameOpen] = useState(false);
-  const [renameInput, setRenameInput] = useState(displayName);
-  const [isRenaming, setIsRenaming] = useState(false);
-  const [renameMessage, setRenameMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-
-  // State cho việc đổi trường & lớp
   const [currentSchool, setCurrentSchool] = useState(studentSchoolName);
   const [currentClass, setCurrentClass] = useState(studentClassName);
-  const [isSchoolModalOpen, setIsSchoolModalOpen] = useState(false);
-  const [schoolInput, setSchoolInput] = useState(studentSchoolName || "");
-  const [provinceInput, setProvinceInput] = useState("Hà Nội");
-  const [classInput, setClassInput] = useState(studentClassName || "");
-  const [isSavingSchool, setIsSavingSchool] = useState(false);
-  const [schoolMessage, setSchoolMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  async function handleRenameSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!renameInput.trim()) return;
-    setIsRenaming(true);
-    setRenameMessage(null);
-    try {
-      const res = await updateStudentDisplayName(renameInput.trim());
-      if (res.error) {
-        setRenameMessage({ type: "error", text: res.error });
-      } else {
-        setCurrentDisplayName(renameInput.trim());
-        setRenameMessage({ type: "success", text: isEn ? "Name updated successfully!" : "Đổi tên thành công!" });
-        setTimeout(() => {
-          setIsRenameOpen(false);
-          setRenameMessage(null);
-        }, 1000);
-      }
-    } catch (err: any) {
-      setRenameMessage({ type: "error", text: err.message || "Lỗi khi đổi tên" });
-    } finally {
-      setIsRenaming(false);
-    }
-  }
-
-  async function handleSchoolSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!schoolInput.trim() || !classInput.trim()) return;
-    setIsSavingSchool(true);
-    setSchoolMessage(null);
-    try {
-      const res = await updateStudentSchoolClass({
-        schoolName: schoolInput.trim(),
-        province: provinceInput.trim(),
-        className: classInput.trim(),
-      });
-      if (res.error) {
-        setSchoolMessage({ type: "error", text: res.error });
-      } else {
-        setCurrentSchool(schoolInput.trim());
-        setCurrentClass(classInput.trim());
-        setSchoolMessage({ type: "success", text: isEn ? "School and Class updated!" : "Đã cập nhật Trường & Lớp thành công!" });
-        setTimeout(() => {
-          setIsSchoolModalOpen(false);
-          setSchoolMessage(null);
-        }, 1000);
-      }
-    } catch (err: any) {
-      setSchoolMessage({ type: "error", text: err.message || "Lỗi khi cập nhật trường lớp" });
-    } finally {
-      setIsSavingSchool(false);
-    }
-  }
+  // Modal Cài Đặt Cá Nhân (Bánh Răng Cài Đặt gom toàn bộ tùy chọn cá nhân)
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [settingsInitialTab, setSettingsInitialTab] = useState<
+    "profile" | "school" | "security" | "preferences"
+  >("profile");
 
   return (
     <main className="flex-1 w-full px-4 sm:px-8 lg:px-12 py-8">
@@ -456,21 +398,21 @@ export function DashboardClient({
                   <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">
                     {currentDisplayName}
                   </h1>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRenameInput(currentDisplayName);
-                      setIsRenameOpen(true);
-                    }}
-                    className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-400 text-xs transition-colors flex items-center gap-1 cursor-pointer border border-slate-700"
-                    title={isEn ? "Edit Display Name" : "Đổi tên hiển thị"}
-                  >
-                    <Edit2 className="w-3 h-3 text-amber-400" />
-                    <span className="text-[11px] font-mono">{isEn ? "Rename" : "Đổi tên"}</span>
-                  </button>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-semibold">
                     {t.dashboard.explorer}
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSettingsInitialTab("profile");
+                      setIsSettingsModalOpen(true);
+                    }}
+                    className="ml-1 px-2.5 py-1 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 text-slate-300 hover:text-amber-400 text-xs transition-colors flex items-center gap-1.5 cursor-pointer border border-slate-700 shadow-sm group"
+                    title={isEn ? "Personal Settings" : "Cài đặt cá nhân"}
+                  >
+                    <Settings className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-45 transition-transform duration-300" />
+                    <span className="text-[11px] font-mono font-bold">{isEn ? "Settings" : "Cài đặt"}</span>
+                  </button>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2.5 text-xs text-slate-400">
@@ -483,17 +425,6 @@ export function DashboardClient({
                     <GraduationCap className="w-3.5 h-3.5 text-blue-400" />
                     <span>{currentClass || (isEn ? "No Class" : "Chưa chọn lớp")}</span>
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSchoolInput(currentSchool);
-                      setClassInput(currentClass);
-                      setIsSchoolModalOpen(true);
-                    }}
-                    className="text-[11px] text-amber-400 hover:text-amber-300 hover:underline cursor-pointer font-mono"
-                  >
-                    ✏️ {isEn ? "Update School/Class" : "Cập nhật trường/lớp"}
-                  </button>
                 </div>
               </div>
             </div>
@@ -881,13 +812,13 @@ export function DashboardClient({
               <button
                 type="button"
                 onClick={() => {
-                  setSchoolInput(currentSchool);
-                  setClassInput(currentClass);
-                  setIsSchoolModalOpen(true);
+                  setSettingsInitialTab("school");
+                  setIsSettingsModalOpen(true);
                 }}
-                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono font-bold transition-all border border-slate-700 cursor-pointer self-start sm:self-auto"
+                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono font-bold transition-all border border-slate-700 cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
               >
-                ✏️ {isEn ? "Edit School & Class" : "Chọn Trường & Lớp"}
+                <Settings className="w-3.5 h-3.5 text-blue-400" />
+                <span>{isEn ? "Configure School & Class" : "Cài Đặt Trường & Lớp"}</span>
               </button>
             </div>
 
@@ -900,10 +831,14 @@ export function DashboardClient({
                 </p>
                 <button
                   type="button"
-                  onClick={() => setIsSchoolModalOpen(true)}
-                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs font-mono transition-all cursor-pointer"
+                  onClick={() => {
+                    setSettingsInitialTab("school");
+                    setIsSettingsModalOpen(true);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs font-mono transition-all cursor-pointer inline-flex items-center gap-1.5"
                 >
-                  🏫 {isEn ? "Select My Class" : "Chọn Lớp Học Của Tôi"}
+                  <Settings className="w-3.5 h-3.5" />
+                  <span>{isEn ? "Configure My Class" : "Cài Đặt Lớp Học Của Tôi"}</span>
                 </button>
               </div>
             ) : (
@@ -940,191 +875,21 @@ export function DashboardClient({
       )}
 
       {/* ============================================================== */}
-      {/* MODAL 1: ĐỔI TÊN HỌC SINH                                      */}
+      {/* MODAL CÀI ĐẶT CÁ NHÂN HỢP NHẤT TRONG BÁNH RĂNG CÀI ĐẶT         */}
       {/* ============================================================== */}
-      {isRenameOpen && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl relative space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Edit2 className="w-4 h-4 text-amber-400" />
-                <span>{isEn ? "Change Display Name" : "Đổi Tên Hiển Thị"}</span>
-              </h3>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsRenameOpen(false);
-                  setRenameMessage(null);
-                }}
-                className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleRenameSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-mono text-slate-400 mb-1.5">
-                  {isEn ? "New Display Name:" : "Tên hiển thị mới:"}
-                </label>
-                <input
-                  type="text"
-                  required
-                  maxLength={40}
-                  value={renameInput}
-                  onChange={(e) => setRenameInput(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-amber-500 font-sans"
-                  placeholder={isEn ? "Enter your name..." : "Nhập tên của bạn..."}
-                />
-              </div>
-
-              {renameMessage && (
-                <div
-                  className={`p-3 rounded-xl text-xs font-mono flex items-center gap-2 ${
-                    renameMessage.type === "success"
-                      ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
-                      : "bg-rose-500/10 border border-rose-500/30 text-rose-400"
-                  }`}
-                >
-                  {renameMessage.type === "success" ? (
-                    <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  ) : (
-                    <XCircle className="w-4 h-4 shrink-0" />
-                  )}
-                  <span>{renameMessage.text}</span>
-                </div>
-              )}
-
-              <div className="flex items-center justify-end gap-2.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsRenameOpen(false);
-                    setRenameMessage(null);
-                  }}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono cursor-pointer"
-                >
-                  {isEn ? "Cancel" : "Hủy"}
-                </button>
-                <button
-                  type="submit"
-                  disabled={isRenaming || !renameInput.trim()}
-                  className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs font-mono shadow-md disabled:opacity-50 cursor-pointer"
-                >
-                  {isRenaming ? (isEn ? "Saving..." : "Đang lưu...") : (isEn ? "Save Changes" : "Lưu Thay Đổi")}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ============================================================== */}
-      {/* MODAL 2: CẬP NHẬT TRƯỜNG & LỚP HỌC                              */}
-      {/* ============================================================== */}
-      {isSchoolModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl relative space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <SchoolIcon className="w-4 h-4 text-blue-400" />
-                <span>{isEn ? "Update School & Class" : "Cập Nhật Trường & Lớp"}</span>
-              </h3>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSchoolModalOpen(false);
-                  setSchoolMessage(null);
-                }}
-                className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSchoolSubmit} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-mono text-slate-400 mb-1">
-                  {isEn ? "School Name:" : "Tên trường học:"}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={schoolInput}
-                  onChange={(e) => setSchoolInput(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-blue-500 font-sans"
-                  placeholder={isEn ? "e.g. THCS Chu Van An" : "Ví dụ: THCS Chu Văn An"}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono text-slate-400 mb-1">
-                  {isEn ? "Province / City:" : "Tỉnh / Thành phố:"}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={provinceInput}
-                  onChange={(e) => setProvinceInput(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-blue-500 font-sans"
-                  placeholder={isEn ? "e.g. Ha Noi, TP.HCM" : "Ví dụ: Hà Nội, TP.HCM"}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono text-slate-400 mb-1">
-                  {isEn ? "Class Name:" : "Tên lớp học:"}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={classInput}
-                  onChange={(e) => setClassInput(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-blue-500 font-sans"
-                  placeholder={isEn ? "e.g. 9A1, 10C2" : "Ví dụ: 9A1, 10C2"}
-                />
-              </div>
-
-              {schoolMessage && (
-                <div
-                  className={`p-3 rounded-xl text-xs font-mono flex items-center gap-2 ${
-                    schoolMessage.type === "success"
-                      ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
-                      : "bg-rose-500/10 border border-rose-500/30 text-rose-400"
-                  }`}
-                >
-                  {schoolMessage.type === "success" ? (
-                    <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  ) : (
-                    <XCircle className="w-4 h-4 shrink-0" />
-                  )}
-                  <span>{schoolMessage.text}</span>
-                </div>
-              )}
-
-              <div className="flex items-center justify-end gap-2.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsSchoolModalOpen(false);
-                    setSchoolMessage(null);
-                  }}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono cursor-pointer"
-                >
-                  {isEn ? "Cancel" : "Hủy"}
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSavingSchool || !schoolInput.trim() || !classInput.trim()}
-                  className="px-5 py-2 rounded-xl bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold text-xs font-mono shadow-md disabled:opacity-50 cursor-pointer"
-                >
-                  {isSavingSchool ? (isEn ? "Saving..." : "Đang lưu...") : (isEn ? "Save Class" : "Lưu Lớp Học")}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <UserSettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        profile={profile}
+        initialTab={settingsInitialTab}
+        currentSchoolName={currentSchool}
+        currentClassName={currentClass}
+        onProfileUpdated={({ displayName: newName, schoolName: newS, className: newC }) => {
+          if (newName) setCurrentDisplayName(newName);
+          if (newS !== undefined) setCurrentSchool(newS);
+          if (newC !== undefined) setCurrentClass(newC);
+        }}
+      />
     </main>
   );
 }

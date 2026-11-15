@@ -266,3 +266,76 @@ export async function updateStudentSchoolClass({
   return { success: true };
 }
 
+/**
+ * Đổi mật khẩu tài khoản người dùng đang đăng nhập
+ */
+export async function updateOwnPassword(newPassword: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Phiên đăng nhập đã hết hạn" };
+  }
+
+  const trimmed = newPassword.trim();
+  if (trimmed.length < 6) {
+    return { error: "Mật khẩu mới tối thiểu 6 ký tự" };
+  }
+
+  const adminClient = createAdminClient();
+  const { error } = await adminClient.auth.admin.updateUserById(user.id, {
+    password: trimmed,
+    user_metadata: {
+      ...user.user_metadata,
+      managed_password: trimmed,
+      last_password_reset_at: new Date().toISOString(),
+    },
+  });
+
+  if (error) {
+    return { error: error.message || "Không thể cập nhật mật khẩu" };
+  }
+
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+/**
+ * Lấy thông tin bảo mật & mã khôi phục của tài khoản
+ */
+export async function getStudentAccountSecurity() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Phiên đăng nhập đã hết hạn" };
+  }
+
+  const adminClient = createAdminClient();
+  const { data: profile } = await adminClient
+    .from("profiles")
+    .select("username, display_name, role, recovery_code_hash, created_at, schools:school_id(name), classes:class_id(name)")
+    .eq("id", user.id)
+    .single();
+
+  return {
+    success: true,
+    user: {
+      id: user.id,
+      email: user.email,
+      username: profile?.username || user.user_metadata?.username,
+      displayName: profile?.display_name || user.user_metadata?.display_name,
+      role: profile?.role || "student",
+      recoveryCode: profile?.recovery_code_hash,
+      schoolName: (profile as any)?.schools?.name || "",
+      className: (profile as any)?.classes?.name || "",
+      createdAt: profile?.created_at,
+    },
+  };
+}
+
+
