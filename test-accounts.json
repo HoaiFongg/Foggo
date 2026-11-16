@@ -1,0 +1,42 @@
+{
+  "accounts": [
+    {
+      "role": "student",
+      "username": "test",
+      "password": "12345678",
+      "email": "test@student.foggo.vn",
+      "displayName": "test",
+      "school": "THCS LLQ",
+      "class": "7A1",
+      "description": "Tài khoản học sinh test giao diện chính"
+    },
+    {
+      "role": "student",
+      "username": "hocsinh_test",
+      "password": "TestPassword123!",
+      "email": "hocsinh_test@student.foggo.vn",
+      "displayName": "Học Sinh Test (Thám Hiểm)",
+      "school": "THCS Lê Quý Đôn",
+      "class": "9A1",
+      "description": "Tài khoản học sinh chạy kịch bản test tự động"
+    },
+    {
+      "role": "teacher",
+      "username": "giaovien_test",
+      "password": "TestPassword123!",
+      "email": "giaovien_test@foggo.vn",
+      "displayName": "Thầy Giáo Test (Giáo Viên)",
+      "plan": "plus",
+      "description": "Tài khoản giáo viên kiểm thử soạn đề và mở phòng"
+    },
+    {
+      "role": "admin",
+      "username": "admin",
+      "password": "Admin@123456",
+      "email": "hoaifongg@gmail.com",
+      "displayName": "Phạm Nguyễn Hoài Phong (Admin)",
+      "plan": "plus",
+      "description": "Tài khoản Superadmin tối cao"
+    }
+  ]
+}

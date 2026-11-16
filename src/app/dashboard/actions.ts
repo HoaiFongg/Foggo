@@ -132,7 +132,7 @@ export async function claimDailyLoginReward() {
     day: nextDay,
     reward,
     streakData: updatedStreakData,
-    message: `Điểm danh Ngày ${nextDay} thành công! Bạn nhận được ${reward.coins} Vàng 🪙 và ${reward.fireflies} Đom Đóm 🪲!`,
+    message: `Điểm danh Ngày ${nextDay} thành công! Bạn nhận được ${reward.coins} Vàng 🪙 và ${reward.fireflies} Điểm Thành Tích 🏆!`,
   };
 }
 

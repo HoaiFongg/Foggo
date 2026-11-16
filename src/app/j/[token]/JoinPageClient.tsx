@@ -154,7 +154,7 @@ export function JoinPageClient({
 
               <div className="pt-4 border-t border-slate-800 text-center">
                 <p className="text-xs text-slate-400 mb-2">
-                  Muốn lưu điểm và Đom Đóm vĩnh viễn?
+                  Muốn lưu điểm và Thành Tích vĩnh viễn?
                 </p>
                 <div className="flex items-center justify-center gap-3 text-xs font-semibold">
                   <Link

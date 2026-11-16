@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Sparkles } from "lucide-react";
+import { X } from "lucide-react";
 import type { PlayerProps } from "../types";
 import type { DragFillContent, DragFillUserAnswer } from "./schema";
 
@@ -59,16 +59,16 @@ export function DragFillPlayer({
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-2.5 sm:space-y-3">
-      {/* Tiêu đề câu hỏi */}
-      <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg">
-        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 inline-block mb-1">
+    <div className="w-full max-w-4xl mx-auto space-y-4">
+      {/* Tiêu đề câu hỏi Google Material 3 (Bo góc lớn 24px, nền sáng, bóng nhẹ) */}
+      <div className="py-4 px-5 sm:py-5 sm:px-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-center shadow-xs space-y-2">
+        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#E8F0FE] text-[#1967D2] dark:bg-[#4285F4]/20 dark:text-[#8AB4F8] border border-[#D2E3FC] dark:border-[#4285F4]/30 inline-block">
           Điền từ vào chỗ trống
         </span>
-        <h2 className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug font-sans">
+        <h2 className="text-base sm:text-lg md:text-xl font-bold text-slate-900 dark:text-white leading-relaxed font-sans px-2">
           {content?.prompt || "Điền từ thích hợp vào các vị trí trống:"}
         </h2>
-        <p className="text-[11px] text-slate-400 mt-1 font-mono">
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">
           {selectedOptId
             ? "Đã chọn từ khóa! Hãy chạm vào ô trống cần điền ở trên."
             : "Chạm vào từ khóa bên dưới rồi chạm vào ô trống tương ứng."}
@@ -76,7 +76,7 @@ export function DragFillPlayer({
       </div>
 
       {/* Vùng đoạn văn tương tác */}
-      <div className="p-3 sm:p-4 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-lg leading-relaxed text-xs sm:text-sm text-slate-200 max-h-[30vh] overflow-y-auto">
+      <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xs leading-loose text-sm sm:text-base text-slate-800 dark:text-slate-100 max-h-[35vh] overflow-y-auto">
         {segments.map((segment, idx) => {
           const match = segment.match(/^\{\{(\d+)\}\}$/);
           if (!match) {
@@ -94,7 +94,7 @@ export function DragFillPlayer({
                 type="button"
                 disabled={disabled}
                 onClick={() => handleSlotClick(blankId)}
-                className="inline-flex items-center gap-1.5 mx-1.5 px-3 py-1 rounded-xl bg-amber-500/20 border-2 border-amber-400 text-amber-300 font-bold text-sm sm:text-base shadow-sm hover:bg-red-500/20 hover:border-red-400 hover:text-red-300 transition-all cursor-pointer group"
+                className="inline-flex items-center gap-1.5 mx-1.5 px-3.5 py-1 rounded-full bg-[#E8F0FE] dark:bg-[#4285F4]/20 border-2 border-[#4285F4] text-[#1967D2] dark:text-[#8AB4F8] font-semibold text-sm shadow-xs hover:bg-[#FCE8E6] hover:border-[#EA4335] hover:text-[#C5221F] transition-all cursor-pointer group"
                 title="Chạm để gỡ từ này ra"
               >
                 <span>{filledOption.text}</span>
@@ -109,10 +109,10 @@ export function DragFillPlayer({
               type="button"
               disabled={disabled}
               onClick={() => handleSlotClick(blankId)}
-              className={`inline-flex items-center justify-center min-w-[80px] sm:min-w-[100px] h-9 mx-1.5 px-3 rounded-xl border-2 border-dashed font-mono text-xs font-bold transition-all cursor-pointer ${
+              className={`inline-flex items-center justify-center min-w-[90px] sm:min-w-[110px] h-9 mx-1.5 px-3 rounded-full border-2 border-dashed font-sans text-xs font-semibold transition-all cursor-pointer ${
                 selectedOptId
-                  ? "border-amber-400 bg-amber-500/10 text-amber-300 animate-pulse"
-                  : "border-slate-700 bg-slate-950/60 text-slate-500 hover:border-slate-500"
+                  ? "border-[#4285F4] bg-[#E8F0FE] text-[#1967D2] animate-pulse"
+                  : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950/60 text-slate-500 hover:border-[#4285F4]"
               }`}
             >
               [ Ô {blankId} ]
@@ -121,9 +121,9 @@ export function DragFillPlayer({
         })}
       </div>
 
-      {/* Ngân hàng từ khóa */}
-      <div className="p-5 rounded-3xl bg-slate-950/60 border border-slate-800 space-y-3">
-        <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 block">
+      {/* Ngân hàng từ khóa dạng Pill bo tròn */}
+      <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xs space-y-3">
+        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block">
           Ngân hàng từ khóa (Chạm để chọn):
         </span>
         <div className="flex flex-wrap gap-2.5">
@@ -137,12 +137,12 @@ export function DragFillPlayer({
                 type="button"
                 disabled={disabled || isUsed}
                 onClick={() => handleSelectOption(opt.id)}
-                className={`px-4 py-2 rounded-xl border-2 text-sm font-bold transition-all cursor-pointer disabled:cursor-not-allowed ${
+                className={`px-5 py-2.5 rounded-full border-2 text-sm font-semibold transition-all cursor-pointer disabled:cursor-not-allowed shadow-xs ${
                   isSelected
-                    ? "border-amber-400 bg-amber-500 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.4)] scale-105"
+                    ? "border-[#4285F4] bg-[#4285F4] text-white shadow-sm scale-105"
                     : isUsed
-                    ? "border-slate-800 bg-slate-900/40 text-slate-600 line-through opacity-50"
-                    : "border-slate-700 bg-slate-900 text-slate-200 hover:border-amber-400/60 hover:text-white"
+                    ? "border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-400 line-through opacity-50"
+                    : "border-slate-200 dark:border-slate-700 bg-[#F8F9FA] dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-[#4285F4]/60 hover:bg-[#E8F0FE]/40"
                 }`}
               >
                 {opt.text}
@@ -154,4 +154,3 @@ export function DragFillPlayer({
     </div>
   );
 }
-

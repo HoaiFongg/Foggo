@@ -62,24 +62,163 @@ export async function createQuestionSet(formData: FormData) {
   redirect(`/dashboard/sets/${data.id}/edit`);
 }
 
-export async function deleteQuestionSet(id: string) {
+export async function softDeleteQuestionSet(id: string) {
   const { user, profile } = await requireUser(["teacher", "admin"]);
   const supabase = await createClient();
   const isAdmin = profile.role === "admin";
 
-  let query = supabase.from("question_sets").delete().eq("id", id);
+  let query = supabase.from("question_sets").select("id, title, description, visibility, owner_id").eq("id", id);
   if (!isAdmin) {
     query = query.eq("owner_id", user.id);
   }
 
-  const { error } = await query;
+  const { data: set, error: fetchErr } = await query.single();
+  if (fetchErr || !set) {
+    return { error: "Không tìm thấy bộ đề hoặc bạn không có quyền xóa." };
+  }
 
-  if (error) {
-    return { error: error.message };
+  // Nếu đã bị xóa trước đó thì không làm lại
+  if (set.description?.startsWith("[DELETED:")) {
+    return { success: true, title: set.title };
+  }
+
+  const deletedTag = `[DELETED:${Date.now()}:${set.visibility || "private"}]`;
+  const cleanOriginalDesc = set.description ? set.description.trim() : "";
+  const newDescription = cleanOriginalDesc ? `${deletedTag} ${cleanOriginalDesc}` : deletedTag;
+
+  const { error: updateErr } = await supabase
+    .from("question_sets")
+    .update({
+      description: newDescription,
+      visibility: "private",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+
+  if (updateErr) {
+    return { error: updateErr.message };
   }
 
   revalidatePath("/dashboard/sets");
-  return { success: true };
+  return { success: true, title: set.title };
+}
+
+export async function deleteQuestionSet(id: string) {
+  // Mặc định chuyển vào Thùng rác để an toàn, tránh lỗi Foreign Key và hỗ trợ Hoàn tác
+  return softDeleteQuestionSet(id);
+}
+
+export async function restoreQuestionSet(id: string) {
+  const { user, profile } = await requireUser(["teacher", "admin"]);
+  const supabase = await createClient();
+  const isAdmin = profile.role === "admin";
+
+  let query = supabase.from("question_sets").select("id, title, description, owner_id").eq("id", id);
+  if (!isAdmin) {
+    query = query.eq("owner_id", user.id);
+  }
+
+  const { data: set, error: fetchErr } = await query.single();
+  if (fetchErr || !set) {
+    return { error: "Không tìm thấy bộ đề cần hoàn tác." };
+  }
+
+  const rawDesc = set.description || "";
+  let originalVisibility: "private" | "unlisted" | "public" = "private";
+  let restoredDesc: string | null = null;
+
+  const match = rawDesc.match(/^\[DELETED:(\d+):([a-z]+)\]\s*([\s\S]*)$/);
+  if (match) {
+    const parsedVis = match[2];
+    if (parsedVis === "public" || parsedVis === "unlisted" || parsedVis === "private") {
+      originalVisibility = parsedVis;
+    }
+    restoredDesc = match[3]?.trim() || null;
+  } else {
+    // Fallback nếu có định dạng khác
+    const simpleMatch = rawDesc.match(/^\[DELETED:[^\]]+\]\s*([\s\S]*)$/);
+    restoredDesc = simpleMatch ? simpleMatch[1]?.trim() || null : rawDesc;
+  }
+
+  const { error: updateErr } = await supabase
+    .from("question_sets")
+    .update({
+      description: restoredDesc,
+      visibility: originalVisibility,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+
+  if (updateErr) {
+    return { error: updateErr.message };
+  }
+
+  revalidatePath("/dashboard/sets");
+  return { success: true, title: set.title };
+}
+
+export async function permanentDeleteQuestionSet(id: string) {
+  const { user, profile } = await requireUser(["teacher", "admin"]);
+  const supabase = await createClient();
+  const isAdmin = profile.role === "admin";
+
+  // Kiểm tra quyền
+  let checkQuery = supabase.from("question_sets").select("id, title").eq("id", id);
+  if (!isAdmin) {
+    checkQuery = checkQuery.eq("owner_id", user.id);
+  }
+  const { data: set, error: checkErr } = await checkQuery.single();
+  if (checkErr || !set) {
+    return { error: "Không tìm thấy bộ đề hoặc bạn không có quyền xóa vĩnh viễn." };
+  }
+
+  // 1. Gỡ liên kết foreign key ở game_sessions để tránh vi phạm ràng buộc RESTRICT
+  await supabase.from("game_sessions").update({ set_id: null }).eq("set_id", id);
+
+  // 2. Xóa các câu hỏi thuộc bộ đề này
+  await supabase.from("questions").delete().eq("set_id", id);
+
+  // 3. Xóa vĩnh viễn bản ghi question_sets
+  const { error: delErr } = await supabase.from("question_sets").delete().eq("id", id);
+  if (delErr) {
+    return { error: delErr.message };
+  }
+
+  revalidatePath("/dashboard/sets");
+  return { success: true, title: set.title };
+}
+
+export async function emptyTrashQuestionSets() {
+  const { user, profile } = await requireUser(["teacher", "admin"]);
+  const supabase = await createClient();
+  const isAdmin = profile.role === "admin";
+
+  let query = supabase.from("question_sets").select("id").like("description", "[DELETED:%");
+  if (!isAdmin) {
+    query = query.eq("owner_id", user.id);
+  }
+
+  const { data: sets, error } = await query;
+  if (error || !sets || sets.length === 0) {
+    return { success: true, count: 0 };
+  }
+
+  const setIds = sets.map((s) => s.id);
+
+  // 1. Gỡ set_id ở game_sessions
+  await supabase.from("game_sessions").update({ set_id: null }).in("set_id", setIds);
+
+  // 2. Xóa câu hỏi
+  await supabase.from("questions").delete().in("set_id", setIds);
+
+  // 3. Xóa question_sets
+  const { error: delErr } = await supabase.from("question_sets").delete().in("id", setIds);
+  if (delErr) {
+    return { error: delErr.message };
+  }
+
+  revalidatePath("/dashboard/sets");
+  return { success: true, count: setIds.length };
 }
 
 export async function saveQuestionSetDetails(

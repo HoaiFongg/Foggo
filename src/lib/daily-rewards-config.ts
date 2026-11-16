@@ -15,7 +15,7 @@ export const DAILY_REWARDS_CONFIG: DailyRewardItem[] = [
     coins: 50,
     fireflies: 10,
     icon: "🪙",
-    desc: "+50 Vàng & +10 Đom Đóm",
+    desc: "+50 Vàng & +10 Điểm Thành Tích",
     items: [],
   },
   {
@@ -32,8 +32,8 @@ export const DAILY_REWARDS_CONFIG: DailyRewardItem[] = [
     title: "Ngày 3: Tiếp Sức Hành Trình",
     coins: 120,
     fireflies: 20,
-    icon: "🪲",
-    desc: "+120 Vàng & +20 Đom Đóm",
+    icon: "⭐",
+    desc: "+120 Vàng & +20 Điểm Thành Tích",
     items: [],
   },
   {
@@ -50,11 +50,11 @@ export const DAILY_REWARDS_CONFIG: DailyRewardItem[] = [
   },
   {
     day: 5,
-    title: "Ngày 5: Cơn Mưa Đom Đóm",
+    title: "Ngày 5: Cơn Mưa Thành Tích",
     coins: 200,
     fireflies: 35,
     icon: "✨",
-    desc: "+200 Vàng & +35 Đom Đóm",
+    desc: "+200 Vàng & +35 Điểm Thành Tích",
     items: [],
   },
   {
@@ -72,7 +72,7 @@ export const DAILY_REWARDS_CONFIG: DailyRewardItem[] = [
     coins: 500,
     fireflies: 60,
     icon: "👑",
-    desc: "+500 Vàng, +60 Đom Đóm & Rương Báu",
+    desc: "+500 Vàng, +60 Điểm Thành Tích & Rương Báu",
     items: [
       { itemId: "bandage", qty: 3 },
       { itemId: "iron_ore", qty: 2 },

@@ -17,6 +17,8 @@ export interface MonsterDef {
   maxCoins: number;
   isBoss: boolean;
   avatar: string;
+  spriteUrl?: string;
+  hasSpritesheet?: boolean;
   description: string;
   weakSpotDescription?: string;
   phases?: number;
@@ -35,6 +37,8 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     maxCoins: 8,
     isBoss: false,
     avatar: "💧",
+    spriteUrl: "/sprites/slime_idle_1_clean.png",
+    hasSpritesheet: true,
     description: "Mục tiêu sơ cấp - Thích hợp ôn tập kiến thức nền tảng.",
     lootTable: [
       { itemId: "slime_gel", chance: 0.7, minQty: 1, maxQty: 2 },
@@ -51,6 +55,8 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     maxCoins: 9,
     isBoss: false,
     avatar: "🐺",
+    spriteUrl: "/sprites/baby_wolf_idle.png",
+    hasSpritesheet: true,
     description: "Mục tiêu nhanh nhẹn - Thử thách phản xạ cơ bản.",
     lootTable: [
       { itemId: "raw_meat", chance: 0.6, minQty: 1, maxQty: 1 },
@@ -67,6 +73,7 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     maxCoins: 12,
     isBoss: false,
     avatar: "🐺",
+    spriteUrl: "/sprites/baby_wolf_idle.png",
     description: "Mục tiêu tiêu chuẩn - Đòi hỏi độ chính xác ổn định.",
     lootTable: [
       { itemId: "raw_meat", chance: 0.8, minQty: 1, maxQty: 2 },
@@ -83,6 +90,8 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     maxCoins: 12,
     isBoss: false,
     avatar: "🕷️",
+    spriteUrl: "/sprites/mist_spider_idle.png",
+    hasSpritesheet: true,
     description: "Mục tiêu tầm trung - Đòi hỏi trả lời câu hỏi liên tục.",
     lootTable: [
       { itemId: "slime_gel", chance: 0.5, minQty: 1, maxQty: 2 },
@@ -99,6 +108,7 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     maxCoins: 14,
     isBoss: false,
     avatar: "🐗",
+    spriteUrl: "/sprites/boar_king_idle.png",
     description: "Mục tiêu nâng cao - Lượng máu và sát thương lớn.",
     lootTable: [
       { itemId: "raw_meat", chance: 0.9, minQty: 1, maxQty: 2 },
@@ -116,6 +126,8 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     maxCoins: 18,
     isBoss: false,
     avatar: "👺",
+    spriteUrl: "/sprites/goblin/frame_1.png",
+    hasSpritesheet: true,
     description: "Mục tiêu cơ động - Thử thách độ chuẩn xác của câu trả lời.",
     lootTable: [
       { itemId: "wood", chance: 0.8, minQty: 2, maxQty: 4 },
@@ -133,6 +145,8 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     maxCoins: 110,
     isBoss: true,
     avatar: "👑🐗",
+    spriteUrl: "/sprites/boar_king_idle.png",
+    hasSpritesheet: true,
     phases: 2,
     description: "Thử thách trùm khu vực - Yêu cầu trả lời chuỗi câu hỏi chuẩn xác.",
     weakSpotDescription: "Lõi sương mù ở giữa trán",
@@ -170,6 +184,8 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     maxCoins: 30,
     isBoss: false,
     avatar: "💀",
+    spriteUrl: "/sprites/skeleton/frame_1.png",
+    hasSpritesheet: true,
     description: "Tàn tích của những nhà thám hiểm xấu số trong hang tối.",
     lootTable: [
       { itemId: "bone", chance: 0.8, minQty: 2, maxQty: 4 },
@@ -186,6 +202,8 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     maxCoins: 45,
     isBoss: false,
     avatar: "🗿",
+    spriteUrl: "/sprites/small_golem/frame_1.png",
+    hasSpritesheet: true,
     description: "Người đá chuyển động được nuôi dưỡng bởi ma thuật pha lê.",
     lootTable: [
       { itemId: "stone", chance: 1.0, minQty: 2, maxQty: 4 },
@@ -203,6 +221,8 @@ export const MONSTER_REGISTRY: Record<string, MonsterDef> = {
     maxCoins: 300,
     isBoss: true,
     avatar: "👑🗿",
+    spriteUrl: "/sprites/rock_golem/frame_1.png",
+    hasSpritesheet: true,
     phases: 3,
     description: "Hộ vệ cổ xưa bảo vệ mỏ pha lê, lớp giáp đá miễn nhiễm với vũ khí thô sơ.",
     weakSpotDescription: "Viên pha lê đỏ ở ngực trái",

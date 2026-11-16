@@ -74,6 +74,7 @@ export default function AuthUnifiedClient({
   // Show password toggles
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegPassword, setShowRegPassword] = useState(false);
+  const [showRegConfirmPassword, setShowRegConfirmPassword] = useState(false);
 
   // Expand optional school details for student
   const [showSchoolDetails, setShowSchoolDetails] = useState(false);
@@ -87,6 +88,7 @@ export default function AuthUnifiedClient({
     username: "",
     displayName: "",
     password: "",
+    confirmPassword: "",
     schoolName: "",
     province: "Hà Nội",
     className: "",
@@ -114,7 +116,11 @@ export default function AuthUnifiedClient({
       if (errorObj?.message?.includes("NEXT_REDIRECT")) {
         throw err;
       }
-      setError(isEn ? "Failed to log in. Please try again." : "Không thể đăng nhập. Vui lòng thử lại.");
+      setError(
+        isEn
+          ? "Failed to log in. Please try again."
+          : "Không thể đăng nhập. Vui lòng thử lại."
+      );
       setLoading(false);
     }
   }
@@ -139,16 +145,39 @@ export default function AuthUnifiedClient({
       if (errorObj?.message?.includes("NEXT_REDIRECT")) {
         throw err;
       }
-      setError(isEn ? "Registration failed. Please try again." : "Không thể đăng ký tài khoản. Vui lòng thử lại.");
+      setError(
+        isEn
+          ? "Registration failed. Please try again."
+          : "Không thể đăng ký tài khoản. Vui lòng thử lại."
+      );
       setLoading(false);
     }
   }
 
-  // Student Register handler (No email)
+  // Student Register handler (No email required)
   async function handleStudentRegister(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+
+    if (studentForm.password.length < 8) {
+      setError(
+        isEn
+          ? "Password must be at least 8 characters."
+          : "Mật khẩu phải có tối thiểu 8 ký tự."
+      );
+      return;
+    }
+
+    if (studentForm.password !== studentForm.confirmPassword) {
+      setError(
+        isEn
+          ? "Passwords do not match."
+          : "Mật khẩu xác nhận không khớp."
+      );
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const res = await registerStudent({
@@ -168,7 +197,10 @@ export default function AuthUnifiedClient({
 
       if (res?.ok && res.recoveryCode) {
         sessionStorage.setItem("foggo_recovery_code", res.recoveryCode);
-        sessionStorage.setItem("foggo_username", studentForm.username.trim().toLowerCase());
+        sessionStorage.setItem(
+          "foggo_username",
+          studentForm.username.trim().toLowerCase()
+        );
         router.push("/register/recovery-code");
       }
     } catch (err: unknown) {
@@ -176,7 +208,11 @@ export default function AuthUnifiedClient({
       if (errorObj?.message?.includes("NEXT_REDIRECT")) {
         throw err;
       }
-      setError(isEn ? "An unexpected error occurred." : "Đã có lỗi xảy ra khi tạo tài khoản học sinh.");
+      setError(
+        isEn
+          ? "An unexpected error occurred."
+          : "Đã có lỗi xảy ra khi tạo tài khoản học sinh."
+      );
       setLoading(false);
     }
   }
@@ -192,25 +228,17 @@ export default function AuthUnifiedClient({
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center px-4 py-8 sm:py-12 relative overflow-hidden selection:bg-amber-500/30">
-      {/* Background radial atmosphere */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-950/25 via-slate-950 to-slate-950 pointer-events-none" />
-      <div className="absolute top-1/4 -left-36 w-[420px] h-[420px] bg-amber-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse" />
-      <div className="absolute bottom-1/4 -right-36 w-[420px] h-[420px] bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
-
-      {/* Floating particles (ambient fireflies) */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[15%] left-[20%] w-1.5 h-1.5 bg-amber-400 rounded-full blur-[0.5px] shadow-[0_0_8px_#f59e0b] animate-ping opacity-60" style={{ animationDuration: "3s" }} />
-        <div className="absolute top-[40%] right-[18%] w-2 h-2 bg-amber-300 rounded-full blur-[0.5px] shadow-[0_0_10px_#f59e0b] animate-pulse opacity-70" />
-        <div className="absolute bottom-[25%] left-[25%] w-1.5 h-1.5 bg-emerald-400 rounded-full blur-[0.5px] shadow-[0_0_8px_#10b981] animate-ping opacity-50" style={{ animationDuration: "4s" }} />
-        <div className="absolute top-[70%] right-[30%] w-1.5 h-1.5 bg-amber-400 rounded-full blur-[0.5px] shadow-[0_0_8px_#f59e0b] animate-pulse opacity-60" />
-      </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-center items-center px-4 py-8 sm:py-12 relative overflow-hidden selection:bg-amber-500/30">
+      {/* Atmospheric ambient glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(245,158,11,0.12)_0%,transparent_60%)] pointer-events-none" />
+      <div className="absolute top-1/4 -left-32 w-96 h-96 bg-amber-500/5 dark:bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Top Header Action Bar */}
       <div className="w-full max-w-xl flex items-center justify-between mb-6 relative z-20">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-amber-400 transition-colors py-1.5 px-3 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-amber-500/40 backdrop-blur-md"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-amber-400 transition-colors py-1.5 px-3.5 rounded-xl bg-white/80 dark:bg-[#0c1220]/80 border border-slate-200 dark:border-white/[0.08] hover:border-slate-300 dark:hover:border-amber-500/40 backdrop-blur-md shadow-xs font-mono"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>{isEn ? "Back to Home" : "Về Trang Chủ"}</span>
@@ -225,19 +253,19 @@ export default function AuthUnifiedClient({
         {/* Brand Header */}
         <div className="text-center mb-6">
           <Link href="/" className="inline-flex items-center gap-3.5 group">
-            <div className="w-13 h-13 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-900/30 border-2 border-amber-500/40 flex items-center justify-center text-amber-400 group-hover:scale-105 group-hover:border-amber-400 transition-all shadow-[0_0_25px_rgba(245,158,11,0.25)]">
-              <Flame className="w-7 h-7 text-amber-400 animate-pulse drop-shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500 dark:text-amber-400 group-hover:scale-105 transition-transform duration-150 shadow-sm shadow-amber-500/15">
+              <Flame className="w-6 h-6 text-amber-500 dark:text-amber-400 animate-pulse motion-reduce:animate-none drop-shadow-sm" />
             </div>
             <div className="text-left">
-              <span className="text-3xl sm:text-4xl font-black tracking-tight text-white font-mono flex items-center">
-                FOG<span className="text-amber-400">GO</span>
+              <span className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white font-mono flex items-center">
+                FOG<span className="text-amber-500 dark:text-amber-400">GO</span>
               </span>
-              <span className="block text-[10px] uppercase font-bold tracking-widest text-amber-500/80 font-mono -mt-1">
-                RPG LEARNING ARENA
+              <span className="block text-[10px] font-bold text-amber-600 dark:text-amber-400/80 font-mono -mt-0.5">
+                RPG Learning Arena
               </span>
             </div>
           </Link>
-          <p className="text-slate-400 text-xs sm:text-sm mt-2 max-w-md mx-auto">
+          <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-2 max-w-md mx-auto">
             {isEn
               ? "Light your lantern, banish the fog of knowledge, conquer monsters"
               : "Thắp sáng đèn lồng, xua tan màn sương tri thức và chinh phục quái vật"}
@@ -245,41 +273,41 @@ export default function AuthUnifiedClient({
         </div>
 
         {/* Auth Card */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-6 sm:p-8 backdrop-blur-2xl shadow-2xl shadow-black/90 relative overflow-hidden">
+        <div className="bg-white dark:bg-[#0c1220] border border-slate-200 dark:border-white/[0.08] rounded-3xl p-6 sm:p-8 backdrop-blur-2xl shadow-xl shadow-slate-200/50 dark:shadow-2xl dark:shadow-black/80 relative overflow-hidden text-slate-900 dark:text-white">
           {/* Subtle top ambient line */}
-          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500/60 to-transparent" />
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
 
           {/* 2-Part Segmented Switcher (Đăng Nhập ⇋ Đăng Ký) */}
-          <div className="grid grid-cols-2 p-1.5 bg-slate-950 rounded-2xl border border-slate-800/90 mb-6 shadow-inner">
+          <div className="grid grid-cols-2 p-1.5 bg-slate-100 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800/90 mb-6 shadow-inner">
             <button
               type="button"
               onClick={() => switchTab("login")}
-              className={`py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors duration-150 cursor-pointer ${
                 tab === "login"
-                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-lg shadow-amber-500/30 scale-[1.01]"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/50"
+                  ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm border border-slate-200/80 dark:border-slate-700/80 font-bold"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-900/50 font-medium"
               }`}
             >
-              <Lock className="w-4 h-4" />
+              <Lock className={`w-4 h-4 ${tab === "login" ? "text-amber-500 dark:text-amber-400" : ""}`} />
               <span>{isEn ? "Sign In" : "Đăng Nhập"}</span>
             </button>
 
             <button
               type="button"
               onClick={() => switchTab("register")}
-              className={`py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer relative ${
+              className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors duration-150 cursor-pointer relative ${
                 tab === "register"
-                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-lg shadow-amber-500/30 scale-[1.01]"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/50"
+                  ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm border border-slate-200/80 dark:border-slate-700/80 font-bold"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-900/50 font-medium"
               }`}
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className={`w-4 h-4 ${tab === "register" ? "text-amber-500 dark:text-amber-400" : ""}`} />
               <span>{isEn ? "New Account" : "Đăng Ký"}</span>
               <span
-                className={`hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full font-extrabold uppercase tracking-wider ${
+                className={`hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
                   tab === "register"
-                    ? "bg-slate-950/20 text-slate-950"
-                    : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                    ? "bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                    : "bg-slate-200/60 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
                 }`}
               >
                 {isEn ? "Fast 30s" : "Tân Thủ"}
@@ -289,28 +317,28 @@ export default function AuthUnifiedClient({
 
           {/* Error Message Alert */}
           {error && (
-            <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs sm:text-sm flex items-start gap-3 animate-shake">
-              <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+            <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs sm:text-sm flex items-start gap-3 animate-shake motion-reduce:animate-none">
+              <AlertCircle className="w-5 h-5 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="font-semibold">{isEn ? "Notice" : "Thông báo"}</p>
-                <p className="text-rose-200/90 mt-0.5">{error}</p>
+                <p className="text-rose-600 dark:text-rose-200/90 mt-0.5">{error}</p>
               </div>
             </div>
           )}
 
           {/* TAB 1: ĐĂNG NHẬP (LOGIN) */}
           {tab === "login" && (
-            <div className="space-y-5 animate-fadeIn">
+            <div className="space-y-5 animate-fadeIn motion-reduce:animate-none">
               <div className="flex items-center justify-between pb-1">
                 <div>
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <span>{isEn ? "Welcome Back!" : "Chào Mừng Trở Lại!"}</span>
-                    <span className="text-amber-400">⚔️</span>
+                    <Swords className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     {isEn
                       ? "Enter your credentials to continue your adventure"
-                      : "Nhập thông tin để tiếp tục săn quái và tích lũy Đom Đóm"}
+                      : "Nhập thông tin để tiếp tục săn quái và tích lũy Điểm Thành Tích"}
                   </p>
                 </div>
               </div>
@@ -318,11 +346,9 @@ export default function AuthUnifiedClient({
               <form onSubmit={handleLoginSubmit} className="space-y-4">
                 {/* Account input (Username or Email) */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider font-mono flex items-center justify-between">
-                    <span className="flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-amber-400" />
-                      <span>{isEn ? "Username or Email" : "Tên đăng nhập hoặc Email"}</span>
-                    </span>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+                    <span>{isEn ? "Account" : "Tài khoản"}</span>
                   </label>
                   <div className="relative">
                     <input
@@ -331,27 +357,19 @@ export default function AuthUnifiedClient({
                       required
                       placeholder={
                         isEn
-                          ? "e.g., student8a or teacher@school.edu.vn"
-                          : "ví dụ: hocsinh8a hoặc giaovien@truong.edu.vn"
+                          ? "Username or email"
+                          : "Tên đăng nhập hoặc email"
                       }
-                      className="w-full pl-4 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors text-sm"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-colors text-sm"
                     />
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1.5">
-                    <span className="text-amber-400 font-bold">🎒</span>
-                    <span>
-                      {isEn
-                        ? "Students use Username • Teachers & Admins use Email"
-                        : "Học sinh dùng Tên đăng nhập • Thầy cô & Admin dùng Email"}
-                    </span>
-                  </p>
                 </div>
 
                 {/* Password input */}
                 <div>
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono flex items-center gap-1.5">
-                      <Lock className="w-3.5 h-3.5 text-amber-400" />
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                      <Lock className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                       <span>{isEn ? "Password" : "Mật khẩu"}</span>
                     </label>
                   </div>
@@ -361,13 +379,14 @@ export default function AuthUnifiedClient({
                       name="password"
                       required
                       placeholder="••••••••"
-                      className="w-full pl-4 pr-11 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors text-sm"
+                      className="w-full pl-4 pr-11 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-colors text-sm"
                     />
                     <button
                       type="button"
                       onClick={() => setShowLoginPassword(!showLoginPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1 cursor-pointer transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 p-1 cursor-pointer transition-colors"
                       tabIndex={-1}
+                      aria-label={showLoginPassword ? "Hide password" : "Show password"}
                     >
                       {showLoginPassword ? (
                         <EyeOff className="w-4 h-4" />
@@ -382,11 +401,11 @@ export default function AuthUnifiedClient({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-xl shadow-amber-500/25 transition-all hover:shadow-amber-500/40 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none mt-2 cursor-pointer"
+                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-lg shadow-amber-500/20 transition-colors duration-150 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none mt-2 cursor-pointer"
                 >
                   {loading ? (
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin motion-reduce:animate-none" />
                       <span>{isEn ? "Connecting..." : "Đang vào thế giới..."}</span>
                     </div>
                   ) : (
@@ -397,40 +416,15 @@ export default function AuthUnifiedClient({
                   )}
                 </button>
               </form>
-
-              {/* Friendly New Adventurer Card */}
-              <div className="mt-6 pt-5 border-t border-slate-800/80">
-                <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                      <span>{isEn ? "New Adventurer?" : "Bạn là người chơi mới?"}</span>
-                    </p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">
-                      {isEn
-                        ? "Create an account in 30 seconds with no email required!"
-                        : "Tạo tài khoản học sinh chỉ trong 30 giây, không cần email!"}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => switchTab("register")}
-                    className="self-start sm:self-auto px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition-all inline-flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>{isEn ? "Sign Up Free" : "Đăng ký ngay"}</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
             </div>
           )}
 
           {/* TAB 2: ĐĂNG KÝ (REGISTER) */}
           {tab === "register" && (
-            <div className="space-y-5 animate-fadeIn">
+            <div className="space-y-5 animate-fadeIn motion-reduce:animate-none">
               {/* Role Picker: 2 Cards (Học Sinh vs Giáo Viên) */}
               <div>
-                <p className="text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wider font-mono">
+                <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
                   {isEn ? "Choose Your Role:" : "Chọn vai trò của bạn:"}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -441,15 +435,15 @@ export default function AuthUnifiedClient({
                       setRegisterRole("student");
                       setError(null);
                     }}
-                    className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden ${
+                    className={`p-3.5 rounded-2xl border text-left transition-colors duration-150 cursor-pointer relative overflow-hidden ${
                       registerRole === "student"
-                        ? "bg-amber-500/10 border-amber-500 text-white shadow-lg shadow-amber-500/15"
-                        : "bg-slate-950/70 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-300"
+                        ? "bg-amber-500/10 border-amber-500/80 dark:border-amber-500 text-slate-900 dark:text-white shadow-sm"
+                        : "bg-slate-50 dark:bg-slate-950/70 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-900 dark:hover:text-slate-300"
                     }`}
                   >
                     {registerRole === "student" && (
                       <div className="absolute top-2 right-2">
-                        <CheckCircle2 className="w-4 h-4 text-amber-400" />
+                        <CheckCircle2 className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                       </div>
                     )}
                     <div className="flex items-center gap-2.5 mb-1.5">
@@ -457,21 +451,21 @@ export default function AuthUnifiedClient({
                         className={`w-8 h-8 rounded-xl flex items-center justify-center ${
                           registerRole === "student"
                             ? "bg-amber-500 text-slate-950 font-bold"
-                            : "bg-slate-800 text-slate-400"
+                            : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
                         }`}
                       >
                         <Swords className="w-4 h-4" />
                       </div>
                       <div>
-                        <span className="text-xs sm:text-sm font-bold block text-white">
+                        <span className="text-xs sm:text-sm font-bold block text-slate-900 dark:text-white">
                           {isEn ? "Student" : "Học Sinh"}
                         </span>
-                        <span className="text-[10px] text-amber-400 font-semibold uppercase">
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
                           {isEn ? "No email required" : "Không cần email"}
                         </span>
                       </div>
                     </div>
-                    <p className="text-[11px] text-slate-400 leading-tight">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
                       {isEn
                         ? "Join in 30s, hunt monsters, forge gear & rank up."
                         : "Đăng ký 30s, săn quái, rèn đồ và nhận quà tân thủ."}
@@ -485,15 +479,15 @@ export default function AuthUnifiedClient({
                       setRegisterRole("teacher");
                       setError(null);
                     }}
-                    className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden ${
+                    className={`p-3.5 rounded-2xl border text-left transition-colors duration-150 cursor-pointer relative overflow-hidden ${
                       registerRole === "teacher"
-                        ? "bg-amber-500/10 border-amber-500 text-white shadow-lg shadow-amber-500/15"
-                        : "bg-slate-950/70 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-300"
+                        ? "bg-amber-500/10 border-amber-500/80 dark:border-amber-500 text-slate-900 dark:text-white shadow-sm"
+                        : "bg-slate-50 dark:bg-slate-950/70 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-900 dark:hover:text-slate-300"
                     }`}
                   >
                     {registerRole === "teacher" && (
                       <div className="absolute top-2 right-2">
-                        <CheckCircle2 className="w-4 h-4 text-amber-400" />
+                        <CheckCircle2 className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                       </div>
                     )}
                     <div className="flex items-center gap-2.5 mb-1.5">
@@ -501,21 +495,21 @@ export default function AuthUnifiedClient({
                         className={`w-8 h-8 rounded-xl flex items-center justify-center ${
                           registerRole === "teacher"
                             ? "bg-amber-500 text-slate-950 font-bold"
-                            : "bg-slate-800 text-slate-400"
+                            : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
                         }`}
                       >
                         <GraduationCap className="w-4 h-4" />
                       </div>
                       <div>
-                        <span className="text-xs sm:text-sm font-bold block text-white">
+                        <span className="text-xs sm:text-sm font-bold block text-slate-900 dark:text-white">
                           {isEn ? "Teacher / Admin" : "Giáo Viên / Quản Lý"}
                         </span>
-                        <span className="text-[10px] text-sky-400 font-semibold uppercase">
+                        <span className="text-[10px] text-sky-600 dark:text-sky-400 font-semibold">
                           {isEn ? "Requires email" : "Cần email"}
                         </span>
                       </div>
                     </div>
-                    <p className="text-[11px] text-slate-400 leading-tight">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
                       {isEn
                         ? "Create question sets, host dungeons & track reports."
                         : "Tạo 8 dạng bài, mở hầm ngục lớp và xuất điểm Excel."}
@@ -524,14 +518,14 @@ export default function AuthUnifiedClient({
                 </div>
               </div>
 
-              {/* SUB-FORM A: ĐĂNG KÝ HỌC SINH (KHÔNG CẦN EMAIL) */}
+              {/* SUB-FORM A: ĐĂNG KÝ HỌC SINH (KHÔNG CẦN EMAIL - 30 GIÂY) */}
               {registerRole === "student" && (
-                <form onSubmit={handleStudentRegister} className="space-y-4 pt-1">
+                <form onSubmit={handleStudentRegister} className="space-y-3.5 pt-1">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     {/* Username */}
                     <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1 font-mono uppercase">
-                        {isEn ? "Username" : "Tên đăng nhập"} <span className="text-amber-400">*</span>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        {isEn ? "Username" : "Tên đăng nhập"} <span className="text-amber-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -547,15 +541,15 @@ export default function AuthUnifiedClient({
                           setStudentForm({ ...studentForm, username: e.target.value })
                         }
                         placeholder={isEn ? "e.g., knight_alex" : "ví dụ: hiepsi_nam"}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-600 focus:outline-none focus:border-amber-500 text-sm"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-colors text-sm"
                       />
                     </div>
 
                     {/* Display Name */}
                     <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1 font-mono uppercase">
-                        {isEn ? "Character / In-Game Name" : "Tên hiển thị nhân vật"}{" "}
-                        <span className="text-amber-400">*</span>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        {isEn ? "Character Name" : "Tên hiển thị nhân vật"}{" "}
+                        <span className="text-amber-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -565,52 +559,88 @@ export default function AuthUnifiedClient({
                           setStudentForm({ ...studentForm, displayName: e.target.value })
                         }
                         placeholder={isEn ? "e.g., Alex Nguyen" : "ví dụ: Nam Phong"}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-600 focus:outline-none focus:border-amber-500 text-sm"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-colors text-sm"
                       />
                     </div>
                   </div>
 
-                  {/* Password */}
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1 font-mono uppercase">
-                      {isEn ? "Password" : "Mật khẩu"} <span className="text-amber-400">*</span>
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showRegPassword ? "text" : "password"}
-                        required
-                        minLength={8}
-                        value={studentForm.password}
-                        onChange={(e) =>
-                          setStudentForm({ ...studentForm, password: e.target.value })
-                        }
-                        placeholder={isEn ? "Min 8 characters" : "Tối thiểu 8 ký tự"}
-                        className="w-full pl-3.5 pr-11 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-600 focus:outline-none focus:border-amber-500 text-sm"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowRegPassword(!showRegPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1 cursor-pointer"
-                        tabIndex={-1}
-                      >
-                        {showRegPassword ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
-                      </button>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {/* Password */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        {isEn ? "Password" : "Mật khẩu"} <span className="text-amber-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showRegPassword ? "text" : "password"}
+                          required
+                          minLength={8}
+                          value={studentForm.password}
+                          onChange={(e) =>
+                            setStudentForm({ ...studentForm, password: e.target.value })
+                          }
+                          placeholder={isEn ? "Min 8 characters" : "Tối thiểu 8 ký tự"}
+                          className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-colors text-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowRegPassword(!showRegPassword)}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 p-1 cursor-pointer transition-colors"
+                          tabIndex={-1}
+                          aria-label={showRegPassword ? "Hide password" : "Show password"}
+                        >
+                          {showRegPassword ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Confirm Password */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        {isEn ? "Confirm Password" : "Xác nhận mật khẩu"} <span className="text-amber-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showRegConfirmPassword ? "text" : "password"}
+                          required
+                          minLength={8}
+                          value={studentForm.confirmPassword}
+                          onChange={(e) =>
+                            setStudentForm({ ...studentForm, confirmPassword: e.target.value })
+                          }
+                          placeholder={isEn ? "Re-enter password" : "Nhập lại mật khẩu"}
+                          className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-colors text-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowRegConfirmPassword(!showRegConfirmPassword)}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 p-1 cursor-pointer transition-colors"
+                          tabIndex={-1}
+                          aria-label={showRegConfirmPassword ? "Hide password" : "Show password"}
+                        >
+                          {showRegConfirmPassword ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
                   {/* Optional School / Class Collapse */}
-                  <div className="border border-slate-800/80 rounded-2xl p-3 bg-slate-950/40">
+                  <div className="border border-slate-200 dark:border-slate-800/80 rounded-2xl p-3 bg-slate-50/60 dark:bg-slate-950/40">
                     <button
                       type="button"
                       onClick={() => setShowSchoolDetails(!showSchoolDetails)}
-                      className="w-full flex items-center justify-between text-xs font-semibold text-slate-400 hover:text-slate-200 cursor-pointer"
+                      className="w-full flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 cursor-pointer transition-colors"
                     >
                       <span className="flex items-center gap-1.5">
-                        <School className="w-3.5 h-3.5 text-amber-400" />
+                        <School className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                         <span>
                           {isEn
                             ? "Add School & Class Info (Optional)"
@@ -618,16 +648,16 @@ export default function AuthUnifiedClient({
                         </span>
                       </span>
                       {showSchoolDetails ? (
-                        <ChevronUp className="w-4 h-4 text-slate-500" />
+                        <ChevronUp className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                       ) : (
-                        <ChevronDown className="w-4 h-4 text-slate-500" />
+                        <ChevronDown className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                       )}
                     </button>
 
                     {showSchoolDetails && (
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-3 pt-3 border-t border-slate-800/60 animate-fadeIn">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-3 pt-3 border-t border-slate-200 dark:border-slate-800/60 animate-fadeIn motion-reduce:animate-none">
                         <div>
-                          <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                          <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
                             {isEn ? "Province" : "Tỉnh / TP"}
                           </label>
                           <select
@@ -635,7 +665,7 @@ export default function AuthUnifiedClient({
                             onChange={(e) =>
                               setStudentForm({ ...studentForm, province: e.target.value })
                             }
-                            className="w-full px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:outline-none focus:border-amber-500"
+                            className="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-amber-500 transition-colors"
                           >
                             {PROVINCES.map((p) => (
                               <option key={p} value={p}>
@@ -645,7 +675,7 @@ export default function AuthUnifiedClient({
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                          <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
                             {isEn ? "School Name" : "Tên Trường"}
                           </label>
                           <input
@@ -655,11 +685,11 @@ export default function AuthUnifiedClient({
                               setStudentForm({ ...studentForm, schoolName: e.target.value })
                             }
                             placeholder={isEn ? "e.g., Lincoln High" : "ví dụ: THCS Lê Quý Đôn"}
-                            className="w-full px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder:text-slate-600 text-xs focus:outline-none focus:border-amber-500"
+                            className="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 text-xs focus:outline-none focus:border-amber-500 transition-colors"
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                          <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
                             {isEn ? "Class" : "Lớp"}
                           </label>
                           <input
@@ -669,7 +699,7 @@ export default function AuthUnifiedClient({
                               setStudentForm({ ...studentForm, className: e.target.value })
                             }
                             placeholder={isEn ? "e.g., 9A1" : "ví dụ: 9A1"}
-                            className="w-full px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder:text-slate-600 text-xs focus:outline-none focus:border-amber-500"
+                            className="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 text-xs focus:outline-none focus:border-amber-500 transition-colors"
                           />
                         </div>
                       </div>
@@ -680,11 +710,11 @@ export default function AuthUnifiedClient({
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-xl shadow-amber-500/25 transition-all hover:shadow-amber-500/40 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                    className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-colors duration-150 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
                   >
                     {loading ? (
                       <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin motion-reduce:animate-none" />
                         <span>{isEn ? "Creating Character..." : "Đang tạo nhân vật..."}</span>
                       </div>
                     ) : (
@@ -698,7 +728,7 @@ export default function AuthUnifiedClient({
                     )}
                   </button>
 
-                  <p className="text-[11px] text-center text-slate-500">
+                  <p className="text-[11px] text-center text-slate-500 dark:text-slate-400">
                     {isEn
                       ? "A secret recovery code will be automatically generated to protect your account."
                       : "Hệ thống sẽ tự động tạo Mã khôi phục bí mật để bạn bảo vệ tài khoản khi quên mật khẩu."}
@@ -710,36 +740,36 @@ export default function AuthUnifiedClient({
               {registerRole === "teacher" && (
                 <form onSubmit={handleTeacherRegister} className="space-y-4 pt-1">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1 font-mono uppercase">
-                      {isEn ? "Full Name" : "Họ và Tên (Thầy/Cô)"} <span className="text-amber-400">*</span>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      {isEn ? "Full Name" : "Họ và Tên (Thầy/Cô)"} <span className="text-amber-500">*</span>
                     </label>
                     <input
                       type="text"
                       name="displayName"
                       required
                       placeholder={isEn ? "e.g., Prof. John Doe" : "Thầy/Cô Nguyễn Văn A"}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-600 focus:outline-none focus:border-amber-500 text-sm"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-colors text-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1 font-mono uppercase flex items-center gap-1.5">
-                      <Mail className="w-3.5 h-3.5 text-amber-400" />
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                       <span>{isEn ? "Work / Teacher Email" : "Email Giáo Viên / Công Tác"}</span>
-                      <span className="text-amber-400">*</span>
+                      <span className="text-amber-500">*</span>
                     </label>
                     <input
                       type="email"
                       name="email"
                       required
                       placeholder="giaovien@truong.edu.vn"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-600 focus:outline-none focus:border-amber-500 text-sm"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-colors text-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1 font-mono uppercase">
-                      {isEn ? "Password" : "Mật khẩu"} <span className="text-amber-400">*</span>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      {isEn ? "Password" : "Mật khẩu"} <span className="text-amber-500">*</span>
                     </label>
                     <div className="relative">
                       <input
@@ -748,13 +778,14 @@ export default function AuthUnifiedClient({
                         required
                         minLength={8}
                         placeholder={isEn ? "Minimum 8 characters" : "Tối thiểu 8 ký tự"}
-                        className="w-full pl-3.5 pr-11 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-600 focus:outline-none focus:border-amber-500 text-sm"
+                        className="w-full pl-3.5 pr-11 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-colors text-sm"
                       />
                       <button
                         type="button"
                         onClick={() => setShowRegPassword(!showRegPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1 cursor-pointer"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 p-1 cursor-pointer transition-colors"
                         tabIndex={-1}
+                        aria-label={showRegPassword ? "Hide password" : "Show password"}
                       >
                         {showRegPassword ? (
                           <EyeOff className="w-4 h-4" />
@@ -769,11 +800,11 @@ export default function AuthUnifiedClient({
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-xl shadow-amber-500/25 transition-all hover:shadow-amber-500/40 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                    className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-colors duration-150 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
                   >
                     {loading ? (
                       <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin motion-reduce:animate-none" />
                         <span>{isEn ? "Registering..." : "Đang tạo tài khoản..."}</span>
                       </div>
                     ) : (
@@ -787,7 +818,7 @@ export default function AuthUnifiedClient({
                     )}
                   </button>
 
-                  <p className="text-[11px] text-center text-slate-500">
+                  <p className="text-[11px] text-center text-slate-500 dark:text-slate-400">
                     {isEn
                       ? "A verification link will be sent to your email to activate your account."
                       : "Một liên kết xác thực sẽ được gửi tới email của bạn để kích hoạt quyền tạo lớp."}
@@ -799,16 +830,15 @@ export default function AuthUnifiedClient({
         </div>
 
         {/* Security & Reliability reassurance footer */}
-        <div className="flex items-center justify-center gap-4 text-xs text-slate-500 mt-6">
+        <div className="flex items-center justify-center gap-4 text-xs text-slate-500 dark:text-slate-500 mt-6">
           <div className="flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-amber-500/70" />
             <span>{isEn ? "End-to-End Encryption" : "Mã hóa bảo mật"}</span>
           </div>
           <span>•</span>
-          <span>{isEn ? "Foggo Learning RPG v1.0" : "Hệ Thống Foggo v1.0"}</span>
+          <span>{isEn ? "Foggo Learning RPG" : "Hệ Thống Foggo"}</span>
         </div>
       </div>
     </div>
   );
 }
-

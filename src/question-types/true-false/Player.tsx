@@ -20,7 +20,7 @@ export function TrueFalsePlayer({
       : [
           {
             id: "s1",
-            text: content?.prompt || "...",
+            text: content?.prompt || (isEn ? "Statement" : "Nhận định"),
           },
         ];
 
@@ -45,100 +45,115 @@ export function TrueFalsePlayer({
   const answeredCount = Object.keys(currentAnswers).length;
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-2.5 sm:space-y-3">
-      {/* 1. Phần đề bài / Câu dẫn */}
-      <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg space-y-1.5">
-        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20 inline-block">
+    <div className="w-full max-w-5xl mx-auto space-y-4">
+      {/* 1. Phần đề bài / Câu dẫn Google Material 3 (Bo góc lớn 24px, nền sáng, bóng nhẹ) */}
+      <div className="py-4 px-5 sm:py-5 sm:px-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-center shadow-xs space-y-2">
+        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#E8F0FE] text-[#1967D2] dark:bg-[#4285F4]/20 dark:text-[#8AB4F8] border border-[#D2E3FC] dark:border-[#4285F4]/30 inline-block">
           {t.questionTypes.true_false}
         </span>
 
-        <h2 className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug font-sans">
-          {content?.prompt || (isEn ? "Evaluate the following statements as True or False:" : "Đọc các nhận định sau đây và chọn Đúng hoặc Sai:")}
+        <h2 className="text-base sm:text-lg md:text-xl font-bold text-slate-900 dark:text-white leading-relaxed font-sans px-2">
+          {content?.prompt ||
+            (isEn
+              ? "Evaluate the following statements as True or False:"
+              : "Đọc các nhận định sau đây và chọn Đúng hoặc Sai:")}
         </h2>
 
         {!isSingle && (
-          <p className="text-[11px] text-slate-400 font-mono">
-            {isEn ? `Progress: ` : `Tiến độ: `}<span className="text-cyan-400 font-bold">{answeredCount}</span>/{statements.length} {isEn ? "statements answered" : "nhận định đã trả lời"}
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">
+            {isEn ? `Progress: ` : `Tiến độ: `}
+            <span className="text-[#1967D2] dark:text-[#8AB4F8] font-bold">{answeredCount}</span>/{statements.length}{" "}
+            {isEn ? "statements answered" : "nhận định đã trả lời"}
           </p>
         )}
 
         {content?.image_url && (
-          <div className="mt-2 max-w-xs mx-auto rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+          <div className="mt-3 max-w-sm mx-auto rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-[#F8F9FA] dark:bg-slate-950 p-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={content.image_url}
               alt="Minh họa"
-              className="w-full h-auto max-h-36 object-contain mx-auto"
+              className="w-full h-auto max-h-48 object-contain mx-auto rounded-xl"
             />
           </div>
         )}
       </div>
 
-      {/* 2. Danh sách nhận định và các nút chọn ĐÚNG / SAI */}
+      {/* 2. Danh sách nhận định và các nút chọn ĐÚNG / SAI chuẩn Google Material 3 */}
       {isSingle ? (
-        /* Trường hợp 1 nhận định đơn lẻ: Hiển thị 2 nút ĐÚNG / SAI to nổi bật */
-        <div className="space-y-2.5">
-          <div className="py-2 px-3 rounded-xl bg-slate-900/60 border border-slate-800 text-center">
-            <p className="text-xs sm:text-sm font-semibold text-slate-200">
+        /* Trường hợp 1 nhận định đơn lẻ: Hiển thị thẻ nhận định & 2 thẻ lớn ĐÚNG (Xanh lá) / SAI (Đỏ) */
+        <div className="space-y-4">
+          <div className="py-4 px-5 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 text-center shadow-xs">
+            <p className="text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-100 leading-relaxed">
               {statements[0].text}
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            {/* Nút ĐÚNG */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+            {/* Thẻ ĐÚNG (Google Green #34A853 / Nền nhạt #E6F4EA) */}
             <button
               type="button"
               disabled={disabled}
               onClick={() => handleSelect(statements[0].id, true)}
-              className={`p-3 sm:p-4 rounded-2xl border-2 flex flex-col items-center justify-center gap-1.5 transition-all duration-150 active:scale-95 cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 ${
+              className={`min-h-[76px] sm:min-h-[84px] p-5 rounded-2xl border-2 flex items-center justify-center gap-3.5 transition-all duration-200 active:scale-98 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60 shadow-xs hover:shadow-sm ${
                 currentAnswers[statements[0].id] === true
-                  ? "bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.35)] scale-[1.01]"
-                  : "bg-slate-900/80 border-slate-800 text-slate-300 hover:border-cyan-500/50 hover:bg-cyan-500/10"
+                  ? "bg-[#E6F4EA] border-[#34A853] text-[#137333] dark:bg-[#34A853]/20 dark:border-[#34A853] dark:text-white shadow-sm ring-2 ring-[#34A853]/30 scale-[1.01]"
+                  : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:border-[#34A853]/60 hover:bg-[#E6F4EA]/30"
               }`}
             >
               <div
-                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                   currentAnswers[statements[0].id] === true
-                    ? "bg-cyan-500 text-slate-950 shadow-md scale-105"
-                    : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
+                    ? "bg-[#34A853] text-white shadow-xs scale-105"
+                    : "bg-[#E6F4EA] text-[#137333] border border-[#CEEAD6] dark:bg-[#34A853]/20 dark:text-[#81C995]"
                 }`}
               >
                 <Check className="w-5 h-5 stroke-[3]" />
               </div>
-              <span className="text-xs sm:text-sm font-black tracking-wider font-mono">
-                {isEn ? "TRUE" : "ĐÚNG"}
-              </span>
+              <div className="text-left">
+                <span className="text-base sm:text-lg font-bold font-sans tracking-wide block">
+                  {isEn ? "TRUE" : "ĐÚNG"}
+                </span>
+                <span className="text-[11px] font-medium opacity-80 block">
+                  {isEn ? "Mark as correct" : "Nhận định chính xác"}
+                </span>
+              </div>
             </button>
 
-            {/* Nút SAI */}
+            {/* Thẻ SAI (Google Red #EA4335 / Nền nhạt #FCE8E6) */}
             <button
               type="button"
               disabled={disabled}
               onClick={() => handleSelect(statements[0].id, false)}
-              className={`p-3 sm:p-4 rounded-2xl border-2 flex flex-col items-center justify-center gap-1.5 transition-all duration-150 active:scale-95 cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 ${
+              className={`min-h-[76px] sm:min-h-[84px] p-5 rounded-2xl border-2 flex items-center justify-center gap-3.5 transition-all duration-200 active:scale-98 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60 shadow-xs hover:shadow-sm ${
                 currentAnswers[statements[0].id] === false
-                  ? "bg-blue-500/20 border-blue-400 text-white shadow-[0_0_15px_rgba(59,130,246,0.35)] scale-[1.01]"
-                  : "bg-slate-900/80 border-slate-800 text-slate-300 hover:border-blue-500/50 hover:bg-blue-500/10"
+                  ? "bg-[#FCE8E6] border-[#EA4335] text-[#C5221F] dark:bg-[#EA4335]/20 dark:border-[#EA4335] dark:text-white shadow-sm ring-2 ring-[#EA4335]/30 scale-[1.01]"
+                  : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:border-[#EA4335]/60 hover:bg-[#FCE8E6]/30"
               }`}
             >
               <div
-                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                   currentAnswers[statements[0].id] === false
-                    ? "bg-blue-500 text-slate-950 shadow-md scale-105"
-                    : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                    ? "bg-[#EA4335] text-white shadow-xs scale-105"
+                    : "bg-[#FCE8E6] text-[#C5221F] border border-[#FAD2CF] dark:bg-[#EA4335]/20 dark:text-[#F28B82]"
                 }`}
               >
                 <X className="w-5 h-5 stroke-[3]" />
               </div>
-              <span className="text-xs sm:text-sm font-black tracking-wider font-mono">
-                {isEn ? "FALSE" : "SAI"}
-              </span>
+              <div className="text-left">
+                <span className="text-base sm:text-lg font-bold font-sans tracking-wide block">
+                  {isEn ? "FALSE" : "SAI"}
+                </span>
+                <span className="text-[11px] font-medium opacity-80 block">
+                  {isEn ? "Mark as incorrect" : "Nhận định sai"}
+                </span>
+              </div>
             </button>
           </div>
         </div>
       ) : (
-        /* Trường hợp nhiều nhận định: Hiển thị từng nhận định kèm nút Đúng / Sai tương ứng */
-        <div className="space-y-2 max-h-[36vh] overflow-y-auto pr-1">
+        /* Trường hợp nhiều nhận định: Mỗi dòng là thẻ bo góc 16px kèm 2 nút Pill ĐÚNG / SAI */
+        <div className="space-y-3 max-h-[45vh] overflow-y-auto pr-1">
           {statements.map((s, idx) => {
             const isTrue = currentAnswers[s.id] === true;
             const isFalse = currentAnswers[s.id] === false;
@@ -146,31 +161,31 @@ export function TrueFalsePlayer({
             return (
               <div
                 key={s.id}
-                className="p-2.5 sm:p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-sm hover:border-slate-700 transition-colors"
+                className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 shadow-xs hover:shadow-sm transition-all"
               >
                 {/* Nội dung nhận định */}
-                <div className="flex items-start gap-2.5 flex-1">
-                  <span className="w-5 h-5 rounded-md bg-slate-950 border border-slate-800 font-mono text-[10px] font-bold text-cyan-400 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="flex items-start gap-3 flex-1 min-w-0">
+                  <span className="w-7 h-7 rounded-full bg-[#E8F0FE] text-[#1967D2] dark:bg-[#4285F4]/20 dark:text-[#8AB4F8] font-bold font-sans text-xs flex items-center justify-center shrink-0 mt-0.5 border border-[#D2E3FC] dark:border-[#4285F4]/30">
                     {idx + 1}
                   </span>
-                  <p className="text-xs sm:text-sm font-medium text-slate-200 leading-snug">
-                    {s.text || <span className="text-slate-600 italic">(Nhận định chưa có nội dung)</span>}
+                  <p className="text-sm sm:text-base font-medium text-slate-800 dark:text-slate-100 leading-relaxed break-words whitespace-normal flex-1">
+                    {s.text || <span className="text-slate-400 italic">(Nhận định chưa có nội dung)</span>}
                   </p>
                 </div>
 
-                {/* 2 Nút lựa chọn: ĐÚNG hoặc SAI */}
-                <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                {/* 2 Nút Lựa Chọn Dạng Pill Bo Tròn (Google Green & Red) */}
+                <div className="flex items-center gap-2.5 self-end sm:self-auto shrink-0">
                   <button
                     type="button"
                     disabled={disabled}
                     onClick={() => handleSelect(s.id, true)}
-                    className={`px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1 transition-all cursor-pointer active:scale-95 disabled:cursor-not-allowed ${
+                    className={`px-4 py-2 rounded-full font-semibold text-xs sm:text-sm flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 disabled:cursor-not-allowed shadow-xs ${
                       isTrue
-                        ? "bg-cyan-600 text-white shadow-[0_0_12px_rgba(6,182,212,0.4)] ring-2 ring-cyan-400"
-                        : "bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800"
+                        ? "bg-[#34A853] text-white shadow-sm ring-2 ring-[#34A853]/40"
+                        : "bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-[#E6F4EA] hover:text-[#137333] hover:border-[#CEEAD6]"
                     }`}
                   >
-                    <Check className="w-3 h-3 stroke-[3]" />
+                    <Check className="w-4 h-4 stroke-[3]" />
                     <span>{isEn ? "TRUE" : "ĐÚNG"}</span>
                   </button>
 
@@ -178,13 +193,13 @@ export function TrueFalsePlayer({
                     type="button"
                     disabled={disabled}
                     onClick={() => handleSelect(s.id, false)}
-                    className={`px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1 transition-all cursor-pointer active:scale-95 disabled:cursor-not-allowed ${
+                    className={`px-4 py-2 rounded-full font-semibold text-xs sm:text-sm flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 disabled:cursor-not-allowed shadow-xs ${
                       isFalse
-                        ? "bg-blue-600 text-white shadow-[0_0_12px_rgba(59,130,246,0.4)] ring-2 ring-blue-400"
-                        : "bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800"
+                        ? "bg-[#EA4335] text-white shadow-sm ring-2 ring-[#EA4335]/40"
+                        : "bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-[#FCE8E6] hover:text-[#C5221F] hover:border-[#FAD2CF]"
                     }`}
                   >
-                    <X className="w-3 h-3 stroke-[3]" />
+                    <X className="w-4 h-4 stroke-[3]" />
                     <span>{isEn ? "FALSE" : "SAI"}</span>
                   </button>
                 </div>

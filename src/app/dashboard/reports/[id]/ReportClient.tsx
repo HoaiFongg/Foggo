@@ -19,7 +19,10 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
+import { NavigationHeader } from "@/components/NavigationHeader";
+
 interface ReportClientProps {
+  profile?: any | null;
   session: any;
   players: any[];
   answers: any[];
@@ -27,6 +30,7 @@ interface ReportClientProps {
 }
 
 export function ReportClient({
+  profile = null,
   session,
   players,
   answers,
@@ -147,25 +151,26 @@ export function ReportClient({
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-16">
-      {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              href={`/teacher/worlds/${session.id}`}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </Link>
-            <div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400">
-                BÁO CÁO KẾT QUẢ THẾ GIỚI
-              </span>
-              <h1 className="text-base sm:text-lg font-black text-white truncate max-w-sm sm:max-w-md">
-                {session.title}
-              </h1>
-            </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans pb-16">
+      {/* Unified Navigation Header */}
+      <NavigationHeader
+        profile={profile}
+        activeItem="worlds"
+        showBackButton
+        backHref={`/teacher/worlds/${session.id}`}
+        backLabel="Bảng điều khiển"
+      />
+
+      {/* Report Action Sub-bar */}
+      <div className="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur-md sticky top-14 z-30 px-4 sm:px-6 py-3 shadow-2xs">
+        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+              BÁO CÁO KẾT QUẢ THẾ GIỚI
+            </span>
+            <h1 className="text-base sm:text-lg font-black text-slate-900 dark:text-white truncate max-w-sm sm:max-w-md">
+              {session.title}
+            </h1>
           </div>
 
           <button
@@ -177,7 +182,7 @@ export function ReportClient({
             <span>Xuất CSV</span>
           </button>
         </div>
-      </header>
+      </div>
 
       {/* Main Container */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-8">

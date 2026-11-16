@@ -34,6 +34,7 @@ export default async function TeacherWorldPage({ params }: TeacherWorldPageProps
     <TeacherWorldClient
       session={session}
       players={players || []}
+      profile={profile}
     />
   );
 }

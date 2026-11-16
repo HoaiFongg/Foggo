@@ -1,11 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOptionalUser } from "@/lib/auth";
 import { NavigationHeader } from "@/components/NavigationHeader";
+import { autoCloseExpiredDungeons } from "@/app/teacher/worlds/actions";
 import { WorldsClient } from "./WorldsClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function WorldsPage() {
+  await autoCloseExpiredDungeons();
   const { user, profile } = await getOptionalUser();
   const supabase = await createClient();
 
@@ -55,7 +57,7 @@ export default async function WorldsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans text-slate-900 dark:text-slate-100">
       <NavigationHeader profile={profile} activeItem="worlds" />
 
       {/* Main Container - Dàn trải đều toàn màn hình */}

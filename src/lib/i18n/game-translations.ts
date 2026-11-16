@@ -92,6 +92,22 @@ export const ITEM_TRANSLATIONS_EN: Record<string, TranslatedEntity> = {
     name: "Crystal Blade",
     description: "Weapon radiating mythical brilliance, cutting cleanly through misty nights.",
   },
+  hunting_bow: {
+    name: "Mistwood Hunting Bow",
+    description: "Supple wooden recurve bow with sinew string, firing sharp arrows through thick fog.",
+  },
+  iron_bow: {
+    name: "Reinforced Steel Bow",
+    description: "Power-assisted bow forged from tempered steel, unleashing devastating long-range strikes.",
+  },
+  magic_staff: {
+    name: "Crystal Magic Staff",
+    description: "Enchanted ashwood staff tipped with a glowing mist crystal, casting radiant magic bolts.",
+  },
+  fire_staff: {
+    name: "Ancient Fire Staff",
+    description: "Relic staff embedded with molten magma gems, summoning blazing fireballs against beasts.",
+  },
   straw_hat: {
     name: "Straw Sun Hat",
     description: "Rustic woven straw hat, shields against wind and mist, reducing damage by 3%.",
@@ -116,6 +132,14 @@ export const ITEM_TRANSLATIONS_EN: Record<string, TranslatedEntity> = {
     name: "Forged Iron Armor",
     description: "Sturdy metallic armor protecting the torso, reducing incoming damage by 18%.",
   },
+  mage_robe: {
+    name: "Sorcerer Mage Robe",
+    description: "Silken robes woven with gilded runes, lightweight and generating a barrier reducing damage by 14%.",
+  },
+  knight_armor: {
+    name: "Royal Knight Plate",
+    description: "Silver-plated battle harness of royal knights, providing impenetrable defense reducing damage by 25%.",
+  },
   wooden_shield: {
     name: "Round Wooden Shield",
     description: "Pine wood shield with leather straps, reduces monster damage by an additional 6%.",
@@ -123,6 +147,10 @@ export const ITEM_TRANSLATIONS_EN: Record<string, TranslatedEntity> = {
   iron_shield: {
     name: "Reinforced Iron Shield",
     description: "Sturdy steel shield blocking fierce lunges, reducing damage by 12%.",
+  },
+  magic_shield: {
+    name: "Crystal Aegis Shield",
+    description: "Shield crystallized from enchanted quartz, radiating a protective aura reducing damage by 20%.",
   },
   bandage: {
     name: "Herbal Bandage",

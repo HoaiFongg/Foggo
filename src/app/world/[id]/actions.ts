@@ -14,6 +14,7 @@ import {
   applyEat,
   applyBlacksmith,
   applyEquipGear,
+  applyUnequipGear,
   applyNightDefense,
   applyRevive,
   applyFlee,
@@ -124,10 +125,7 @@ export async function submitSurvivalAction({
     if (huntResult.result === "kill") {
       message = `Hạ gục quái vật! Bạn ra đòn gây ${huntResult.damageDealt} sát thương kết liễu. Nhận được ${huntResult.coinsAwarded} xu và ${huntResult.scoreAwarded} điểm.`;
     } else if (huntResult.result === "hit") {
-      message =
-        huntResult.damageTaken > 0
-          ? `Tấn công trúng! Bạn gây ${huntResult.damageDealt} sát thương. Đến lượt quái phản công gây ${huntResult.damageTaken} sát thương!`
-          : `Tấn công trúng! Gây ${huntResult.damageDealt} sát thương.`;
+      message = `Tấn công trúng! Gây ${huntResult.damageDealt} sát thương.`;
     } else if (huntResult.result === "death") {
       message = "Bạn đã bị quái vật đánh gục! Hãy hồi sinh tại lửa trại.";
     } else {
@@ -219,12 +217,14 @@ export async function performSurvivalItemAction({
   action,
   itemId,
   slotIndex,
+  gearSlot,
   sellQty,
 }: {
   sessionId: string;
-  action: "eat" | "buy_gear" | "repair" | "enhance" | "revive" | "equip" | "sell_item";
+  action: "eat" | "buy_gear" | "repair" | "enhance" | "revive" | "equip" | "unequip" | "sell_item";
   itemId?: string;
   slotIndex?: number;
+  gearSlot?: "weapon" | "armor" | "helmet" | "shield";
   sellQty?: number;
 }) {
   const supabase = await createClient();
@@ -276,6 +276,13 @@ export async function performSurvivalItemAction({
     const res = applyEquipGear(state, slotIndex);
     state = res.state;
     message = res.message;
+  } else if (action === "unequip" && gearSlot) {
+    const res = applyUnequipGear(state, gearSlot);
+    state = res.state;
+    message = res.message;
+    if (!res.success) {
+      return { error: res.message, state };
+    }
   } else if (action === "revive") {
     state = applyRevive(state);
     message = "Bạn đã hồi sinh tại đống lửa trại an toàn!";
@@ -376,7 +383,7 @@ export async function emergencyHealOrRevive({
     message = res.message;
   } else {
     state = applyRevive(state);
-    message = "Bạn đã hồi sinh miễn phí tại Trại! Toàn bộ Xu được bảo lưu nguyên vẹn.";
+    message = "Bạn đã hồi sinh an toàn tại Trại!";
   }
 
   await adminClient

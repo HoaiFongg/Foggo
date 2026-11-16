@@ -18,16 +18,22 @@ import {
   Home,
   Package,
   XCircle,
+  CheckCircle,
   Check,
   ArrowRight,
   BookOpen,
+  SunMedium,
+  Moon,
 } from "lucide-react";
+import { MonsterBestiaryModal } from "@/components/MonsterBestiaryModal";
 import { getScaledMonster, getRandomFarmMonster, MONSTER_REGISTRY, type MonsterDef } from "@/game-modes/survival/monsters";
 import { ITEM_REGISTRY } from "@/game-modes/survival/items";
 import { getQuestionType } from "@/question-types/registry";
 import { submitSurvivalAction, fleeSurvivalBattle, emergencyHealOrRevive } from "./actions";
 import { useLanguage } from "@/lib/i18n/useLanguage";
 import { localizeQuestion } from "@/lib/i18n/questions-translation";
+import { PixelHero } from "@/components/PixelHero";
+import { PixelItemIcon } from "@/components/PixelItemIcon";
 
 interface MonsterBattleArenaProps {
   sessionId: string;
@@ -77,7 +83,103 @@ export function MonsterBattleArena({
   // 2. Trạng thái hoạt họa nhân vật & quái vật
   const [heroAnim, setHeroAnim] = useState<"idle" | "attack" | "hurt" | "flee">("idle");
   const [monsterAnim, setMonsterAnim] = useState<"idle" | "jump" | "hit" | "dead" | "spawn">("idle");
-  const [slimeFrame, setSlimeFrame] = useState<number>(1);
+  const [monsterFrame, setMonsterFrame] = useState<number>(1);
+
+  // Helper hàm ánh xạ khung hình animation theo từng loại quái vật
+  const getMonsterSprite = (id: string, frame: number): string => {
+    if (id === "slime") {
+      switch (frame) {
+        case 1: return "/sprites/slime_idle_1_clean.png";
+        case 2: return "/sprites/slime_idle_2_clean.png";
+        case 3: return "/sprites/slime_prep_clean.png";
+        case 4: return "/sprites/slime_jump_clean.png";
+        case 5: return "/sprites/slime_land_clean.png";
+        case 6: return "/sprites/slime_hit_clean.png";
+        case 7:
+        case 8: return "/sprites/slime_dead_clean.png";
+        default: return "/sprites/slime_idle_1_clean.png";
+      }
+    }
+    if (id === "baby_wolf" || id === "wolf") {
+      switch (frame) {
+        case 1: return "/sprites/baby_wolf/frame_1.png"; // Đứng chờ (Idle)
+        case 2: return "/sprites/baby_wolf/frame_2.png"; // Chuẩn bị chạy
+        case 3: return "/sprites/baby_wolf/frame_3.png"; // Chạy
+        case 4: return "/sprites/baby_wolf/frame_4.png"; // Nhảy
+        case 5: return "/sprites/baby_wolf/frame_5.png"; // Tiếp đất
+        case 6: return "/sprites/baby_wolf/frame_6.png"; // Bị thương (Hurt)
+        case 7: return "/sprites/baby_wolf/frame_7.png"; // Nằm xuống (Death)
+        case 8: return "/sprites/baby_wolf/frame_8.png"; // Ngồi chờ
+        default: return "/sprites/baby_wolf/frame_1.png";
+      }
+    }
+    if (id === "mist_spider") {
+      switch (frame) {
+        case 1: return "/sprites/mist_spider/frame_1.png"; // Đứng chờ (Idle)
+        case 2: return "/sprites/mist_spider/frame_2.png"; // Bò (Crawl)
+        case 3: return "/sprites/mist_spider/frame_3.png"; // Chuẩn bị tấn công
+        case 4: return "/sprites/mist_spider/frame_4.png"; // Phun sương độc
+        case 5: return "/sprites/mist_spider/frame_5.png"; // Bị choáng (Hurt)
+        case 6: return "/sprites/mist_spider/frame_6.png"; // Bị đánh bại (Defeated)
+        case 7: return "/sprites/mist_spider/frame_7.png"; // Tan biến trong sương
+        case 8: return "/sprites/mist_spider/frame_8.png"; // Sương độc còn sót lại
+        default: return "/sprites/mist_spider/frame_1.png";
+      }
+    }
+    if (id === "boar_king" || id === "wild_boar") {
+      switch (frame) {
+        case 1: return "/sprites/boar_king/frame_1.png"; // Idle (Đứng uy nghi)
+        case 2: return "/sprites/boar_king/frame_2.png"; // Walk (Đi tuần)
+        case 3: return "/sprites/boar_king/frame_3.png"; // Charge (Lao tới)
+        case 4: return "/sprites/boar_king/frame_4.png"; // Roar (Gầm thét)
+        case 5: return "/sprites/boar_king/frame_5.png"; // Impact (Húc mạnh)
+        case 6: return "/sprites/boar_king/frame_6.png"; // Stun (Choáng váng)
+        case 7: return "/sprites/boar_king/frame_7.png"; // Defeated (Bị đánh bại)
+        case 8: return "/sprites/boar_king/frame_8.png"; // Vanish (Tan biến còn vương miện)
+        default: return "/sprites/boar_king/frame_1.png";
+      }
+    }
+    if (id === "forest_goblin" || id === "goblin") {
+      switch (frame) {
+        case 1: return "/sprites/goblin/frame_1.png"; // Đứng chờ (Idle)
+        case 2: return "/sprites/goblin/frame_2.png"; // Đi bộ (Walk)
+        case 3: return "/sprites/goblin/frame_3.png"; // Chạy (Run)
+        case 4: return "/sprites/goblin/frame_4.png"; // Nhảy (Jump)
+        case 5: return "/sprites/goblin/frame_5.png"; // Vui vẻ (Happy)
+        case 6: return "/sprites/goblin/frame_6.png"; // Tức giận (Angry)
+        case 7: return "/sprites/goblin/frame_7.png"; // Ngủ / Nằm bẹp (Sleep/Defeat)
+        case 8: return "/sprites/goblin/frame_8.png"; // Ngồi nghỉ (Sit)
+        default: return "/sprites/goblin/frame_1.png";
+      }
+    }
+    if (id === "small_golem" || id === "rock_golem" || id === "golem") {
+      switch (frame) {
+        case 1: return "/sprites/small_golem/frame_1.png"; // Đứng chờ (Idle)
+        case 2: return "/sprites/small_golem/frame_2.png"; // Bò (Crawl)
+        case 3: return "/sprites/small_golem/frame_3.png"; // Chuẩn bị tấn công
+        case 4: return "/sprites/small_golem/frame_4.png"; // Phun sương độc / khói đá
+        case 5: return "/sprites/small_golem/frame_5.png"; // Bị choáng (Hurt)
+        case 6: return "/sprites/small_golem/frame_6.png"; // Bị đánh bại (Defeated)
+        case 7: return "/sprites/small_golem/frame_7.png"; // Tan biến trong sương (Fade)
+        case 8: return "/sprites/small_golem/frame_8.png"; // Tàn tích còn sót lại (Residue)
+        default: return "/sprites/small_golem/frame_1.png";
+      }
+    }
+    if (id === "skeleton") {
+      switch (frame) {
+        case 1: return "/sprites/skeleton/frame_1.png"; // Đứng chờ (Idle)
+        case 2: return "/sprites/skeleton/frame_2.png"; // Bò (Crawl)
+        case 3: return "/sprites/skeleton/frame_3.png"; // Chuẩn bị tấn công
+        case 4: return "/sprites/skeleton/frame_4.png"; // Chém kiếm trăng khuyết tím (Slash)
+        case 5: return "/sprites/skeleton/frame_5.png"; // Bị choáng (Hurt)
+        case 6: return "/sprites/skeleton/frame_6.png"; // Bị đánh bại (Defeated)
+        case 7: return "/sprites/skeleton/frame_7.png"; // Tan biến trong sương / linh hồn
+        case 8: return "/sprites/skeleton/frame_8.png"; // Tàn tích còn sót lại (Residue)
+        default: return "/sprites/skeleton/frame_1.png";
+      }
+    }
+    return "";
+  };
 
   // 3. Floating combat text (Sát thương bay lên)
   const [floatingTexts, setFloatingTexts] = useState<
@@ -89,6 +191,7 @@ export function MonsterBattleArena({
   const [submitting, setSubmitting] = useState(false);
   const [battleNotice, setBattleNotice] = useState<string | null>(null);
   const [showFleeConfirm, setShowFleeConfirm] = useState(false);
+  const [showBestiary, setShowBestiary] = useState(false);
   const [isFleeing, setIsFleeing] = useState(false);
   const [healingLoading, setHealingLoading] = useState(false);
   const [reviewData, setReviewData] = useState<{
@@ -137,12 +240,35 @@ export function MonsterBattleArena({
       item.qty > 0
   );
 
-  // Nhịp thở nhấp nhô cho Slime khi ở trạng thái idle
+  // Nhịp thở nhấp nhô & hoạt ảnh idle cho quái vật (mượt mà, tự nhiên chuẩn Retro RPG)
   useEffect(() => {
-    if (monsterDef.id !== "slime" || monsterAnim !== "idle") return;
+    if (monsterAnim !== "idle") return;
     const interval = setInterval(() => {
-      setSlimeFrame((prev) => (prev === 1 ? 2 : 1));
-    }, 700);
+      setMonsterFrame((prev) => {
+        if (monsterDef.id === "slime") {
+          return prev === 1 ? 2 : 1;
+        }
+        if (monsterDef.id === "baby_wolf" || monsterDef.id === "wolf") {
+          return prev === 1 ? 8 : 1;
+        }
+        if (monsterDef.id === "mist_spider") {
+          return prev === 1 ? 2 : 1;
+        }
+        if (monsterDef.id === "boar_king" || monsterDef.id === "wild_boar") {
+          return prev === 1 ? 2 : 1;
+        }
+        if (monsterDef.id === "forest_goblin" || monsterDef.id === "goblin") {
+          return prev === 1 ? 8 : 1;
+        }
+        if (monsterDef.id === "small_golem" || monsterDef.id === "rock_golem" || monsterDef.id === "golem") {
+          return prev === 1 ? 2 : 1;
+        }
+        if (monsterDef.id === "skeleton") {
+          return prev === 1 ? 2 : 1;
+        }
+        return 1;
+      });
+    }, 460);
     return () => clearInterval(interval);
   }, [monsterDef.id, monsterAnim]);
 
@@ -155,20 +281,59 @@ export function MonsterBattleArena({
     }, 1200);
   };
 
-  // Hàm chuyển sang quái tiếp theo ngẫu nhiên
-  const spawnNextMonster = () => {
-    const next = getRandomFarmMonster(true);
+  // Đếm số quái nhỏ đã hạ trong lượt hiện tại (cứ 5 quái nhỏ sẽ xuất hiện 1 boss)
+  const [monstersDefeatedCount, setMonstersDefeatedCount] = useState<number>(0);
+
+  // Hàm chuyển sang quái tiếp theo: cứ đủ 5 con quái nhỏ sẽ xuất hiện 1 con Boss
+  const spawnNextMonster = (countOverride?: number) => {
+    const currentCount = typeof countOverride === "number" ? countOverride : monstersDefeatedCount;
+    const shouldSpawnBoss = currentCount > 0 && currentCount % 5 === 0 && !monsterDef.isBoss;
+
+    const next = shouldSpawnBoss ? MONSTER_REGISTRY.boar_king : getRandomFarmMonster(true);
     const scaled = getScaledMonster(next.id, clock.dayNumber, !clock.isDay);
     const nextName = (t.monsters as any)?.[next.id] || next.name;
     setMonsterDef(next);
     setMonsterMaxHp(scaled.hp);
     setMonsterCurrentHp(scaled.hp);
     setMonsterAnim("spawn");
-    setSlimeFrame(1);
-    setBattleNotice(isEn ? `⚡ New monster appeared: ${nextName}!` : `⚡ Quái vật mới xuất hiện: ${next.name}!`);
+
+    // Khung hình xuất hiện theo từng loại quái
+    if (next.id === "boar_king") {
+      setMonsterFrame(4); // Roar (Gầm thét khi xuất hiện)
+    } else if (next.id === "mist_spider") {
+      setMonsterFrame(7); // Fade in từ sương
+      setTimeout(() => setMonsterFrame(2), 250);
+    } else if (next.id === "baby_wolf" || next.id === "wolf") {
+      setMonsterFrame(4); // Nhảy tới
+      setTimeout(() => setMonsterFrame(5), 250);
+    } else if (next.id === "forest_goblin" || next.id === "goblin") {
+      setMonsterFrame(4); // Nhảy xuất hiện
+      setTimeout(() => setMonsterFrame(5), 250); // Vui vẻ khích tướng
+    } else if (next.id === "small_golem" || next.id === "rock_golem" || next.id === "golem") {
+      setMonsterFrame(2); // Bò nhô lên từ lòng đất
+    } else if (next.id === "skeleton") {
+      setMonsterFrame(7); // Hóa hình từ làn khói tím
+      setTimeout(() => setMonsterFrame(2), 250);
+    } else if (next.id === "slime") {
+      setMonsterFrame(4);
+      setTimeout(() => setMonsterFrame(5), 250);
+    } else {
+      setMonsterFrame(1);
+    }
+
+    if (shouldSpawnBoss) {
+      setBattleNotice(
+        isEn
+          ? `👑 WARNING: REGIONAL BOSS APPEARED: ${nextName.toUpperCase()}!`
+          : `👑 CẢNH BÁO: TRÙM KHU VỰC XUẤT HIỆN: ${next.name.toUpperCase()}!`
+      );
+    } else {
+      setBattleNotice(isEn ? `⚡ New monster appeared: ${nextName}!` : `⚡ Quái vật mới xuất hiện: ${next.name}!`);
+    }
 
     setTimeout(() => {
       setMonsterAnim("idle");
+      setMonsterFrame(1);
       setBattleNotice(null);
     }, 1000);
   };
@@ -197,7 +362,7 @@ export function MonsterBattleArena({
       return;
     }
 
-    // 1. NẾU TRẢ LỜI ĐÚNG -> NHÂN VẬT LAO LÊN TẤN CÔNG QUÁI (PHẢN HỒI SIÊU TỐC 80MS)
+    // 1. NẾU TRẢ LỜI ĐÚNG -> BẠN ĐÁNH QUÁI, QUÁI KHÔNG THỂ ĐÁNH ĐƯỢC BẠN
     if (res.isCorrect) {
       setReviewData(null);
       const damageDealt = res.huntResult?.damageDealt ?? 25;
@@ -207,7 +372,19 @@ export function MonsterBattleArena({
 
       setTimeout(() => {
         if (monsterDef.id === "slime") {
-          setSlimeFrame(6); // slime_hit
+          setMonsterFrame(6); // slime_hit
+        } else if (monsterDef.id === "baby_wolf" || monsterDef.id === "wolf") {
+          setMonsterFrame(6); // hurt
+        } else if (monsterDef.id === "mist_spider") {
+          setMonsterFrame(5); // hurt
+        } else if (monsterDef.id === "boar_king" || monsterDef.id === "wild_boar") {
+          setMonsterFrame(6); // stun
+        } else if (monsterDef.id === "forest_goblin" || monsterDef.id === "goblin") {
+          setMonsterFrame(6); // angry / hurt
+        } else if (monsterDef.id === "small_golem" || monsterDef.id === "rock_golem" || monsterDef.id === "golem") {
+          setMonsterFrame(5); // hurt
+        } else if (monsterDef.id === "skeleton") {
+          setMonsterFrame(5); // hurt
         }
         setMonsterAnim("hit");
         const nextHp = Math.max(0, monsterCurrentHp - damageDealt);
@@ -223,12 +400,31 @@ export function MonsterBattleArena({
 
         setTimeout(() => {
           setHeroAnim("idle");
-        }, 100);
+        }, 220);
 
         if (isKill || nextHp <= 0) {
           setTimeout(() => {
             if (monsterDef.id === "slime") {
-              setSlimeFrame(7); // slime_dead
+              setMonsterFrame(7); // slime_dead
+            } else if (monsterDef.id === "baby_wolf" || monsterDef.id === "wolf") {
+              setMonsterFrame(7); // death
+            } else if (monsterDef.id === "mist_spider") {
+              setMonsterFrame(6); // defeat
+              setTimeout(() => setMonsterFrame(7), 240); // fade
+              setTimeout(() => setMonsterFrame(8), 500); // residue
+            } else if (monsterDef.id === "boar_king" || monsterDef.id === "wild_boar") {
+              setMonsterFrame(7); // defeat
+              setTimeout(() => setMonsterFrame(8), 450); // vanish
+            } else if (monsterDef.id === "forest_goblin" || monsterDef.id === "goblin") {
+              setMonsterFrame(7); // sleep / defeat
+            } else if (monsterDef.id === "small_golem" || monsterDef.id === "rock_golem" || monsterDef.id === "golem") {
+              setMonsterFrame(6); // defeat
+              setTimeout(() => setMonsterFrame(7), 240); // fade
+              setTimeout(() => setMonsterFrame(8), 500); // residue
+            } else if (monsterDef.id === "skeleton") {
+              setMonsterFrame(6); // defeat
+              setTimeout(() => setMonsterFrame(7), 240); // fade
+              setTimeout(() => setMonsterFrame(8), 500); // residue
             }
             setMonsterAnim("dead");
             const coins = res.huntResult?.coinsAwarded ?? 10;
@@ -242,92 +438,104 @@ export function MonsterBattleArena({
 
             if (res.state) onStateUpdate(res.state);
 
+            const nextCount = monsterDef.isBoss ? 0 : monstersDefeatedCount + 1;
+            setMonstersDefeatedCount(nextCount);
+
             setTimeout(() => {
-              spawnNextMonster();
+              spawnNextMonster(nextCount);
               onNextQuestion();
               setUserAnswer(null);
-            }, 250);
-          }, 100);
+            }, 650);
+          }, 240);
         } else {
-          // QUÁI CÒN SỐNG -> PHẢN CÔNG NHANH
+          // QUÁI CÒN SỐNG -> BẠN ĐÃ TẤN CÔNG THÀNH CÔNG, QUÁI KHÔNG THỂ ĐÁNH LẠI BẠN
           setTimeout(() => {
-            if (monsterDef.id === "slime") {
-              setSlimeFrame(3);
-              setTimeout(() => setSlimeFrame(4), 50);
-            }
-            setMonsterAnim("jump");
-
-            setTimeout(() => {
-              setHeroAnim("hurt");
-              const damageTaken = res.huntResult?.damageTaken ?? 6;
-              addFloatingText(`💔 -${damageTaken} HP`, "text-rose-400", 25, 40);
-
-              if (totalDefensePct > 0) {
-                addFloatingText(isEn ? `🛡️ -${totalDefensePct}% Dmg` : `🛡️ Giảm -${totalDefensePct}%`, "text-blue-400", 25, 25);
-              }
-
-              if (monsterDef.id === "slime") {
-                setSlimeFrame(5);
-                setTimeout(() => {
-                  setSlimeFrame(1);
-                  setMonsterAnim("idle");
-                }, 80);
-              } else {
-                setMonsterAnim("idle");
-              }
-
-              setTimeout(() => {
-                setHeroAnim("idle");
-                if (res.state) onStateUpdate(res.state);
-                onNextQuestion();
-                setUserAnswer(null);
-              }, 120);
-            }, 100);
-          }, 100);
+            setMonsterFrame(1);
+            setMonsterAnim("idle");
+            if (res.state) onStateUpdate(res.state);
+            onNextQuestion();
+            setUserAnswer(null);
+          }, 280);
         }
-      }, 80);
+      }, 180);
     } else {
-      // 2. TRẢ LỜI SAI -> QUÁI PHẢN CÔNG NHANH & LẬP TỨC HIỆN ĐÁP ÁN ĐÚNG ĐỂ HỌC SINH ÔN TẬP
+      // 2. TRẢ LỜI SAI -> QUÁI PHẢN CÔNG MƯỢT MÀ VỚI NHỊP ĐỘ CHUẨN RPG
       setBattleNotice(isEn ? `❌ Incorrect answer! ${monsterName} counterattacks!` : `❌ Trả lời chưa chính xác! ${monsterDef.name} phản công!`);
 
+      // Giai đoạn 1: Chuẩn bị / Lấy đà (Anticipation)
       if (monsterDef.id === "slime") {
-        setSlimeFrame(3);
-        setTimeout(() => setSlimeFrame(4), 50);
+        setMonsterFrame(3); // prep
+      } else if (monsterDef.id === "baby_wolf" || monsterDef.id === "wolf") {
+        setMonsterFrame(2); // prep run
+      } else if (monsterDef.id === "mist_spider") {
+        setMonsterFrame(3); // prep attack
+      } else if (monsterDef.id === "boar_king" || monsterDef.id === "wild_boar") {
+        setMonsterFrame(3); // charge
+      } else if (monsterDef.id === "forest_goblin" || monsterDef.id === "goblin") {
+        setMonsterFrame(3); // run
+      } else if (monsterDef.id === "small_golem" || monsterDef.id === "rock_golem" || monsterDef.id === "golem") {
+        setMonsterFrame(3); // attack
+      } else if (monsterDef.id === "skeleton") {
+        setMonsterFrame(3); // prep slash
       }
-      setMonsterAnim("jump");
 
+      // Giai đoạn 2: Lao tới tấn công (Action / Strike)
       setTimeout(() => {
-        setHeroAnim("hurt");
-        const damageTaken = res.huntResult?.damageTaken ?? 8;
-        addFloatingText(`💔 -${damageTaken} HP!`, "text-rose-400", 25, 40);
-
-        if (totalDefensePct > 0) {
-          addFloatingText(isEn ? `🛡️ -${totalDefensePct}% Dmg` : `🛡️ Giảm -${totalDefensePct}%`, "text-blue-400", 25, 25);
-        }
-
+        setMonsterAnim("jump");
         if (monsterDef.id === "slime") {
-          setSlimeFrame(5);
-          setTimeout(() => {
-            setSlimeFrame(1);
-            setMonsterAnim("idle");
-          }, 80);
-        } else {
-          setMonsterAnim("idle");
+          setMonsterFrame(4); // jump
+        } else if (monsterDef.id === "baby_wolf" || monsterDef.id === "wolf") {
+          setMonsterFrame(4); // jump strike
+        } else if (monsterDef.id === "mist_spider") {
+          setMonsterFrame(4); // poison cloud
+        } else if (monsterDef.id === "boar_king" || monsterDef.id === "wild_boar") {
+          setMonsterFrame(5); // impact
+        } else if (monsterDef.id === "forest_goblin" || monsterDef.id === "goblin") {
+          setMonsterFrame(4); // jump
+        } else if (monsterDef.id === "small_golem" || monsterDef.id === "rock_golem" || monsterDef.id === "golem") {
+          setMonsterFrame(4); // poison gas
+        } else if (monsterDef.id === "skeleton") {
+          setMonsterFrame(4); // crescent slash
         }
 
+        // Giai đoạn 3: Va chạm & Hiệp sĩ trúng đòn (Impact)
         setTimeout(() => {
-          setHeroAnim("idle");
-          if (res.state) onStateUpdate(res.state);
+          setHeroAnim("hurt");
+          const damageTaken = res.huntResult?.damageTaken ?? 8;
+          addFloatingText(`💔 -${damageTaken} HP!`, "text-rose-400", 25, 40);
 
-          // Cung cấp bảng ôn tập và hiển thị rõ ràng đáp án đúng cho học sinh
-          setReviewData({
-            isCorrect: false,
-            correctAnswerDisplay: (res as any).correctAnswerDisplay || "Xem lại bài giảng",
-            explanation: res.explanation || null,
-            message: res.message,
-          });
-        }, 100);
-      }, 100);
+          if (totalDefensePct > 0) {
+            addFloatingText(isEn ? `🛡️ -${totalDefensePct}% Dmg` : `🛡️ Giảm -${totalDefensePct}%`, "text-blue-400", 25, 25);
+          }
+
+          // Giai đoạn 4: Tiếp đất / Thu chiêu (Follow-through)
+          setTimeout(() => {
+            if (monsterDef.id === "slime" || monsterDef.id === "baby_wolf" || monsterDef.id === "wolf") {
+              setMonsterFrame(5); // land
+            } else if (monsterDef.id === "forest_goblin" || monsterDef.id === "goblin") {
+              setMonsterFrame(5); // happy taunt
+            } else {
+              setMonsterFrame(1);
+            }
+
+            // Giai đoạn 5: Trở về vị trí nghỉ ngơi (Recovery)
+            setTimeout(() => {
+              setMonsterFrame(1);
+              setMonsterAnim("idle");
+              setHeroAnim("idle");
+              if (res.state) onStateUpdate(res.state);
+
+              // Cung cấp bảng ôn tập và hiển thị rõ ràng đáp án đúng cho học sinh
+              setReviewData({
+                isCorrect: false,
+                correctAnswerDisplay: (res as any).correctAnswerDisplay || "Xem lại bài giảng",
+                explanation: res.explanation || null,
+                message: res.message,
+              });
+            }, 260);
+          }, 260);
+        }, 260);
+      }, 220);
     }
   };
 
@@ -391,46 +599,92 @@ export function MonsterBattleArena({
   const monsterHpPercent = Math.max(0, Math.min(100, (monsterCurrentHp / Math.max(1, monsterMaxHp)) * 100));
   const playerHpPercent = Math.max(0, Math.min(100, (playerHp / Math.max(1, playerMaxHp)) * 100));
 
+  const totalQuestions = Math.max(1, questions.length);
+  const currentQuestionNum = (currentQIndex % totalQuestions) + 1;
+  const questionProgressPercent = Math.min(100, Math.round((currentQuestionNum / totalQuestions) * 100));
+
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col h-screen max-h-screen overflow-hidden select-none">
+    <div className="fixed inset-0 z-50 bg-[#F8F9FA] dark:bg-slate-950 flex flex-col h-screen max-h-screen overflow-hidden select-none font-sans text-slate-800 dark:text-slate-100">
       {/* ============================================================== */}
-      {/* 1. THANH TRẠNG THÁI TRÊN CÙNG: RÚT LUI & SỐ XU HIỆN CÓ        */}
+      {/* 1. THANH TRẠNG THÁI TRÊN CÙNG: RETRO PIXEL RPG STATUS BAR      */}
       {/* ============================================================== */}
-      <div className="w-full px-3 sm:px-6 py-2 bg-slate-900/95 border-b border-slate-800 flex items-center justify-between gap-3 shrink-0">
-        <div className="flex items-center gap-2 sm:gap-3">
+      <div className="w-full px-3 sm:px-6 py-2 bg-white/95 dark:bg-slate-900/95 border-b-2 border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 sm:gap-3 shrink-0 shadow-xs">
+        {/* GÓC BÊN TRÁI TRÊN CÙNG: NÚT TRỞ VỀ VÀ SỔ TAY QUÁI VẬT */}
+        <div className="flex items-center gap-2">
           <button
             type="button"
             disabled={submitting || isFleeing}
             onClick={() => setShowFleeConfirm(true)}
-            className="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold font-mono flex items-center gap-1.5 transition-all cursor-pointer"
+            className="pixel-btn-neutral px-3 sm:px-4 py-1.5 rounded-xl text-rose-600 dark:text-rose-400 text-xs font-mono font-bold flex items-center gap-1.5 transition-all duration-150 cursor-pointer shadow-xs border-2 border-rose-500/40 hover:bg-rose-500/10"
+            title={isEn ? "Return to Base" : "Trở về Căn cứ"}
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>🏃 {t.battle.fleeBtn}</span>
+            <ArrowLeft className="w-4 h-4 text-rose-500 shrink-0" />
+            <span className="font-pixel text-[11px]">{isEn ? "RETURN" : "TRỞ VỀ"}</span>
           </button>
-          <span className="text-[10px] text-slate-500 hidden md:inline font-mono">
-            (-15 HP &amp; -50 {t.common.score})
-          </span>
+
+          <button
+            type="button"
+            onClick={() => setShowBestiary(true)}
+            className="pixel-btn-amber px-2.5 sm:px-3 py-1.5 rounded-xl text-slate-950 text-xs font-mono font-bold flex items-center gap-1.5 transition-all duration-150 cursor-pointer shadow-xs"
+            title={isEn ? "Inspect Monster Bestiary (7 types)" : "Xem sổ tay quái vật (7 loài)"}
+          >
+            <BookOpen className="w-3.5 h-3.5 text-slate-950 shrink-0" />
+            <span className="font-pixel text-[10px] hidden sm:inline">{isEn ? "BESTIARY (7)" : "QUÁI VẬT (7)"}</span>
+          </button>
         </div>
 
-        {/* Hiển thị số tiền hiện đang có nổi bật */}
-        <div className="flex items-center gap-2 sm:gap-4 text-xs font-mono">
-          <div className="flex items-center gap-1.5 text-amber-300 bg-amber-500/15 px-3 py-1.5 rounded-xl border border-amber-500/30 font-bold shadow-sm">
-            <Coins className="w-4 h-4 text-amber-400" />
-            <span>{t.battle.currentCoins}: <span className="text-amber-200">{playerCoins} {t.common.coins}</span></span>
-            <span className="text-[10px] text-amber-400/70 hidden sm:inline font-normal">({isEn ? "100% Kept" : "Bảo lưu 100%"})</span>
+        {/* CÁC CHỈ SỐ GỌN GÀNG, KHÔNG RƯỜM RÀ NHIỀU CHỮ */}
+        <div className="flex items-center gap-2 sm:gap-2.5 text-xs font-mono">
+          {/* Tiến độ câu hỏi */}
+          <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg pixel-panel bg-[#E8F0FE] dark:bg-[#4285F4]/15 text-[#1967D2] dark:text-[#8AB4F8] border-[#4285F4]/30 font-bold text-xs">
+            <span>[ {isEn ? "Q" : "CÂU"} {currentQuestionNum}/{totalQuestions} ]</span>
           </div>
 
+          {/* Tiến độ Boss: 5 quái nhỏ -> 1 Boss */}
+          <div className={`px-2.5 py-1 rounded-lg pixel-panel flex items-center gap-1 font-bold text-xs ${
+            monsterDef.isBoss
+              ? "pixel-panel-amber bg-amber-500/20 text-amber-500 dark:text-amber-300 animate-pulse"
+              : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+          }`}>
+            <Skull className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+            <span>
+              {monsterDef.isBoss
+                ? (isEn ? "BOSS!" : "TRÙM!")
+                : (isEn ? `QUÁI ${monstersDefeatedCount % 5 + 1}/5` : `QUÁI ${monstersDefeatedCount % 5 + 1}/5`)}
+            </span>
+          </div>
+
+          {/* Xu */}
+          <div className="flex items-center gap-1 text-amber-700 dark:text-amber-300 bg-amber-500/15 px-2.5 py-1 rounded-lg pixel-panel border-amber-500/30 font-bold text-xs">
+            <Coins className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+            <span>{playerCoins}</span>
+          </div>
+
+          {/* Chuỗi Streak */}
           {playerState?.streak > 0 && (
-            <div className="flex items-center gap-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-full text-xs font-bold">
-              <Flame className="w-3.5 h-3.5 fill-amber-400" />
-              <span>Streak x{playerState.streak}</span>
+            <div className="flex items-center gap-1 bg-amber-500/20 text-amber-700 dark:text-amber-300 pixel-panel border-amber-500/30 px-2.5 py-1 rounded-lg text-xs font-bold">
+              <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500 shrink-0" />
+              <span>x{playerState.streak}</span>
             </div>
           )}
 
-          <div className="text-slate-400 hidden lg:block text-[11px]">
-            {t.common.day} {clock.dayNumber} · {clock.isDay ? ("☀️ " + (isEn ? "Day" : "Ngày")) : ("🌙 " + (isEn ? "Night" : "Đêm"))}
+          <div className="text-slate-500 dark:text-slate-400 hidden lg:flex items-center gap-1 text-xs">
+            <span>D{clock.dayNumber}</span>
+            {clock.isDay ? (
+              <SunMedium className="w-3.5 h-3.5 text-amber-500" />
+            ) : (
+              <Moon className="w-3.5 h-3.5 text-indigo-400" />
+            )}
           </div>
         </div>
+      </div>
+
+      {/* THANH TIẾN ĐỘ CHUYỂN CÂU (GOOGLE MATERIAL LINEAR PROGRESS INDICATOR) */}
+      <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 overflow-hidden relative">
+        <div
+          className="h-full bg-gradient-to-r from-[#4285F4] via-[#34A853] to-[#4285F4] transition-all duration-500 ease-out rounded-r-full"
+          style={{ width: `${questionProgressPercent}%` }}
+        />
       </div>
 
       {/* POPUP XÁC NHẬN RÚT LUI */}
@@ -450,7 +704,7 @@ export function MonsterBattleArena({
               <button
                 type="button"
                 onClick={() => setShowFleeConfirm(false)}
-                className="py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-semibold transition-colors"
+                className="py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-semibold transition-colors duration-150 cursor-pointer"
               >
                 {t.battle.keepFighting}
               </button>
@@ -458,7 +712,7 @@ export function MonsterBattleArena({
                 type="button"
                 disabled={isFleeing}
                 onClick={handleFlee}
-                className="py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all"
+                className="py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-colors duration-150 cursor-pointer"
               >
                 {isFleeing ? <Loader2 className="w-4 h-4 animate-spin" /> : t.battle.stillFlee}
               </button>
@@ -471,7 +725,7 @@ export function MonsterBattleArena({
       {isOutOfHp && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-rose-500/50 p-6 sm:p-8 rounded-3xl max-w-lg w-full text-center space-y-5 shadow-2xl">
-            <div className="w-16 h-16 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center justify-center mx-auto animate-pulse">
+            <div className="w-16 h-16 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center justify-center mx-auto animate-pulse motion-reduce:animate-none">
               <Heart className="w-8 h-8" />
             </div>
 
@@ -499,9 +753,12 @@ export function MonsterBattleArena({
                           type="button"
                           disabled={healingLoading}
                           onClick={() => handleEmergencyHeal("use_inventory", item.itemId)}
-                          className="px-3 py-2 rounded-xl bg-slate-900 border border-emerald-500/40 hover:bg-emerald-900/30 text-xs font-semibold text-white flex items-center justify-between"
+                          className="px-3 py-2 rounded-xl bg-slate-900 border border-emerald-500/40 hover:bg-emerald-900/30 text-xs font-semibold text-white flex items-center justify-between cursor-pointer transition-colors duration-150"
                         >
-                          <span>{def?.icon || "🧪"} {def?.name || item.itemId}</span>
+                          <span className="flex items-center gap-1.5">
+                            <PixelItemIcon itemId={item.itemId} size={18} />
+                            <span>{def?.name || item.itemId}</span>
+                          </span>
                           <span className="text-[10px] text-emerald-400 font-mono">x{item.qty}</span>
                         </button>
                       );
@@ -515,11 +772,11 @@ export function MonsterBattleArena({
                 type="button"
                 disabled={healingLoading || playerCoins < 10}
                 onClick={() => handleEmergencyHeal("buy_potion")}
-                className="w-full p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/40 hover:bg-amber-500/25 text-left flex items-center justify-between gap-3 transition-all cursor-pointer disabled:opacity-50"
+                className="w-full p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/40 hover:bg-amber-500/25 text-left flex items-center justify-between gap-3 transition-colors duration-150 cursor-pointer disabled:opacity-50"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg">
-                    🧪
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center p-1">
+                    <PixelItemIcon itemId="small_healing_potion" size={26} />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-white">{t.battle.emergencyBuy}</p>
@@ -534,15 +791,15 @@ export function MonsterBattleArena({
                 type="button"
                 disabled={healingLoading}
                 onClick={() => handleEmergencyHeal("free_camp")}
-                className="w-full p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700 hover:bg-slate-800 text-left flex items-center justify-between gap-3 transition-all cursor-pointer"
+                className="w-full p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700 hover:bg-slate-800 text-left flex items-center justify-between gap-3 transition-colors duration-150 cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-slate-700 text-slate-300 flex items-center justify-center text-lg">
-                    🏕️
+                  <div className="w-10 h-10 rounded-xl bg-slate-700 text-slate-300 flex items-center justify-center">
+                    <Home className="w-5 h-5 text-slate-300" />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-white">{t.battle.reviveFree}</p>
-                    <p className="text-[11px] text-slate-400">{isEn ? "Recover 100% HP · Keep 100% of your earned Coins" : "Hồi đầy 100% sinh lực · Giữ nguyên 100% Xu kiếm được"}</p>
+                    <p className="text-[11px] text-slate-400">{isEn ? "Recover 100% HP" : "Hồi đầy 100% sinh lực"}</p>
                   </div>
                 </div>
                 <span className="text-xs font-mono font-bold text-emerald-400 shrink-0">{isEn ? "Free" : "Miễn Phí"}</span>
@@ -553,50 +810,71 @@ export function MonsterBattleArena({
       )}
 
       {/* ============================================================== */}
-      {/* 2. SÀN ĐẤU 2D RPG (GỌN GÀNG, VỪA VẶN MÀN HÌNH MÁY TÍNH)          */}
+      {/* 2. SÀN ĐẤU 2D RPG TRẢI RỘNG TOÀN MÀN HÌNH (KHÔNG KHOẢNG TRỐNG)  */}
       {/* ============================================================== */}
-      <div className="relative w-full max-w-6xl mx-auto h-[175px] sm:h-[195px] md:h-[210px] shrink-0 flex flex-col justify-between px-4 sm:px-8 py-2 overflow-hidden select-none">
-        {/* Nền Sân Đấu Rừng Sương Mù Mở Rộng */}
+      <div className="relative w-full h-[180px] sm:h-[200px] md:h-[220px] shrink-0 flex flex-col justify-between px-3 sm:px-6 md:px-10 py-2 overflow-hidden select-none border-b-2 border-emerald-600/40 bg-gradient-to-b from-slate-950 via-slate-900 to-emerald-950/60 shadow-inner">
+        {/* Nền Sân Đấu Rừng Sương Mù Mở Rộng Tràn Màn Hình */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900/90 to-emerald-950/40 pointer-events-none" />
-        <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-emerald-900/40 via-slate-900 to-transparent border-b-2 border-emerald-600/50 pointer-events-none" />
+        <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-emerald-900/50 via-slate-900/60 to-transparent border-b-2 border-emerald-500/50 pointer-events-none" />
 
-        {/* Thanh Máu 2 Bên Dàn Trải Đều (Player vs Monster) */}
-        <div className="relative z-10 grid grid-cols-2 gap-3 sm:gap-6 w-full">
+        {/* MÂY XANH PIXEL TRÔI ĐỘNG TRÊN BẦU TRỜI SÀN ĐẤU (BLUE CLOUDS) */}
+        <div className="absolute top-2 -left-16 w-52 h-12 opacity-85 pointer-events-none animate-[pixelCloudDriftSlow_55s_linear_infinite] z-0">
+          <svg viewBox="0 0 128 32" className="w-full h-full drop-shadow-[0_2px_6px_rgba(2,132,199,0.35)]" shapeRendering="crispEdges">
+            <rect x="0" y="20" width="128" height="6" fill="#0284c7" />
+            <rect x="12" y="14" width="104" height="6" fill="#38bdf8" />
+            <rect x="24" y="8" width="80" height="6" fill="#38bdf8" />
+            <rect x="36" y="4" width="56" height="4" fill="#7dd3fc" />
+            <rect x="44" y="2" width="40" height="2" fill="#bae6fd" />
+          </svg>
+        </div>
+        <div className="absolute top-6 -right-20 w-64 h-14 opacity-80 pointer-events-none animate-[pixelCloudDriftMed_45s_linear_infinite] z-0">
+          <svg viewBox="0 0 160 40" className="w-full h-full drop-shadow-[0_2px_8px_rgba(14,165,233,0.35)]" shapeRendering="crispEdges">
+            <rect x="0" y="26" width="160" height="8" fill="#0369a1" />
+            <rect x="16" y="18" width="128" height="8" fill="#0ea5e9" />
+            <rect x="28" y="10" width="104" height="8" fill="#38bdf8" />
+            <rect x="40" y="4" width="76" height="6" fill="#7dd3fc" />
+            <rect x="52" y="0" width="52" height="4" fill="#bae6fd" />
+          </svg>
+        </div>
+
+        {/* Thanh Máu 2 Bên Dàn Trải Đều (Player vs Monster) - Chuẩn Retro Pixel RPG */}
+        <div className="relative z-10 grid grid-cols-2 gap-3 sm:gap-6 w-full max-w-5xl mx-auto">
           {/* Cột 1: Thông tin Học sinh */}
-          <div className="px-3 py-1.5 rounded-xl bg-slate-900/85 border border-slate-800 backdrop-blur-sm space-y-1 shadow">
+          <div className="pixel-panel px-3 py-1.5 rounded-xl bg-slate-900/90 border-2 border-slate-700 space-y-1 shadow-md">
             <div className="flex items-center justify-between text-xs font-mono">
               <span className="font-bold text-white flex items-center gap-1.5 truncate">
-                <span>🛡️ {isEn ? "You" : "Bạn"}</span>
+                <Shield className="w-3.5 h-3.5 text-blue-400 inline shrink-0" />
+                <span className="font-pixel text-[11px]">{isEn ? "HERO" : "HIỆP SĨ"}</span>
                 <span className="text-[10px] text-amber-400 font-semibold hidden sm:inline">
                   (+{weaponDef?.atk || 25} ATK)
                 </span>
               </span>
               <span className="text-emerald-400 font-bold shrink-0">{playerHp}/{playerMaxHp} HP</span>
             </div>
-            {/* Thanh HP */}
-            <div className="w-full h-2 rounded-full bg-slate-950 border border-slate-800 overflow-hidden">
+            {/* Thanh HP Retro Pixel */}
+            <div className="w-full h-2.5 bg-slate-950 border border-slate-700 overflow-hidden shadow-inner">
               <div
-                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-300 rounded-full"
+                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400"
                 style={{ width: `${playerHpPercent}%` }}
               />
             </div>
           </div>
 
           {/* Cột 2: Thông tin Quái vật */}
-          <div className="px-3 py-1.5 rounded-xl bg-slate-900/85 border border-slate-800 backdrop-blur-sm space-y-1 shadow">
+          <div className="pixel-panel px-3 py-1.5 rounded-xl bg-slate-900/90 border-2 border-slate-700 space-y-1 shadow-md">
             <div className="flex items-center justify-between text-xs font-mono">
               <span className="font-bold text-rose-400 flex items-center gap-1.5 truncate">
-                <span>{monsterDef.avatar} {monsterName}</span>
+                <span className="font-pixel text-[11px]">{monsterName.toUpperCase()}</span>
                 <span className="text-[10px] text-slate-400 hidden sm:inline">
                   (ATK {scaledMonster.atk})
                 </span>
               </span>
               <span className="text-rose-400 font-bold shrink-0">{monsterCurrentHp}/{monsterMaxHp} HP</span>
             </div>
-            {/* Thanh HP */}
-            <div className="w-full h-2 rounded-full bg-slate-950 border border-slate-800 overflow-hidden">
+            {/* Thanh HP Retro Pixel */}
+            <div className="w-full h-2.5 bg-slate-950 border border-slate-700 overflow-hidden shadow-inner">
               <div
-                className="h-full bg-gradient-to-r from-rose-500 via-amber-500 to-rose-500 transition-all duration-300 rounded-full"
+                className="h-full bg-gradient-to-r from-rose-500 via-amber-500 to-rose-500"
                 style={{ width: `${monsterHpPercent}%` }}
               />
             </div>
@@ -614,8 +892,8 @@ export function MonsterBattleArena({
         {floatingTexts.map((item) => (
           <div
             key={item.id}
-            className={`absolute z-30 font-black font-mono transition-all duration-1000 pointer-events-none animate-out fade-out slide-out-to-top-8 ${
-              item.isCrit ? "text-xl sm:text-2xl text-yellow-300 drop-shadow-[0_0_15px_rgba(234,179,8,0.9)]" : "text-base sm:text-lg " + item.color
+            className={`absolute z-30 font-black font-mono transition-opacity duration-700 pointer-events-none animate-out fade-out slide-out-to-top-8 ${
+              item.isCrit ? "text-xl sm:text-2xl text-yellow-300 drop-shadow-md" : "text-base sm:text-lg " + item.color
             }`}
             style={{
               left: `${item.x}%`,
@@ -626,20 +904,20 @@ export function MonsterBattleArena({
           </div>
         ))}
 
-        {/* KHÔNG GIAN ĐỐI KHÁNG DÀN ĐỀU RỘNG RÃI */}
-        <div className="relative z-10 w-full flex items-end justify-between px-6 sm:px-20 lg:px-32 pb-1 min-h-[110px]">
+        {/* KHÔNG GIAN ĐỐI KHÁNG TRẢI RỘNG ĐỀU, KHÔNG BỊ TRỐNG 2 BÊN */}
+        <div className="relative z-10 w-full max-w-5xl mx-auto flex items-end justify-between px-6 sm:px-16 md:px-24 pb-1 min-h-[110px]">
           {/* ========================================================== */}
           {/* A. NHÂN VẬT HỌC SINH (HERO)                                */}
           {/* ========================================================== */}
           <div
-            className={`relative flex flex-col items-center transition-all duration-300 ${
+            className={`relative flex flex-col items-center transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none motion-reduce:animate-none ${
               heroAnim === "attack"
-                ? "translate-x-32 sm:translate-x-52 lg:translate-x-64 scale-105"
+                ? "translate-x-8 sm:translate-x-14 scale-105"
                 : heroAnim === "hurt"
-                ? "-translate-x-4 scale-95 brightness-125"
+                ? "-translate-x-3 scale-95 brightness-125"
                 : heroAnim === "flee"
-                ? "-translate-x-64 opacity-0 scale-75"
-                : "animate-pulse"
+                ? "-translate-x-48 opacity-0 scale-75"
+                : "motion-safe:animate-[pulse_4s_ease-in-out_infinite]"
             }`}
             style={{
               filter: heroAnim === "hurt" ? "drop-shadow(0 0 16px rgba(239, 68, 68, 0.9))" : undefined,
@@ -657,39 +935,17 @@ export function MonsterBattleArena({
               </div>
             )}
 
-            {/* Model Chiến Binh (scale gọn gàng) */}
-            <div className="relative w-18 h-24 sm:w-20 sm:h-26 flex flex-col items-center scale-90 sm:scale-100 origin-bottom">
-              <div className="relative w-11 h-11 rounded-xl bg-amber-200 border-2 border-slate-900 shadow-md flex items-center justify-center z-10">
-                <div className="flex gap-2">
-                  <div className="w-1.5 h-2 bg-slate-950 rounded-full" />
-                  <div className="w-1.5 h-2 bg-slate-950 rounded-full" />
-                </div>
-                <div className="absolute -top-2 inset-x-0 h-3.5 bg-slate-700 border-t-2 border-slate-500 rounded-t-lg" />
-              </div>
-
-              <div className="relative w-13 h-11 -mt-1 rounded-lg bg-slate-800 border-2 border-slate-950 flex items-center justify-between px-1 z-0 shadow">
-                <div className="absolute -top-1 inset-x-1 h-2 bg-amber-500 rounded-full" />
-                <div className="w-4 h-6 rounded bg-blue-600 border border-blue-300 flex items-center justify-center text-[10px] shadow">
-                  🛡️
-                </div>
-                <div className="w-5 h-7 rounded bg-slate-600 border border-slate-400" />
-                <div
-                  className={`w-4 h-10 flex flex-col items-center transition-transform ${
-                    heroAnim === "attack" ? "rotate-45 translate-x-2" : "-rotate-12"
-                  }`}
-                >
-                  <div className="w-2 h-7 bg-slate-200 border border-slate-400 rounded-t shadow" />
-                  <div className="w-4 h-1.5 bg-amber-600 rounded-full" />
-                  <div className="w-1.5 h-1.5 bg-amber-800 rounded-b" />
-                </div>
-              </div>
-
-              <div className="flex gap-2 -mt-0.5">
-                <div className="w-3 h-5 bg-slate-900 rounded-b" />
-                <div className="w-3 h-5 bg-slate-900 rounded-b" />
-              </div>
-
-              <div className="w-14 h-2.5 bg-black/40 rounded-full blur-[2px] mt-0.5" />
+            {/* Model Hiệp Sĩ Pixel Art Đồ Họa Động (Modular Paper-Doll) */}
+            <div className="relative flex flex-col items-center">
+              <PixelHero
+                heroAnim={heroAnim}
+                weaponId={weaponId}
+                armorId={armorId}
+                helmetId={helmetId}
+                shieldId={shieldId}
+                size={104}
+                showShadow={true}
+              />
             </div>
 
             <span className="text-[10px] font-mono font-bold text-white bg-slate-950/80 px-2 py-0.5 rounded-full border border-slate-800">
@@ -701,57 +957,87 @@ export function MonsterBattleArena({
           {/* B. QUÁI VẬT ĐỐI THỦ (MONSTER)                              */}
           {/* ========================================================== */}
           <div
-            className={`relative flex flex-col items-center transition-all duration-300 ${
+            className={`relative flex flex-col items-center transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none motion-reduce:animate-none ${
               monsterAnim === "jump"
-                ? "-translate-x-32 sm:-translate-x-52 lg:-translate-x-64 scale-105"
+                ? "-translate-x-12 sm:-translate-x-24 -translate-y-2 scale-105"
                 : monsterAnim === "hit"
                 ? "translate-x-4 scale-95"
                 : monsterAnim === "dead"
-                ? "scale-y-50 opacity-60 translate-y-2"
+                ? "scale-90 opacity-40 translate-y-2"
                 : monsterAnim === "spawn"
                 ? "animate-bounce"
-                : "animate-pulse"
+                : "motion-safe:animate-[pulse_3s_ease-in-out_infinite]"
             }`}
             style={{
               filter: monsterAnim === "hit" ? "drop-shadow(0 0 16px rgba(239, 68, 68, 0.9))" : undefined,
             }}
           >
-            {monsterDef.id === "slime" ? (
-              <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-end justify-center">
-                <img
-                  src={
-                    slimeFrame === 1
-                      ? "/sprites/slime_idle_1_clean.png"
-                      : slimeFrame === 2
-                      ? "/sprites/slime_idle_2_clean.png"
-                      : slimeFrame === 3
-                      ? "/sprites/slime_prep_clean.png"
-                      : slimeFrame === 4
-                      ? "/sprites/slime_jump_clean.png"
-                      : slimeFrame === 5
-                      ? "/sprites/slime_land_clean.png"
-                      : slimeFrame === 6
-                      ? "/sprites/slime_hit_clean.png"
-                      : "/sprites/slime_dead_clean.png"
-                  }
-                  alt="Slime Sprite"
-                  className={`max-w-full max-h-full object-contain filter drop-shadow-md select-none transition-transform pixelated ${
-                    slimeFrame === 4 ? "-translate-y-4" : ""
-                  }`}
-                  draggable={false}
-                />
-                <div className="absolute -bottom-1 w-16 h-2.5 bg-black/40 rounded-full blur-[2px]" />
-              </div>
-            ) : (
-              <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex flex-col items-center justify-end">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-500/20 via-slate-900 to-slate-950 border-2 border-rose-500/40 flex items-center justify-center text-4xl shadow-lg shadow-rose-500/20">
-                  <span className="filter drop-shadow-lg select-none">
-                    {monsterDef.avatar}
-                  </span>
+            {(() => {
+              const spriteSrc = getMonsterSprite(monsterDef.id, monsterFrame);
+              const isBoss = monsterDef.id === "boar_king" || monsterDef.id === "rock_golem";
+              const isHeavy = monsterDef.id === "small_golem";
+              const isMedium = monsterDef.id === "mist_spider" || monsterDef.id === "skeleton";
+              const isNimble =
+                monsterDef.id === "baby_wolf" ||
+                monsterDef.id === "wolf" ||
+                monsterDef.id === "forest_goblin" ||
+                monsterDef.id === "goblin";
+
+              if (spriteSrc) {
+                return (
+                  <div
+                    className={`relative flex items-end justify-center -scale-x-100 ${
+                      isBoss
+                        ? "w-28 h-28 sm:w-38 sm:h-38"
+                        : isHeavy
+                        ? "w-26 h-26 sm:w-34 sm:h-34"
+                        : isMedium
+                        ? "w-24 h-24 sm:w-30 sm:h-30"
+                        : isNimble
+                        ? "w-24 h-24 sm:w-28 sm:h-28"
+                        : "w-20 h-20 sm:w-24 sm:h-24"
+                    }`}
+                  >
+                    <img
+                      src={spriteSrc}
+                      alt={monsterName}
+                      className={`max-w-full max-h-full object-contain filter drop-shadow-xl select-none transition-transform duration-200 pixelated ${
+                        monsterAnim === "jump"
+                          ? "-translate-y-2 scale-105"
+                          : monsterAnim === "hit"
+                          ? "brightness-125 saturate-150"
+                          : ""
+                      }`}
+                      draggable={false}
+                    />
+                    <div
+                      className={`absolute -bottom-1 bg-black/40 rounded-full blur-[2px] ${
+                        isBoss
+                          ? "w-28 h-3.5"
+                          : isHeavy
+                          ? "w-26 h-3.5"
+                          : isMedium
+                          ? "w-24 h-3"
+                          : isNimble
+                          ? "w-20 h-2.5"
+                          : "w-16 h-2"
+                      }`}
+                    />
+                  </div>
+                );
+              }
+
+              return (
+                <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex flex-col items-center justify-end -scale-x-100">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-500/20 via-slate-900 to-slate-950 border-2 border-rose-500/40 flex items-center justify-center text-4xl shadow-lg shadow-rose-500/20">
+                    <span className="filter drop-shadow-lg select-none">
+                      {monsterDef.avatar}
+                    </span>
+                  </div>
+                  <div className="w-16 h-2.5 bg-black/40 rounded-full blur-[2px] mt-0.5" />
                 </div>
-                <div className="w-16 h-2.5 bg-black/40 rounded-full blur-[2px] mt-0.5" />
-              </div>
-            )}
+              );
+            })()}
 
             <span className="text-[10px] font-mono font-bold text-rose-300 bg-slate-950/80 px-2 py-0.5 rounded-full border border-slate-800">
               {monsterName}
@@ -763,42 +1049,52 @@ export function MonsterBattleArena({
       {/* ============================================================== */}
       {/* 3. BẢNG CÂU HỎI & NÚT TẤN CÔNG HOẶC BẢNG ĐÁP ÁN ĐÚNG           */}
       {/* ============================================================== */}
-      <div className="flex-1 min-h-0 w-full bg-slate-900/95 border-t border-slate-800 flex flex-col justify-between p-2 sm:p-3.5 shadow-2xl">
-        <div className="flex-1 min-h-0 overflow-y-auto max-w-5xl xl:max-w-6xl mx-auto w-full flex flex-col justify-center px-1">
+      <div className="flex-1 min-h-0 w-full bg-[#F8F9FA] dark:bg-slate-900/95 border-t border-slate-200/90 dark:border-slate-800 flex flex-col justify-between p-3 sm:p-5 shadow-xs">
+        <div className="flex-1 min-h-0 overflow-y-auto max-w-5xl xl:max-w-6xl mx-auto w-full flex flex-col justify-center px-1 transition-all duration-300 ease-in-out">
           {reviewData ? (
-            /* BẢNG XEM LẠI ĐÁP ÁN ĐÚNG CHO HỌC SINH */
-            <div className="w-full max-w-2xl mx-auto p-4 sm:p-5 rounded-3xl bg-slate-950 border-2 border-rose-500/50 shadow-2xl space-y-3.5 animate-in fade-in zoom-in-95 my-auto">
-              <div className="flex items-center gap-2.5 text-rose-400 font-mono font-bold text-xs sm:text-sm">
-                <XCircle className="w-5 h-5 shrink-0 text-rose-500" />
-                <span>
-                  {isEn
-                    ? "Incorrect Answer — Review & Learn:"
-                    : "Câu trả lời chưa chính xác — Hãy xem lại để học đáp án đúng:"}
-                </span>
+            /* BẢNG XEM LẠI ĐÁP ÁN ĐÚNG CHO HỌC SINH (GOOGLE MATERIAL CARD) */
+            <div className={`w-full max-w-2xl mx-auto p-6 sm:p-7 rounded-3xl border-2 shadow-md space-y-4 animate-in fade-in zoom-in-95 my-auto ${
+              reviewData.isCorrect
+                ? "bg-[#E6F4EA] dark:bg-[#34A853]/15 border-[#34A853] text-[#137333] dark:text-[#81C995]"
+                : "bg-[#FCE8E6] dark:bg-[#EA4335]/15 border-[#EA4335] text-[#C5221F] dark:text-[#F28B82]"
+            }`}>
+              <div className="flex items-center gap-2.5 font-bold text-sm sm:text-base">
+                {reviewData.isCorrect ? (
+                  <>
+                    <CheckCircle className="w-6 h-6 shrink-0 text-[#34A853]" />
+                    <span>{isEn ? "Correct Answer! Great Job!" : "Chính xác! Làm rất tốt!"}</span>
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="w-6 h-6 shrink-0 text-[#EA4335]" />
+                    <span>{isEn ? "Incorrect Answer — Review & Learn:" : "Câu trả lời chưa chính xác — Hãy xem lại để học đáp án đúng:"}</span>
+                  </>
+                )}
               </div>
 
               {/* Ô hiển thị đáp án đúng */}
-              <div className="p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/40">
-                <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400 mb-1 flex items-center gap-1.5">
-                  <Check className="w-3.5 h-3.5" />
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xs">
+                <p className="text-xs font-semibold text-[#137333] dark:text-[#81C995] mb-1.5 flex items-center gap-1.5">
+                  <Check className="w-4 h-4 text-[#34A853]" />
                   <span>{isEn ? "Correct Answer:" : "Đáp án đúng:"}</span>
                 </p>
-                <p className="text-xs sm:text-sm md:text-base font-bold text-emerald-200">
+                <p className="text-sm sm:text-base font-bold text-slate-900 dark:text-white break-words whitespace-normal leading-relaxed">
                   {reviewData.correctAnswerDisplay}
                 </p>
               </div>
 
               {/* Lời giải thích nếu có */}
               {reviewData.explanation && (
-                <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-xs text-slate-300 leading-relaxed">
-                  <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 mb-0.5">
-                    {isEn ? "💡 Explanation:" : "💡 Lời giải thích:"}
+                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed shadow-xs">
+                  <p className="text-xs font-semibold text-[#B06000] dark:text-amber-400 mb-1 flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-[#FBBC05]" />
+                    <span>{isEn ? "Explanation:" : "Lời giải thích:"}</span>
                   </p>
                   <p>{reviewData.explanation}</p>
                 </div>
               )}
 
-              {/* Nút tiếp tục sang câu tiếp theo */}
+              {/* Nút tiếp tục sang câu tiếp theo chuẩn Pixel Art RPG */}
               <button
                 type="button"
                 onClick={() => {
@@ -806,31 +1102,33 @@ export function MonsterBattleArena({
                   onNextQuestion();
                   setUserAnswer(null);
                 }}
-                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black font-mono text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
+                className="w-full py-3.5 px-6 rounded-xl pixel-btn-amber text-slate-950 font-bold font-mono text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer transition-all duration-150"
               >
                 <span>{isEn ? "Continue Battle ➔" : "Đã hiểu, Tiếp tục chiến đấu ➔"}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           ) : PlayerComponent && localizedQuestion ? (
-            <PlayerComponent
-              content={localizedQuestion.content}
-              value={userAnswer}
-              onChange={(val) => setUserAnswer(val)}
-              disabled={submitting || monsterAnim === "dead" || isOutOfHp}
-            />
+            <div className="w-full transition-opacity duration-300 ease-in-out">
+              <PlayerComponent
+                content={localizedQuestion.content}
+                value={userAnswer}
+                onChange={(val) => setUserAnswer(val)}
+                disabled={submitting || monsterAnim === "dead" || isOutOfHp}
+              />
+            </div>
           ) : (
-            <div className="p-4 text-center text-slate-400 text-xs">{t.common.loadingShort}</div>
+            <div className="p-4 text-center text-slate-400 text-xs font-mono">{t.common.loadingShort}</div>
           )}
         </div>
 
-        {/* Nút hành động Tấn Công (chỉ hiển thị khi đang làm bài) */}
+        {/* Nút hành động Tấn Công - Chuẩn Retro Pixel RPG */}
         {!reviewData && (
           <button
             type="button"
             disabled={userAnswer === null || submitting || monsterAnim === "dead" || isOutOfHp}
             onClick={handleAttack}
-            className="mt-1.5 sm:mt-2 w-full max-w-5xl xl:max-w-6xl mx-auto py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black font-mono text-xs sm:text-sm transition-all shadow-lg active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer shrink-0"
+            className="mt-2 w-full max-w-5xl xl:max-w-6xl mx-auto py-3.5 px-8 rounded-xl pixel-btn-amber disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer shrink-0 font-mono text-sm sm:text-base font-black uppercase tracking-wider"
           >
             {submitting ? (
               <>
@@ -851,6 +1149,13 @@ export function MonsterBattleArena({
           </button>
         )}
       </div>
+
+      {/* SỔ TAY QUÁI VẬT HẦM NGỤC (7 LOÀI) */}
+      <MonsterBestiaryModal
+        isOpen={showBestiary}
+        onClose={() => setShowBestiary(false)}
+        language={language}
+      />
     </div>
   );
 }

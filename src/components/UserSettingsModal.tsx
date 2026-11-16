@@ -21,6 +21,9 @@ import {
   AlertCircle,
   CheckCircle2,
   GraduationCap,
+  Sun,
+  Moon,
+  Palette,
 } from "lucide-react";
 import {
   updateStudentDisplayName,
@@ -30,6 +33,7 @@ import {
 } from "@/app/dashboard/actions";
 import { logout } from "@/app/(auth)/actions";
 import { useLanguage } from "@/lib/i18n/useLanguage";
+import { useTheme } from "@/lib/theme/useTheme";
 import { VIETNAM_PROVINCES } from "@/lib/constants/provinces";
 import type { Profile } from "@/types/database";
 
@@ -57,6 +61,7 @@ export function UserSettingsModal({
   onProfileUpdated,
 }: UserSettingsModalProps) {
   const { language, setLanguage, isEn } = useLanguage();
+  const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<"profile" | "school" | "security" | "preferences">(
     initialTab
   );
@@ -293,34 +298,35 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
+      className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md overflow-y-auto p-3 sm:p-6 animate-in fade-in duration-150 motion-reduce:animate-none"
       onClick={onClose}
     >
-      <div
-        className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-xl my-auto max-h-[85vh] flex flex-col shadow-2xl overflow-hidden ring-1 ring-amber-500/20 relative"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="min-h-full flex items-center justify-center py-4">
+        <div
+          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-xl max-h-[88vh] flex flex-col shadow-2xl overflow-hidden ring-1 ring-amber-500/20 relative"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Header Modal */}
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/70 shrink-0">
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950/70 shrink-0 sticky top-0 z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-sm shadow-amber-500/10">
-              <Settings className="w-5 h-5 animate-[spin_12s_linear_infinite]" />
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500 shadow-sm shadow-amber-500/10">
+              <Settings className="w-5 h-5 animate-[spin_12s_linear_infinite] motion-reduce:animate-none" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                 <span>{isEn ? "Personal Settings" : "Cài Đặt Cá Nhân"}</span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 {isEn
-                  ? "Manage your profile, school, class, password & preferences"
-                  : "Quản lý hồ sơ, trường lớp, bảo mật mật khẩu và tùy chọn của bạn"}
+                  ? "Manage your profile, theme mode, school, class, password & preferences"
+                  : "Quản lý hồ sơ, giao diện sáng/tối, trường lớp, bảo mật mật khẩu của bạn"}
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 border border-transparent hover:border-slate-700 transition-all cursor-pointer"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 border border-transparent transition-colors duration-150 cursor-pointer"
             title={isEn ? "Close" : "Đóng"}
           >
             <X className="w-5 h-5" />
@@ -328,56 +334,56 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
         </div>
 
         {/* Tab Navigation (Bánh Răng Cài Đặt gom toàn bộ tùy chọn cá nhân) */}
-        <div className="flex items-center gap-1 px-4 sm:px-6 pt-3 border-b border-slate-800/80 bg-slate-950/30 overflow-x-auto no-scrollbar shrink-0">
+        <div className="flex items-center gap-1 px-4 sm:px-6 pt-3 border-b border-slate-200 dark:border-slate-800/80 bg-slate-100/60 dark:bg-slate-950/30 overflow-x-auto no-scrollbar shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab("profile")}
-            className={`px-3.5 py-2.5 rounded-t-xl text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer border-b-2 shrink-0 ${
+            className={`px-3.5 py-2.5 rounded-t-xl text-xs font-mono font-bold flex items-center gap-2 transition-colors duration-150 cursor-pointer border-b-2 shrink-0 ${
               activeTab === "profile"
-                ? "border-amber-400 text-amber-300 bg-amber-500/10"
-                : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
+                ? "border-amber-500 text-amber-700 dark:text-amber-300 bg-amber-500/10"
+                : "border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/40"
             }`}
           >
-            <User className="w-3.5 h-3.5 text-amber-400" />
+            <User className="w-3.5 h-3.5 text-amber-500" />
             <span>{isEn ? "Profile" : "Hồ Sơ"}</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("school")}
-            className={`px-3.5 py-2.5 rounded-t-xl text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer border-b-2 shrink-0 ${
+            className={`px-3.5 py-2.5 rounded-t-xl text-xs font-mono font-bold flex items-center gap-2 transition-colors duration-150 cursor-pointer border-b-2 shrink-0 ${
               activeTab === "school"
-                ? "border-blue-400 text-blue-300 bg-blue-500/10"
-                : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
+                ? "border-blue-500 text-blue-700 dark:text-blue-300 bg-blue-500/10"
+                : "border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/40"
             }`}
           >
-            <SchoolIcon className="w-3.5 h-3.5 text-blue-400" />
+            <SchoolIcon className="w-3.5 h-3.5 text-blue-500" />
             <span>{isEn ? "School & Class" : "Trường & Lớp"}</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("security")}
-            className={`px-3.5 py-2.5 rounded-t-xl text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer border-b-2 shrink-0 ${
+            className={`px-3.5 py-2.5 rounded-t-xl text-xs font-mono font-bold flex items-center gap-2 transition-colors duration-150 cursor-pointer border-b-2 shrink-0 ${
               activeTab === "security"
-                ? "border-emerald-400 text-emerald-300 bg-emerald-500/10"
-                : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
+                ? "border-emerald-500 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10"
+                : "border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/40"
             }`}
           >
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
             <span>{isEn ? "Security & Password" : "Bảo Mật & Mật Khẩu"}</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("preferences")}
-            className={`px-3.5 py-2.5 rounded-t-xl text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer border-b-2 shrink-0 ${
+            className={`px-3.5 py-2.5 rounded-t-xl text-xs font-mono font-bold flex items-center gap-2 transition-colors duration-150 cursor-pointer border-b-2 shrink-0 ${
               activeTab === "preferences"
-                ? "border-purple-400 text-purple-300 bg-purple-500/10"
-                : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
+                ? "border-purple-500 text-purple-700 dark:text-purple-300 bg-purple-500/10"
+                : "border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/40"
             }`}
           >
-            <Globe className="w-3.5 h-3.5 text-purple-400" />
+            <Globe className="w-3.5 h-3.5 text-purple-500" />
             <span>{isEn ? "Preferences" : "Hệ Thống"}</span>
           </button>
         </div>
@@ -386,28 +392,28 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
           {/* TAB 1: HỒ SƠ & TÊN HIỂN THỊ */}
           {activeTab === "profile" && (
-            <div className="space-y-6">
+            <div className="space-y-5">
               {/* Profile Card Header */}
-              <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 flex items-center gap-4">
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 font-black text-2xl shadow-lg shadow-amber-500/20 shrink-0">
                   {effectiveDisplayName.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-base font-bold text-white truncate">{effectiveDisplayName}</h3>
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white truncate">{effectiveDisplayName}</h3>
                     <span
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider ${
+                      className={`text-[10px] font-mono px-2 py-0.5 rounded-full border font-bold ${
                         isAdmin
-                          ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                          ? "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30"
                           : isTeacher
-                          ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
-                          : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                          ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30"
+                          : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
                       }`}
                     >
                       {isAdmin ? "Admin" : isTeacher ? (isEn ? "Teacher" : "Giáo Viên") : (isEn ? "Student" : "Học Sinh")}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 font-mono mt-0.5 truncate">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5 truncate">
                     {accountInfo?.username ? `@${accountInfo.username}` : (accountInfo?.email || "")}
                   </p>
                 </div>
@@ -417,10 +423,10 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
               <form onSubmit={handleSaveDisplayName} className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-mono font-bold text-slate-300">
+                    <label className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
                       {isEn ? "Display Name (In-Game & Leaderboard):" : "Tên hiển thị nhân vật:"}
                     </label>
-                    <span className="text-[11px] font-mono text-slate-500">
+                    <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">
                       {displayNameInput.trim().length}/40 {isEn ? "chars" : "ký tự"}
                     </span>
                   </div>
@@ -429,10 +435,10 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
                     value={displayNameInput}
                     onChange={(e) => setDisplayNameInput(e.target.value)}
                     placeholder={isEn ? "Enter your new display name..." : "Nhập tên hiển thị bạn muốn..."}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-400 text-sm font-sans transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-amber-500 text-sm font-sans transition-colors"
                     maxLength={40}
                   />
-                  <p className="text-[11px] text-slate-500 mt-1">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                     {isEn
                       ? "This name will appear on the leaderboard, in dungeon teams and classroom activities."
                       : "Tên này sẽ hiển thị trên bảng xếp hạng thế giới, đấu trường lớp và danh sách lớp học."}
@@ -443,29 +449,82 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
                   <div
                     className={`p-3 rounded-xl border text-xs flex items-center gap-2 font-mono ${
                       profileMsg.type === "success"
-                        ? "bg-emerald-950/40 border-emerald-500/40 text-emerald-300"
-                        : "bg-rose-950/40 border-rose-500/40 text-rose-300"
+                        ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-500/40 text-emerald-800 dark:text-emerald-300"
+                        : "bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-500/40 text-rose-800 dark:text-rose-300"
                     }`}
                   >
                     {profileMsg.type === "success" ? (
-                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
                     ) : (
-                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
                     )}
                     <span>{profileMsg.text}</span>
                   </div>
                 )}
 
-                <div className="flex justify-end pt-2">
+                <div className="flex justify-end pt-1">
                   <button
                     type="submit"
                     disabled={savingProfile}
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-bold text-xs font-mono transition-all shadow-md shadow-amber-500/20 active:scale-95 disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs font-mono transition-colors duration-150 shadow-md shadow-amber-500/20 active:scale-95 disabled:opacity-50 cursor-pointer"
                   >
                     {savingProfile ? (isEn ? "Saving..." : "Đang lưu...") : (isEn ? "Save Display Name" : "Lưu Tên Hiển Thị")}
                   </button>
                 </div>
               </form>
+
+              {/* TÙY CHỌN THEME SÁNG / TỐI NGAY TẠI TRANG CHÍNH CÀI ĐẶT */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 space-y-3">
+                <div>
+                  <h4 className="text-xs font-mono font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <Palette className="w-4 h-4 text-amber-500" />
+                    <span>{isEn ? "Color Theme Mode" : "Chế Độ Giao Diện Hệ Thống"}</span>
+                  </h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    {isEn
+                      ? "Instant switch between Elegant Google Light and Immersive RPG Dark"
+                      : "Chuyển đổi tức thì giữa Giao diện Sáng (Google Light) và Giao diện Tối (RPG Dark)"}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setTheme("light")}
+                    className={`p-3 rounded-xl border flex items-center gap-3 transition-colors duration-150 cursor-pointer ${
+                      theme === "light"
+                        ? "bg-amber-500/15 border-amber-500/50 text-amber-900 dark:text-amber-300 ring-2 ring-amber-400"
+                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-950 dark:hover:text-slate-200"
+                    }`}
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                      <Sun className="w-4 h-4" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-bold leading-tight">{isEn ? "Light Theme" : "Giao diện Sáng"}</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">{isEn ? "Google Light" : "Thanh lịch · Hiện đại"}</p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTheme("dark")}
+                    className={`p-3 rounded-xl border flex items-center gap-3 transition-colors duration-150 cursor-pointer ${
+                      theme === "dark"
+                        ? "bg-amber-500/15 border-amber-500/50 text-amber-300 ring-2 ring-amber-400"
+                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-950 dark:hover:text-slate-200"
+                    }`}
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-slate-800 text-amber-400 flex items-center justify-center shrink-0">
+                      <Moon className="w-4 h-4" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-bold leading-tight">{isEn ? "Dark Theme" : "Giao diện Tối"}</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">{isEn ? "RPG Night Mode" : "Mặc định · Dịu mắt"}</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -559,7 +618,7 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
                 <button
                   type="submit"
                   disabled={savingSchool}
-                  className="px-5 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md shadow-blue-500/20 active:scale-95 disabled:opacity-50 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold text-xs font-mono transition-colors duration-150 shadow-md shadow-blue-500/20 active:scale-95 disabled:opacity-50 cursor-pointer"
                 >
                   {savingSchool ? (isEn ? "Saving..." : "Đang lưu...") : (isEn ? "Save School & Class" : "Lưu Trường & Lớp")}
                 </button>
@@ -572,7 +631,7 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
             <div className="space-y-6">
               {/* Đổi Mật Khẩu */}
               <form onSubmit={handleSavePassword} className="space-y-4">
-                <h3 className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                <h3 className="text-xs font-mono font-bold text-emerald-400 flex items-center gap-1.5">
                   <KeyRound className="w-4 h-4" />
                   <span>{isEn ? "Change Password" : "Đổi Mật Khẩu Mới"}</span>
                 </h3>
@@ -646,7 +705,7 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
                   <button
                     type="submit"
                     disabled={savingPassword}
-                    className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md shadow-emerald-500/20 active:scale-95 disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs font-mono transition-colors duration-150 shadow-md shadow-emerald-500/20 active:scale-95 disabled:opacity-50 cursor-pointer"
                   >
                     {savingPassword ? (isEn ? "Saving..." : "Đang lưu...") : (isEn ? "Update Password" : "Cập Nhật Mật Khẩu")}
                   </button>
@@ -656,7 +715,7 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
               {/* Mục Mã Khôi Phục Bí Mật Cho Học Sinh */}
               {recoveryCode && (
                 <div className="pt-4 border-t border-slate-800/80 space-y-3">
-                  <h4 className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="text-xs font-mono font-bold text-amber-400 flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4" />
                     <span>{isEn ? "Secret Recovery Code" : "Mã Khôi Phục Bí Mật Của Bạn"}</span>
                   </h4>
@@ -667,8 +726,9 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
                   </p>
 
                   <div className="p-3.5 rounded-2xl bg-slate-950 border border-amber-500/30 flex items-center justify-between gap-3 font-mono">
-                    <div className="flex items-center gap-2 text-sm font-bold text-amber-300 tracking-wider">
-                      <span>🔑 {recoveryCode}</span>
+                    <div className="flex items-center gap-2 text-sm font-bold text-amber-300">
+                      <KeyRound className="w-4 h-4 text-amber-400 shrink-0" />
+                      <span>{recoveryCode}</span>
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
@@ -701,6 +761,61 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
           {/* TAB 4: TÙY CHỌN & HỆ THỐNG */}
           {activeTab === "preferences" && (
             <div className="space-y-6">
+              {/* Tùy Chỉnh Màu Sắc Giao Diện (Theme Sáng / Tối Cá Nhân) */}
+              <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-xs font-mono font-bold text-white flex items-center gap-1.5">
+                      <Palette className="w-4 h-4 text-amber-400" />
+                      <span>{isEn ? "Color Theme" : "Màu Sắc Giao Diện"}</span>
+                    </h4>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      {isEn
+                        ? "Choose between Dark RPG mode and Elegant Light mode"
+                        : "Lựa chọn chế độ Tối huyền bí hoặc Sáng thanh lịch theo sở thích cá nhân"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setTheme("dark")}
+                    className={`p-3 rounded-xl border flex items-center gap-3 transition-colors duration-150 cursor-pointer ${
+                      theme === "dark"
+                        ? "bg-amber-500/15 border-amber-500/40 text-amber-300 ring-1 ring-amber-500/30"
+                        : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200"
+                    }`}
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-slate-800 text-amber-400 flex items-center justify-center shrink-0">
+                      <Moon className="w-4 h-4" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-bold leading-tight">{isEn ? "Dark Theme" : "Giao diện Tối"}</p>
+                      <p className="text-[10px] text-slate-400 font-mono">{isEn ? "RPG Night Mode" : "Mặc định · Dịu mắt"}</p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTheme("light")}
+                    className={`p-3 rounded-xl border flex items-center gap-3 transition-colors duration-150 cursor-pointer ${
+                      theme === "light"
+                        ? "bg-amber-500/15 border-amber-500/40 text-amber-300 ring-1 ring-amber-500/30"
+                        : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200"
+                    }`}
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                      <Sun className="w-4 h-4" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-bold leading-tight">{isEn ? "Light Theme" : "Giao diện Sáng"}</p>
+                      <p className="text-[10px] text-slate-400 font-mono">{isEn ? "Google Light" : "Thanh lịch · Hiện đại"}</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
               {/* Lựa Chọn Ngôn Ngữ Giao Diện */}
               <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
                 <div className="flex items-center justify-between">
@@ -721,13 +836,13 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
                   <button
                     type="button"
                     onClick={() => setLanguage("vi")}
-                    className={`p-3 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
+                    className={`p-3 rounded-xl border flex items-center gap-3 transition-colors duration-150 cursor-pointer ${
                       language === "vi"
                         ? "bg-amber-500/15 border-amber-500/40 text-amber-300 ring-1 ring-amber-500/30"
                         : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200"
                     }`}
                   >
-                    <span className="text-xl">🇻🇳</span>
+                    <span className="w-7 h-7 rounded-lg bg-red-600 text-yellow-300 font-mono font-black text-xs flex items-center justify-center shrink-0">VN</span>
                     <div className="text-left">
                       <p className="text-xs font-bold leading-tight">Tiếng Việt</p>
                       <p className="text-[10px] text-slate-400 font-mono">Bản ngữ</p>
@@ -737,13 +852,13 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
                   <button
                     type="button"
                     onClick={() => setLanguage("en")}
-                    className={`p-3 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
+                    className={`p-3 rounded-xl border flex items-center gap-3 transition-colors duration-150 cursor-pointer ${
                       language === "en"
                         ? "bg-amber-500/15 border-amber-500/40 text-amber-300 ring-1 ring-amber-500/30"
                         : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200"
                     }`}
                   >
-                    <span className="text-xl">🇬🇧</span>
+                    <span className="w-7 h-7 rounded-lg bg-blue-700 text-white font-mono font-black text-xs flex items-center justify-center shrink-0">EN</span>
                     <div className="text-left">
                       <p className="text-xs font-bold leading-tight">English</p>
                       <p className="text-[10px] text-slate-400 font-mono">Global</p>
@@ -761,7 +876,7 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
                   <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-3">
                     <Sparkles className="w-5 h-5 text-amber-400 shrink-0" />
                     <div>
-                      <p className="text-[11px] text-slate-400 font-mono">{isEn ? "Fireflies" : "Đom Đóm"}</p>
+                      <p className="text-[11px] text-slate-400 font-mono">{isEn ? "Achievement Points" : "Điểm Thành Tích"}</p>
                       <p className="text-sm font-bold text-amber-300 font-mono">{profile?.fireflies ?? 120}</p>
                     </div>
                   </div>
@@ -798,19 +913,20 @@ Luu y: Giu bi mat ma nay de khoi phuc mat khau khi quen ma khong can email!`;
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-3.5 border-t border-slate-800 bg-slate-950/60 flex items-center justify-between shrink-0 text-xs font-mono text-slate-500">
+        <div className="px-6 py-3.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between shrink-0 text-xs font-mono text-slate-600 dark:text-slate-400">
           <div className="flex items-center gap-1.5">
-            <Settings className="w-3.5 h-3.5 text-amber-400" />
+            <Settings className="w-3.5 h-3.5 text-amber-500" />
             <span>FOGGO · {isEn ? "Account Settings Center" : "Trung Tâm Cài Đặt Tài Khoản"}</span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono transition-colors cursor-pointer"
+            className="px-4 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-mono transition-colors duration-150 cursor-pointer"
           >
             {isEn ? "Close" : "Đóng"}
           </button>
         </div>
+      </div>
       </div>
     </div>,
     document.body

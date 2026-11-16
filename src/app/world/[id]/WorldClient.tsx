@@ -9,18 +9,29 @@ import {
   Trophy,
   Swords,
   Shield,
+  ShieldAlert,
   Backpack,
   SunMedium,
   Moon,
   Sparkles,
   ShoppingBag,
+  Crown,
+  Utensils,
+  AlertCircle,
+  Lock,
+  Home,
+  Trees,
   X,
   CheckCircle2,
+  Check,
   XCircle,
+  ArrowLeft,
+  BookOpen,
 } from "lucide-react";
+import { MonsterBestiaryModal } from "@/components/MonsterBestiaryModal";
 import { getQuestionType } from "@/question-types/registry";
 import { getSurvivalClock } from "@/game-modes/survival/clock";
-import { getItemDef } from "@/game-modes/survival/items";
+import { getItemDef, ITEM_REGISTRY } from "@/game-modes/survival/items";
 import { getScaledMonster } from "@/game-modes/survival/monsters";
 import { submitSurvivalAction, performSurvivalItemAction, emergencyHealOrRevive } from "./actions";
 import { MonsterBattleArena } from "./MonsterBattleArena";
@@ -28,6 +39,8 @@ import { useLanguage } from "@/lib/i18n/useLanguage";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { localizeItemDef, localizeMonsterDef, localizeWorldTitle } from "@/lib/i18n/game-translations";
 import { localizeQuestion } from "@/lib/i18n/questions-translation";
+import { PixelHero } from "@/components/PixelHero";
+import { PixelItemIcon } from "@/components/PixelItemIcon";
 import type { SurvivalPlayerState } from "@/game-modes/survival/engine";
 
 interface WorldClientProps {
@@ -70,6 +83,7 @@ export function WorldClient({
 
   // Bộ lọc cửa hàng / Thợ rèn
   const [shopTab, setShopTab] = useState<"all" | "weapons" | "defense" | "consumables">("all");
+  const [showBestiary, setShowBestiary] = useState(false);
 
   // State người chơi - Đảm bảo luôn khởi tạo an toàn, không bao giờ crash nếu DB cũ thiếu trường
   const [playerState, setPlayerState] = useState<SurvivalPlayerState>(() => {
@@ -251,19 +265,48 @@ export function WorldClient({
     }
   }
 
-  // Bán vật phẩm trong túi đồ đổi lấy Xu
+  // Bán vật phẩm trong túi đồ đổi lấy Xu (Tối ưu phản hồi siêu tốc 0ms Optimistic UI)
   async function handleSellItem(slotIndex: number, e?: React.MouseEvent) {
     if (e) e.stopPropagation();
-    const res = await performSurvivalItemAction({
-      sessionId,
-      action: "sell_item",
-      slotIndex,
-    });
-    if (res.state) {
-      handleUpdatePlayerState(res.state);
-      showToast(res.message);
-    } else {
-      alert(res.error || res.message);
+
+    const targetSlot = playerState.inventory?.find((s: any) => s.slotIndex === slotIndex);
+    if (!targetSlot) return;
+
+    const itemDef = ITEM_REGISTRY[targetSlot.itemId];
+    const unitPrice = itemDef?.sellPrice && itemDef.sellPrice > 0 ? itemDef.sellPrice : 1;
+    const countToSell = targetSlot.qty;
+    const coinsEarned = unitPrice * countToSell;
+
+    // Cập nhật lạc quan (Optimistic update) ngay lập tức
+    const previousState = playerState;
+    const optimisticInventory = playerState.inventory.filter((s: any) => s.slotIndex !== slotIndex);
+    const optimisticState = {
+      ...playerState,
+      coins: (playerState.coins || 0) + coinsEarned,
+      inventory: optimisticInventory,
+    };
+    handleUpdatePlayerState(optimisticState);
+    showToast(
+      isEn
+        ? `Sold ${countToSell}x ${itemDef?.name || targetSlot.itemId} for +${coinsEarned} Coins!`
+        : `Đã bán ${countToSell}x ${itemDef?.name || targetSlot.itemId} nhận +${coinsEarned} Xu!`
+    );
+
+    try {
+      const res = await performSurvivalItemAction({
+        sessionId,
+        action: "sell_item",
+        slotIndex,
+      });
+      if (res.state) {
+        handleUpdatePlayerState(res.state);
+      } else {
+        handleUpdatePlayerState(previousState);
+        alert(res.error || res.message);
+      }
+    } catch (err: any) {
+      handleUpdatePlayerState(previousState);
+      alert(err.message || "Lỗi khi bán đồ");
     }
   }
 
@@ -282,6 +325,38 @@ export function WorldClient({
     }
   }
 
+  // Tháo trang bị về túi đồ
+  async function handleUnequipGear(gearSlot: "weapon" | "armor" | "helmet" | "shield") {
+    if (!sessionId || !playerState?.equipped?.[gearSlot]) return;
+    try {
+      const res = await performSurvivalItemAction({
+        sessionId,
+        action: "unequip",
+        gearSlot,
+      });
+      if (res.state) {
+        handleUpdatePlayerState(res.state);
+        showToast(
+          isEn
+            ? `Unequipped ${gearSlot} back into your backpack!`
+            : `Đã tháo ${
+                gearSlot === "weapon"
+                  ? "vũ khí"
+                  : gearSlot === "helmet"
+                  ? "mũ"
+                  : gearSlot === "armor"
+                  ? "áo giáp"
+                  : "khiên"
+              } cất vào túi đồ!`
+        );
+      } else {
+        alert(res.error || res.message);
+      }
+    } catch (err: any) {
+      alert(err.message || (isEn ? "Failed to unequip" : "Lỗi khi tháo trang bị"));
+    }
+  }
+
   // Hồi sinh
   async function handleRevive() {
     const res = await performSurvivalItemAction({
@@ -290,7 +365,7 @@ export function WorldClient({
     });
     if (res.state) {
       handleUpdatePlayerState(res.state);
-      showToast("Bạn đã hồi sinh an toàn tại Trại! Toàn bộ Xu được giữ nguyên.");
+      showToast(isEn ? "Safely revived at camp!" : "Bạn đã hồi sinh an toàn tại Trại!");
     }
   }
 
@@ -309,7 +384,8 @@ export function WorldClient({
     }
   }
 
-  function showToast(msg: string) {
+  function showToast(msg?: string | null) {
+    if (!msg) return;
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
   }
@@ -317,41 +393,54 @@ export function WorldClient({
   const isDead = playerState.hp <= 0;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-16">
+    <div className="min-h-screen text-slate-900 dark:text-slate-100 flex flex-col font-sans pb-16">
       {/* Toast thông báo */}
       {toastMessage && (
-        <div className="fixed top-4 right-4 z-50 bg-amber-500 text-slate-950 px-4 py-2.5 rounded-2xl font-bold font-mono text-xs shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-top-3">
+        <div className="fixed top-4 right-4 z-50 bg-amber-500 text-slate-950 px-4 py-2.5 rounded-2xl font-bold font-mono text-xs shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-top-3 motion-reduce:animate-none">
           <Sparkles className="w-4 h-4" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* TOP HEADER: Thanh trạng thái sinh tồn RPG */}
-      <header className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-2.5">
+      {/* TOP HEADER: Thanh trạng thái sinh tồn RPG (Apple Glass Nav) */}
+      <header className="apple-glass-nav sticky top-0 z-40 px-4 py-2.5">
         <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
-          {/* Logo & Thế giới */}
-          <div className="flex items-center gap-3">
+          {/* NÚT TRỞ VỀ NẰM Ở GÓC BÊN TRÁI TRÊN CÙNG & THÔNG TIN THẾ GIỚI */}
+          <div className="flex items-center gap-2.5 sm:gap-3">
             <Link
-              href="/worlds"
-              className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-black text-sm"
+              href="/dashboard"
+              className="pixel-btn-neutral px-3 sm:px-3.5 py-1.5 rounded-xl text-rose-600 dark:text-rose-400 font-mono text-xs font-bold flex items-center gap-1.5 border border-rose-500/40 hover:bg-rose-500/10 transition-all shadow-xs cursor-pointer"
+              title={isEn ? "Return to Dashboard" : "Trở về Bảng điều khiển"}
             >
-              🦊
+              <ArrowLeft className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+              <span className="font-pixel text-[10px]">{isEn ? "RETURN" : "TRỞ VỀ"}</span>
             </Link>
+
+            <button
+              type="button"
+              onClick={() => setShowBestiary(true)}
+              className="pixel-btn-amber px-2.5 sm:px-3 py-1.5 rounded-xl text-slate-950 font-mono text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              title={isEn ? "View Monster Codex (7 species)" : "Xem sổ tay quái vật (7 loài)"}
+            >
+              <BookOpen className="w-3.5 h-3.5 text-slate-950 shrink-0" />
+              <span className="font-pixel text-[10px] hidden sm:inline">{isEn ? "BESTIARY (7)" : "QUÁI VẬT (7)"}</span>
+            </button>
+
             <div>
-              <h1 className="text-xs sm:text-sm font-black text-white truncate max-w-[150px] sm:max-w-xs">
+              <h1 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white truncate max-w-[130px] sm:max-w-xs apple-headline">
                 {localizeWorldTitle(worldTitle, language)}
               </h1>
-              <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+              <div className="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                 <span className="flex items-center gap-1">
                   {clock.isDay ? (
-                    <SunMedium className="w-3 h-3 text-amber-400" />
+                    <SunMedium className="w-3 h-3 text-amber-500" />
                   ) : (
-                    <Moon className="w-3 h-3 text-indigo-400" />
+                    <Moon className="w-3 h-3 text-indigo-500" />
                   )}
                   <span>{t.common.day} {clock.dayNumber} · {clock.formattedTime}</span>
                 </span>
-                <span className="text-slate-600">|</span>
-                <span className={clock.isDay ? "text-amber-300" : "text-indigo-300 font-bold"}>
+                <span className="text-slate-300 dark:text-slate-600">|</span>
+                <span className={clock.isDay ? "text-amber-600 dark:text-amber-300" : "text-indigo-600 dark:text-indigo-300 font-bold"}>
                   {clock.isDay
                     ? (isEn ? `Night in ${clock.phaseRemainingSec}s` : `Đêm sau ${clock.phaseRemainingSec}s`)
                     : (isEn ? `Dawn in ${clock.phaseRemainingSec}s` : `Trời sáng sau ${clock.phaseRemainingSec}s`)}
@@ -362,45 +451,45 @@ export function WorldClient({
 
           {/* Vitals: HP, Đói, Xu, Điểm & Language Switcher */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Máu (HP) */}
-            <div className="flex items-center gap-1.5 bg-slate-950/80 px-2.5 py-1.5 rounded-xl border border-rose-500/30">
+            {/* Máu (HP) - Retro Pixel Box */}
+            <div className="pixel-panel flex items-center gap-1.5 px-2.5 py-1 rounded-lg border-2 border-rose-500/30 bg-rose-500/10">
               <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 shrink-0" />
-              <div className="w-16 sm:w-20 bg-slate-800 h-2.5 rounded-full overflow-hidden">
+              <div className="w-16 sm:w-20 bg-slate-950 h-2 border border-slate-700 overflow-hidden shadow-inner">
                 <div
-                  className="bg-rose-500 h-full transition-all duration-300"
+                  className="bg-rose-500 h-full"
                   style={{ width: `${(playerState.hp / playerState.maxHp) * 100}%` }}
                 />
               </div>
-              <span className="text-[10px] font-mono font-bold text-rose-300">
+              <span className="text-[10px] font-mono font-bold text-rose-600 dark:text-rose-300">
                 {playerState.hp}
               </span>
             </div>
 
-            {/* Đói (Hunger) */}
-            <div className="flex items-center gap-1.5 bg-slate-950/80 px-2.5 py-1.5 rounded-xl border border-amber-500/30">
-              <span className="text-xs">🍗</span>
-              <div className="w-14 sm:w-16 bg-slate-800 h-2.5 rounded-full overflow-hidden">
+            {/* Đói (Hunger) - Retro Pixel Box */}
+            <div className="pixel-panel flex items-center gap-1.5 px-2.5 py-1 rounded-lg border-2 border-amber-500/30 bg-amber-500/10">
+              <Utensils className="w-3.5 h-3.5 text-amber-500" />
+              <div className="w-14 sm:w-16 bg-slate-950 h-2 border border-slate-700 overflow-hidden shadow-inner">
                 <div
-                  className={`h-full transition-all duration-300 ${
+                  className={`h-full ${
                     playerState.hunger > 30 ? "bg-amber-500" : "bg-red-500 animate-pulse"
                   }`}
                   style={{ width: `${(playerState.hunger / playerState.maxHunger) * 100}%` }}
                 />
               </div>
-              <span className="text-[10px] font-mono font-bold text-amber-300">
+              <span className="text-[10px] font-mono font-bold text-amber-700 dark:text-amber-300">
                 {playerState.hunger}
               </span>
             </div>
 
-            {/* Xu */}
-            <div className="flex items-center gap-1.5 bg-amber-500/15 px-3 py-1.5 rounded-xl border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
-              <Coins className="w-3.5 h-3.5 text-amber-400" />
+            {/* Xu - Retro Pixel Box */}
+            <div className="pixel-panel-amber flex items-center gap-1.5 px-3 py-1 rounded-lg text-amber-700 dark:text-amber-300 text-xs font-mono font-bold bg-amber-500/10">
+              <Coins className="w-3.5 h-3.5 text-amber-500" />
               <span>{Number.isFinite(playerState?.coins) ? playerState.coins : 0} {t.common.coins}</span>
             </div>
 
-            {/* Điểm */}
-            <div className="hidden sm:flex items-center gap-1 bg-slate-950/80 px-2.5 py-1.5 rounded-xl border border-slate-800 text-slate-300 text-xs font-mono font-bold">
-              <Trophy className="w-3.5 h-3.5 text-amber-400" />
+            {/* Điểm - Retro Pixel Box */}
+            <div className="pixel-panel hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg border-2 border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-mono font-bold bg-black/[0.03] dark:bg-slate-950/80">
+              <Trophy className="w-3.5 h-3.5 text-amber-500" />
               <span>{Number.isFinite(playerState?.score) ? playerState.score : 0}</span>
             </div>
 
@@ -414,8 +503,9 @@ export function WorldClient({
       {isDead && (
         <div className="bg-rose-950/95 border-b border-rose-500/40 p-4 sm:p-5 text-center">
           <div className="max-w-lg mx-auto space-y-3">
-            <span className="text-xs font-mono font-bold text-rose-300 uppercase tracking-wider block">
-              {isEn ? "⚠️ YOU ARE OUT OF HP · 100% COINS PRESERVED" : "⚠️ BẠN ĐANG HẾT SINH LỰC · BẢO LƯU 100% XU KIẾM ĐƯỢC"}
+            <span className="text-xs font-mono font-bold text-rose-300 flex items-center justify-center gap-1.5">
+              <AlertCircle className="w-4 h-4 text-rose-400" />
+              <span>{isEn ? "You are out of HP" : "Bạn đang hết sinh lực"}</span>
             </span>
             <p className="text-xs text-rose-200">
               {isEn ? "You can buy a potion to continue fighting or revive for free at the camp:" : "Bạn có thể mua bình máu để tăng máu tiếp tục trận chiến hoặc hồi sinh miễn phí về trại:"}
@@ -427,34 +517,36 @@ export function WorldClient({
                 type="button"
                 disabled={(Number.isFinite(playerState?.coins) ? playerState.coins : 0) < 10}
                 onClick={() => handleEmergencyHealClient("buy_potion")}
-                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs font-mono transition-all shadow-md cursor-pointer disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs font-mono transition-colors duration-150 shadow-md cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
               >
-                🧪 {isEn ? "BUY EMERGENCY POTION (-10 Coins, +50 HP)" : "MUA BÌNH MÁU CẤP CỨU (-10 Xu, +50 HP)"}
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{isEn ? "Buy emergency potion (-10 Coins, +50 HP)" : "Mua bình máu cấp cứu (-10 Xu, +50 HP)"}</span>
               </button>
 
               {/* Hồi sinh miễn phí về trại */}
               <button
                 type="button"
                 onClick={() => handleEmergencyHealClient("free_camp")}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs font-mono transition-all border border-slate-700 cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs font-mono transition-colors duration-150 border border-slate-700 cursor-pointer flex items-center gap-1.5"
               >
-                🏕️ {isEn ? "CAMP REVIVAL (FREE)" : "HỒI SINH TẠI TRẠI (MIỄN PHÍ)"}
+                <Home className="w-3.5 h-3.5" />
+                <span>{isEn ? "Camp revival (Free)" : "Hồi sinh tại trại (Miễn phí)"}</span>
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* THANH TAB ĐIỀU HƯỚNG TỐI GIẢN CHO HỌC SINH */}
-      <nav className="bg-slate-900 border-b border-slate-800 px-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-start gap-2 overflow-x-auto py-2 no-scrollbar text-xs font-bold font-mono">
+      {/* THANH TAB ĐIỀU HƯỚNG RETRO PIXEL RPG CHO HỌC SINH */}
+      <nav className="bg-slate-900 border-b-2 border-slate-800 px-4">
+        <div className="max-w-5xl mx-auto flex items-center justify-start gap-2.5 overflow-x-auto py-2.5 no-scrollbar text-xs font-bold font-mono">
           <button
             type="button"
             onClick={() => setActiveTab("hunt")}
-            className={`px-4 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all duration-150 cursor-pointer ${
               activeTab === "hunt"
-                ? "bg-amber-500 text-slate-950 shadow-md font-black"
-                : "text-slate-400 hover:text-white hover:bg-slate-800"
+                ? "pixel-btn-amber text-slate-950 font-black shadow-md"
+                : "pixel-btn-neutral text-slate-400 hover:text-white"
             }`}
           >
             <Swords className="w-3.5 h-3.5" />
@@ -464,10 +556,10 @@ export function WorldClient({
           <button
             type="button"
             onClick={() => setActiveTab("blacksmith")}
-            className={`px-4 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all duration-150 cursor-pointer ${
               activeTab === "blacksmith"
-                ? "bg-amber-500 text-slate-950 shadow-md font-black"
-                : "text-slate-400 hover:text-white hover:bg-slate-800"
+                ? "pixel-btn-amber text-slate-950 font-black shadow-md"
+                : "pixel-btn-neutral text-slate-400 hover:text-white"
             }`}
           >
             <ShoppingBag className="w-3.5 h-3.5" />
@@ -477,10 +569,10 @@ export function WorldClient({
           <button
             type="button"
             onClick={() => setActiveTab("backpack")}
-            className={`px-4 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all duration-150 cursor-pointer ${
               activeTab === "backpack"
-                ? "bg-amber-500 text-slate-950 shadow-md font-black"
-                : "text-slate-400 hover:text-white hover:bg-slate-800"
+                ? "pixel-btn-amber text-slate-950 font-black shadow-md"
+                : "pixel-btn-neutral text-slate-400 hover:text-white"
             }`}
           >
             <Backpack className="w-3.5 h-3.5" />
@@ -490,14 +582,23 @@ export function WorldClient({
           <button
             type="button"
             onClick={() => setActiveTab("leaderboard")}
-            className={`px-4 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all duration-150 cursor-pointer ${
               activeTab === "leaderboard"
-                ? "bg-amber-500 text-slate-950 shadow-md font-black"
-                : "text-slate-400 hover:text-white hover:bg-slate-800"
+                ? "pixel-btn-amber text-slate-950 font-black shadow-md"
+                : "pixel-btn-neutral text-slate-400 hover:text-white"
             }`}
           >
             <Trophy className="w-3.5 h-3.5" />
             <span>{t.battle.leaderboardTab}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowBestiary(true)}
+            className="px-4 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap transition-all duration-150 cursor-pointer pixel-btn-neutral text-amber-400 hover:text-amber-300 border border-amber-500/30 font-bold"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span>{isEn ? "Monster Codex (7)" : "Sổ Tay Quái (7)"}</span>
           </button>
         </div>
       </nav>
@@ -510,7 +611,8 @@ export function WorldClient({
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
-                  <span>{isEn ? "🌲 Forest Practice Zone" : "🌲 Vùng Rừng Xanh"}</span>
+                  <Trees className="w-5 h-5 text-emerald-400" />
+                  <span>{isEn ? "Forest Practice Zone" : "Vùng Rừng Xanh"}</span>
                 </h2>
                 <p className="text-xs text-slate-400">
                   {isEn
@@ -528,134 +630,83 @@ export function WorldClient({
               )}
             </div>
 
-            {/* Banner Vào Đấu Trường Săn Quái Bất Tận (Gauntlet Arena) */}
-            <div className="p-6 rounded-3xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-amber-950/30 border border-emerald-500/40 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-mono text-[10px] font-bold uppercase tracking-wider">
-                    {isEn ? "Self-paced Practice · Continuous Questions" : "Luyện Tập Tự Do · Câu Hỏi Bất Tận"}
-                  </span>
-                </div>
-                <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
-                  <span>{isEn ? "⚔️ Continuous Practice Arena" : "⚔️ Sàn Đấu Luyện Tập Bất Tận"}</span>
-                </h3>
-                <p className="text-xs text-slate-300 max-w-xl leading-relaxed mt-1">
-                  {isEn
-                    ? "Continuous question practice. Answer correctly to accumulate score and gold coins."
-                    : "Chế độ luyện tập liên tục. Trả lời đúng để tích lũy điểm và xu thưởng."}
-                </p>
-              </div>
+            {/* ĐẤU TRƯỜNG SINH TỒN TRI THỨC (CHUẨN GOOGLE & RPG) */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-6">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="space-y-3 max-w-2xl">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-xs font-semibold">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>{isEn ? "Continuous Practice & Battle Arena" : "Đấu Trường Luyện Tập & Săn Quái"}</span>
+                  </div>
 
-              <button
-                type="button"
-                onClick={() => startAction("hunt", "slime", isEn ? "Infinite Monster Arena" : "Đấu Trường Săn Quái Bất Tận")}
-                className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-amber-400 to-emerald-500 hover:from-emerald-400 hover:to-amber-300 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
-              >
-                <Swords className="w-4 h-4" />
-                <span>{isEn ? "ENTER ARENA NOW" : "BƯỚC VÀO SÀN ĐẤU NGAY"}</span>
-              </button>
-            </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                    {isEn ? "Infinite Knowledge Gauntlet" : "Đấu Trường Sinh Tồn Tri Thức"}
+                  </h3>
 
-            {/* Lưới danh sách quái vật trong khu vực */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {["slime", "wolf", "wild_boar", "boar_king"].map((mId) => {
-                const m = getScaledMonster(mId, clock.dayNumber, !clock.isDay);
-                const locMonster = localizeMonsterDef(m, language);
-                const monstersKilled = playerState.monstersKilled ?? 0;
-                const isBossLairLocked = m.isBoss && monstersKilled < 5;
+                  <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                    {isEn
+                      ? "Monsters spawn randomly. Answer questions correctly to strike monsters without taking damage. Defeat 5 normal monsters to summon the Regional Boss!"
+                      : "Quái vật xuất hiện ngẫu nhiên theo bộ câu hỏi. Trả lời đúng để tung đòn tấn công quái (quái không thể đánh lại bạn). Cứ hạ đủ 5 quái nhỏ sẽ triệu hồi 1 Trùm Khu Vực!"}
+                  </p>
 
-                return (
-                  <div
-                    key={m.id}
-                    className={`p-5 rounded-3xl border flex flex-col justify-between transition-all hover:scale-[1.01] ${
-                      m.isBoss
-                        ? "bg-gradient-to-b from-amber-950/40 via-slate-900 to-slate-950 border-amber-500/50 shadow-xl shadow-amber-500/10 ring-1 ring-amber-500/30"
-                        : "bg-slate-900/80 border-slate-800 hover:border-slate-700"
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        {m.id === "slime" ? (
-                          <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center p-1">
-                            <img
-                              src="/sprites/slime_idle_1_clean.png"
-                              alt="Slime"
-                              className="w-10 h-10 object-contain pixelated animate-pulse"
-                            />
-                          </div>
-                        ) : (
-                          <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center text-2xl ${
-                            m.isBoss
-                              ? "bg-amber-500/20 border-amber-500/40 text-3xl"
-                              : "bg-slate-950 border-slate-800"
-                          }`}>
-                            <span>{m.avatar}</span>
-                          </div>
-                        )}
-
-                        <span
-                          className={`text-[9px] font-mono font-black px-2 py-0.5 rounded-full border uppercase tracking-wider ${
-                            m.isBoss
-                              ? "text-amber-300 bg-amber-500/20 border-amber-500/40 animate-pulse"
-                              : m.id === "slime"
-                              ? "text-emerald-300 bg-emerald-500/15 border-emerald-500/30"
-                              : m.id === "wolf"
-                              ? "text-blue-300 bg-blue-500/15 border-blue-500/30"
-                              : "text-amber-300 bg-amber-500/15 border-amber-500/30"
-                          }`}
-                        >
-                          {m.isBoss
-                            ? (isEn ? "👑 REGIONAL BOSS" : "👑 TRÙM KHU VỰC")
-                            : m.id === "slime"
-                            ? (isEn ? "TIER 1 · EASY" : "CẤP 1 · DỄ")
-                            : m.id === "wolf"
-                            ? (isEn ? "TIER 2 · MEDIUM" : "CẤP 2 · VỪA")
-                            : (isEn ? "TIER 3 · HARD" : "CẤP 3 · KHÓ")}
-                        </span>
+                  {/* 3 quy tắc cốt lõi hiển thị sinh động theo phong cách Google Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2">
+                    <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-start gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                        <Check className="w-4 h-4" />
                       </div>
-
-                      <h3 className="font-black text-white text-base mb-1 flex items-center gap-1.5">
-                        <span>{locMonster.name}</span>
-                      </h3>
-                      <p className="text-xs text-slate-400 leading-snug line-clamp-2 mb-3">
-                        {locMonster.description}
-                      </p>
+                      <div>
+                        <p className="text-xs font-bold text-white">{isEn ? "Correct Answer" : "Trả lời đúng"}</p>
+                        <p className="text-[11px] text-slate-400">{isEn ? "Attack monster · You stay safe" : "Tấn công quái · Quái không thể phản đòn"}</p>
+                      </div>
                     </div>
 
-                    <div className="space-y-3 pt-3 border-t border-slate-800/80">
-                      <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-                        <div className="flex items-center justify-between p-1.5 rounded-lg bg-slate-950 border border-slate-800/80">
-                          <span className="text-slate-400">{isEn ? "❤️ HP:" : "❤️ Máu:"}</span>
-                          <span className="font-bold text-rose-400">{m.hp}</span>
-                        </div>
-                        <div className="flex items-center justify-between p-1.5 rounded-lg bg-slate-950 border border-slate-800/80">
-                          <span className="text-slate-400">{isEn ? "⚔️ ATK:" : "⚔️ Công:"}</span>
-                          <span className="font-bold text-amber-400">+{m.atk}</span>
-                        </div>
+                    <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-start gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-rose-500/15 text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
+                        <ShieldAlert className="w-4 h-4" />
                       </div>
+                      <div>
+                        <p className="text-xs font-bold text-white">{isEn ? "Incorrect Answer" : "Trả lời sai"}</p>
+                        <p className="text-[11px] text-slate-400">{isEn ? "Monster attacks you" : "Bạn không thể tấn công · Quái đánh trả"}</p>
+                      </div>
+                    </div>
 
-                      {isBossLairLocked ? (
-                        <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-center text-[11px] text-slate-400 font-mono">
-                          {isEn ? `🔒 Locked! Defeat 5 normal monsters (${monstersKilled}/5).` : `🔒 Khóa! Cần hạ 5 quái thường (${monstersKilled}/5).`}
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => startAction("hunt", m.id, locMonster.name)}
-                          className={`w-full py-2.5 rounded-xl font-bold font-mono text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                            m.isBoss
-                              ? "bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 shadow-md shadow-amber-500/25 active:scale-95"
-                              : "bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 border border-slate-700/60 active:scale-95"
-                          }`}
-                        >
-                          <Swords className="w-3.5 h-3.5" />
-                          <span>{isEn ? "Fight" : "Khiêu Chiến"}</span>
-                        </button>
-                      )}
+                    <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-start gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                        <Crown className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-white">{isEn ? "Boss Summon" : "Triệu hồi Boss"}</p>
+                        <p className="text-[11px] text-slate-400">{isEn ? "Every 5 normal monsters" : "Cứ đủ 5 quái nhỏ sẽ xuất hiện 1 Boss"}</p>
+                      </div>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+
+                {/* Nút hành động Bước Vào Sàn Đấu - Chuẩn Retro Pixel RPG */}
+                <div className="flex flex-col items-center justify-center gap-3 shrink-0 p-5 rounded-2xl pixel-panel bg-slate-950/80 border-2 border-slate-700 text-center shadow-lg">
+                  <div className="w-16 h-16 rounded-xl pixel-panel bg-emerald-500/15 border-2 border-emerald-500/40 flex items-center justify-center p-2">
+                    <img
+                      src="/sprites/slime_idle_1_clean.png"
+                      alt="Slime"
+                      className="w-12 h-12 object-contain pixelated animate-pulse motion-reduce:animate-none"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => startAction("hunt", "slime", isEn ? "Infinite Monster Arena" : "Đấu Trường Săn Quái Bất Tận")}
+                    className="w-full sm:w-auto px-8 py-3.5 rounded-xl pixel-btn-amber text-slate-950 font-black font-mono text-xs sm:text-sm flex items-center justify-center gap-2.5 shadow-xl uppercase cursor-pointer"
+                  >
+                    <Swords className="w-4 h-4" />
+                    <span>{isEn ? "ENTER ARENA NOW" : "BƯỚC VÀO SÀN ĐẤU NGAY"}</span>
+                  </button>
+
+                  <span className="text-[11px] font-mono font-bold text-slate-400">
+                    {isEn ? "[ Random monster encounter ]" : "[ Gặp quái ngẫu nhiên ]"}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -665,7 +716,8 @@ export function WorldClient({
           <div className="space-y-6">
             <div>
               <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
-                <span>{isEn ? "🏪 Shop & Explorer's Forge" : "🏪 Tiệm Đồ & Lò Rèn Thám Hiểm"}</span>
+                <ShoppingBag className="w-5 h-5 text-amber-400" />
+                <span>{isEn ? "Shop & Explorer's Forge" : "Tiệm Đồ & Lò Rèn Thám Hiểm"}</span>
               </h2>
               <p className="text-xs text-slate-400">
                 {isEn
@@ -674,18 +726,45 @@ export function WorldClient({
               </p>
             </div>
 
-            {/* BẢNG TRANG BỊ CỦA NHÂN VẬT (4 Ô: VŨ KHÍ, MŨ, GIÁP, KHIÊN) */}
-            <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-3">
-              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-amber-400 block">
-                {isEn ? "Equipped Gear:" : "Trang bị trên người:"}
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* BẢNG TRANG BỊ CỦA NHÂN VẬT (4 Ô: VŨ KHÍ, MŨ, GIÁP, KHIÊN) KÈM PREVIEW HIỆP SĨ PIXEL ART */}
+            <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
+              <div className="flex flex-col md:flex-row items-center gap-5">
+                {/* 1. Preview Hiệp sĩ Pixel Art phản ánh trang bị trực tiếp */}
+                <div className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-slate-950 border border-slate-800/80 shrink-0 shadow-inner w-full md:w-44">
+                  <span className="text-[10px] font-mono font-bold text-amber-400 mb-1">
+                    {isEn ? "Explorer Live Preview" : "Diện mạo Hiệp Sĩ"}
+                  </span>
+                  <PixelHero
+                    weaponId={playerState.equipped?.weapon?.itemId}
+                    armorId={playerState.equipped?.armor?.itemId}
+                    helmetId={playerState.equipped?.helmet?.itemId}
+                    shieldId={playerState.equipped?.shield?.itemId}
+                    size={96}
+                    showShadow={true}
+                  />
+                  <span className="text-[9px] font-mono text-slate-400 mt-1 text-center">
+                    {isEn ? "Live Equipment" : "Trang bị trực quan"}
+                  </span>
+                </div>
+
+                {/* 2. Lưới 4 ô trang bị */}
+                <div className="flex-1 w-full space-y-2">
+                  <span className="text-[11px] font-mono font-bold text-amber-400 block">
+                    {isEn ? "Equipped Gear Slots:" : "Chi tiết 4 ô trang bị:"}
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* 1. Vũ khí */}
                 <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between">
                   <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">⚔️</span>
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                      {playerState.equipped?.weapon ? (
+                        <PixelItemIcon itemId={playerState.equipped.weapon.itemId} size={28} />
+                      ) : (
+                        <Swords className="w-5 h-5 text-amber-400" />
+                      )}
+                    </div>
                     <div>
-                      <span className="text-[9px] font-mono uppercase text-slate-400 block">
+                      <span className="text-[9px] font-mono text-slate-400 block">
                         {isEn ? "Weapon" : "Vũ khí"}
                       </span>
                       <h4 className="font-bold text-xs text-white truncate max-w-[140px]">
@@ -711,16 +790,24 @@ export function WorldClient({
                       <button
                         type="button"
                         onClick={() => handleBlacksmith("repair", playerState.equipped!.weapon!.itemId)}
-                        className="flex-1 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-all cursor-pointer"
+                        className="flex-1 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-colors duration-150 cursor-pointer"
                       >
                         {isEn ? "Repair" : "Sửa"}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleBlacksmith("enhance", playerState.equipped!.weapon!.itemId)}
-                        className="flex-1 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-[10px] font-mono font-bold text-slate-950 transition-all cursor-pointer"
+                        className="flex-1 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-[10px] font-mono font-bold text-slate-950 transition-colors duration-150 cursor-pointer"
                       >
                         {isEn ? "Enhance (+4)" : "Cường hóa (+4)"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleUnequipGear("weapon")}
+                        className="py-1 px-2.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-[10px] font-mono font-bold transition-colors duration-150 cursor-pointer"
+                        title={isEn ? "Unequip into backpack" : "Tháo cất vào túi đồ"}
+                      >
+                        {isEn ? "Unequip" : "Tháo"}
                       </button>
                     </div>
                   )}
@@ -729,9 +816,15 @@ export function WorldClient({
                 {/* 2. Mũ bảo hộ */}
                 <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between">
                   <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">🪖</span>
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+                      {playerState.equipped?.helmet ? (
+                        <PixelItemIcon itemId={playerState.equipped.helmet.itemId} size={28} />
+                      ) : (
+                        <Crown className="w-5 h-5 text-blue-400" />
+                      )}
+                    </div>
                     <div>
-                      <span className="text-[9px] font-mono uppercase text-slate-400 block">
+                      <span className="text-[9px] font-mono text-slate-400 block">
                         {isEn ? "Helmet" : "Mũ bảo hộ"}
                       </span>
                       <h4 className="font-bold text-xs text-white truncate max-w-[140px]">
@@ -751,13 +844,21 @@ export function WorldClient({
                     </div>
                   </div>
                   {playerState.equipped?.helmet && (
-                    <div className="mt-3 pt-2 border-t border-slate-900">
+                    <div className="flex items-center gap-1.5 mt-3 pt-2 border-t border-slate-900">
                       <button
                         type="button"
                         onClick={() => handleBlacksmith("repair", playerState.equipped!.helmet!.itemId)}
-                        className="w-full py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-all cursor-pointer"
+                        className="flex-1 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-colors duration-150 cursor-pointer"
                       >
                         {isEn ? "Repair" : "Sửa chữa"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleUnequipGear("helmet")}
+                        className="py-1 px-2.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-[10px] font-mono font-bold transition-colors duration-150 cursor-pointer"
+                        title={isEn ? "Unequip into backpack" : "Tháo cất vào túi đồ"}
+                      >
+                        {isEn ? "Unequip" : "Tháo"}
                       </button>
                     </div>
                   )}
@@ -766,9 +867,15 @@ export function WorldClient({
                 {/* 3. Áo giáp */}
                 <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between">
                   <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">🛡️</span>
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                      {playerState.equipped?.armor ? (
+                        <PixelItemIcon itemId={playerState.equipped.armor.itemId} size={28} />
+                      ) : (
+                        <Shield className="w-5 h-5 text-emerald-400" />
+                      )}
+                    </div>
                     <div>
-                      <span className="text-[9px] font-mono uppercase text-slate-400 block">
+                      <span className="text-[9px] font-mono text-slate-400 block">
                         {isEn ? "Armor" : "Áo giáp"}
                       </span>
                       <h4 className="font-bold text-xs text-white truncate max-w-[140px]">
@@ -788,13 +895,21 @@ export function WorldClient({
                     </div>
                   </div>
                   {playerState.equipped?.armor && (
-                    <div className="mt-3 pt-2 border-t border-slate-900">
+                    <div className="flex items-center gap-1.5 mt-3 pt-2 border-t border-slate-900">
                       <button
                         type="button"
                         onClick={() => handleBlacksmith("repair", playerState.equipped!.armor!.itemId)}
-                        className="w-full py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-all cursor-pointer"
+                        className="flex-1 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-colors duration-150 cursor-pointer"
                       >
                         {isEn ? "Repair" : "Sửa chữa"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleUnequipGear("armor")}
+                        className="py-1 px-2.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-[10px] font-mono font-bold transition-colors duration-150 cursor-pointer"
+                        title={isEn ? "Unequip into backpack" : "Tháo cất vào túi đồ"}
+                      >
+                        {isEn ? "Unequip" : "Tháo"}
                       </button>
                     </div>
                   )}
@@ -803,9 +918,15 @@ export function WorldClient({
                 {/* 4. Khiên chắn */}
                 <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between">
                   <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">🛡️</span>
+                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0">
+                      {playerState.equipped?.shield ? (
+                        <PixelItemIcon itemId={playerState.equipped.shield.itemId} size={28} />
+                      ) : (
+                        <ShieldAlert className="w-5 h-5 text-purple-400" />
+                      )}
+                    </div>
                     <div>
-                      <span className="text-[9px] font-mono uppercase text-slate-400 block">
+                      <span className="text-[9px] font-mono text-slate-400 block">
                         {isEn ? "Shield" : "Khiên chắn"}
                       </span>
                       <h4 className="font-bold text-xs text-white truncate max-w-[140px]">
@@ -825,16 +946,26 @@ export function WorldClient({
                     </div>
                   </div>
                   {playerState.equipped?.shield && (
-                    <div className="mt-3 pt-2 border-t border-slate-900">
+                    <div className="flex items-center gap-1.5 mt-3 pt-2 border-t border-slate-900">
                       <button
                         type="button"
                         onClick={() => handleBlacksmith("repair", playerState.equipped!.shield!.itemId)}
-                        className="w-full py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-all cursor-pointer"
+                        className="flex-1 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-mono font-bold text-slate-200 transition-colors duration-150 cursor-pointer"
                       >
                         {isEn ? "Repair" : "Sửa chữa"}
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => handleUnequipGear("shield")}
+                        className="py-1 px-2.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-[10px] font-mono font-bold transition-colors duration-150 cursor-pointer"
+                        title={isEn ? "Unequip into backpack" : "Tháo cất vào túi đồ"}
+                      >
+                        {isEn ? "Unequip" : "Tháo"}
+                      </button>
                     </div>
                   )}
+                </div>
+              </div>
                 </div>
               </div>
             </div>
@@ -842,16 +973,16 @@ export function WorldClient({
             {/* BỘ LỌC CỬA HÀNG */}
             <div className="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-3">
               {[
-                { id: "all", label: isEn ? "🌟 All" : "🌟 Tất Cả" },
-                { id: "weapons", label: isEn ? "⚔️ Swords & Weapons" : "⚔️ Kiếm & Vũ Khí" },
-                { id: "defense", label: isEn ? "🛡️ Armor, Helmets & Shields" : "🛡️ Giáp, Mũ & Khiên" },
-                { id: "consumables", label: isEn ? "🧪 Supplies & Food" : "🧪 Nhu Yếu Phẩm & Thức Ăn" },
+                { id: "all", label: isEn ? "All Items" : "Tất Cả" },
+                { id: "weapons", label: isEn ? "Swords & Weapons" : "Kiếm & Vũ Khí" },
+                { id: "defense", label: isEn ? "Armor, Helmets & Shields" : "Giáp, Mũ & Khiên" },
+                { id: "consumables", label: isEn ? "Supplies & Food" : "Nhu Yếu Phẩm & Thức Ăn" },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   type="button"
                   onClick={() => setShopTab(tab.id as any)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-colors duration-150 cursor-pointer ${
                     shopTab === tab.id
                       ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20"
                       : "bg-slate-900 text-slate-400 hover:text-white"
@@ -865,9 +996,21 @@ export function WorldClient({
             {/* DANH SÁCH MẶT HÀNG TRONG CỬA HÀNG */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
-                // Kiếm & Vũ khí
+                // Kiếm & Vũ khí (Cận chiến, Cung tên, Gậy phép)
                 ...(shopTab === "all" || shopTab === "weapons"
-                  ? ["wooden_club", "wooden_sword", "stone_axe", "stone_sword", "iron_sword"]
+                  ? [
+                      "wooden_club",
+                      "wooden_sword",
+                      "stone_axe",
+                      "stone_sword",
+                      "iron_sword",
+                      "steel_sword",
+                      "hunting_bow",
+                      "iron_bow",
+                      "magic_staff",
+                      "fire_staff",
+                      "crystal_sword",
+                    ]
                   : []),
                 // Giáp, Mũ & Khiên
                 ...(shopTab === "all" || shopTab === "defense"
@@ -877,9 +1020,12 @@ export function WorldClient({
                       "iron_helmet",
                       "cloth_armor",
                       "leather_armor",
+                      "mage_robe",
                       "iron_armor",
+                      "knight_armor",
                       "wooden_shield",
                       "iron_shield",
+                      "magic_shield",
                     ]
                   : []),
                 // Nhu yếu phẩm & Thức ăn
@@ -895,35 +1041,25 @@ export function WorldClient({
                 return (
                   <div
                     key={item.id}
-                    className="p-5 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-all"
+                    className="p-5 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors duration-150"
                   >
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-2xl">
-                          {item.category === "weapon"
-                            ? "⚔️"
-                            : item.category === "helmet"
-                            ? "🪖"
-                            : item.category === "armor"
-                            ? "🛡️"
-                            : item.category === "shield"
-                            ? "🛡️"
-                            : item.category === "food"
-                            ? "🍖"
-                            : "🧪"}
-                        </span>
+                        <div className="w-12 h-12 rounded-xl bg-slate-950 border border-slate-800/80 flex items-center justify-center p-1.5 shadow-inner shrink-0">
+                          <PixelItemIcon itemId={item.id} size={32} />
+                        </div>
                         <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                           {item.category === "weapon"
-                            ? (isEn ? "WEAPON" : "VŨ KHÍ")
+                            ? (isEn ? "Weapon" : "Vũ khí")
                             : item.category === "helmet"
-                            ? (isEn ? "HELMET" : "MŨ")
+                            ? (isEn ? "Helmet" : "Mũ")
                             : item.category === "armor"
-                            ? (isEn ? "ARMOR" : "GIÁP")
+                            ? (isEn ? "Armor" : "Giáp")
                             : item.category === "shield"
-                            ? (isEn ? "SHIELD" : "KHIÊN")
+                            ? (isEn ? "Shield" : "Khiên")
                             : item.category === "food"
-                            ? (isEn ? "FOOD" : "THỨC ĂN")
-                            : (isEn ? "CONSUMABLE" : "TIÊU HAO")}
+                            ? (isEn ? "Food" : "Thức ăn")
+                            : (isEn ? "Consumable" : "Tiêu hao")}
                         </span>
                       </div>
                       <h3 className="font-bold text-white text-base mb-1">{locItem.name}</h3>
@@ -933,19 +1069,34 @@ export function WorldClient({
 
                       <div className="text-xs font-mono space-y-1 text-slate-300 py-2 border-t border-slate-800/80">
                         {item.atk !== undefined && (
-                          <div>{isEn ? `⚔️ Damage: +${item.atk} ATK` : `⚔️ Sát thương: +${item.atk} ATK`}</div>
+                          <div className="flex items-center gap-1">
+                            <Swords className="w-3 h-3 text-amber-400" />
+                            <span>{isEn ? `Damage: +${item.atk} ATK` : `Sát thương: +${item.atk} ATK`}</span>
+                          </div>
                         )}
                         {item.defensePct !== undefined && (
-                          <div>{isEn ? `🛡️ Defense: -${Math.round(item.defensePct * 100)}% damage` : `🛡️ Phòng thủ: -${Math.round(item.defensePct * 100)}% sát thương`}</div>
+                          <div className="flex items-center gap-1">
+                            <Shield className="w-3 h-3 text-blue-400" />
+                            <span>{isEn ? `Defense: -${Math.round(item.defensePct * 100)}% dmg` : `Phòng thủ: -${Math.round(item.defensePct * 100)}% sát thương`}</span>
+                          </div>
                         )}
                         {item.healHp !== undefined && (
-                          <div>{isEn ? `❤️ Recovery: ${item.healHp > 0 ? `+${item.healHp}` : item.healHp} HP` : `❤️ Hồi phục: ${item.healHp > 0 ? `+${item.healHp}` : item.healHp} HP`}</div>
+                          <div className="flex items-center gap-1">
+                            <Heart className="w-3 h-3 text-rose-400" />
+                            <span>{isEn ? `Recovery: ${item.healHp > 0 ? `+${item.healHp}` : item.healHp} HP` : `Hồi phục: ${item.healHp > 0 ? `+${item.healHp}` : item.healHp} HP`}</span>
+                          </div>
                         )}
                         {item.healHunger !== undefined && (
-                          <div>{isEn ? `🍗 Hunger Relief: +${item.healHunger} pts` : `🍗 Giảm đói: +${item.healHunger} điểm`}</div>
+                          <div className="flex items-center gap-1">
+                            <Utensils className="w-3 h-3 text-amber-400" />
+                            <span>{isEn ? `Hunger Relief: +${item.healHunger} pts` : `Giảm đói: +${item.healHunger} điểm`}</span>
+                          </div>
                         )}
                         {item.durability !== undefined && (
-                          <div>{isEn ? `🔨 Durability: ${item.durability}` : `🔨 Độ bền: ${item.durability}`}</div>
+                          <div className="flex items-center gap-1">
+                            <Sparkles className="w-3 h-3 text-amber-400" />
+                            <span>{isEn ? `Durability: ${item.durability}` : `Độ bền: ${item.durability}`}</span>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -954,9 +1105,9 @@ export function WorldClient({
                       type="button"
                       disabled={!canAfford}
                       onClick={() => handleBlacksmith("buy_gear", item.id)}
-                      className={`w-full mt-4 py-2.5 rounded-xl font-bold font-mono text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                      className={`w-full mt-4 py-2.5 rounded-xl font-bold font-mono text-xs flex items-center justify-center gap-1.5 transition-colors duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                         canAfford
-                          ? "bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20"
+                          ? "bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20 active:scale-95"
                           : "bg-slate-800 text-slate-500"
                       }`}
                     >
@@ -976,7 +1127,8 @@ export function WorldClient({
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
-                  <span>{isEn ? `🎒 Survival Backpack (${playerState.inventory.length}/30 slots)` : `🎒 Túi Đồ Sinh Tồn (${playerState.inventory.length}/30 ô)`}</span>
+                  <Backpack className="w-5 h-5 text-amber-400" />
+                  <span>{isEn ? `Survival Backpack (${playerState.inventory.length}/30 slots)` : `Túi Đồ Sinh Tồn (${playerState.inventory.length}/30 ô)`}</span>
                 </h2>
                 <p className="text-xs text-slate-400">
                   {isEn
@@ -986,7 +1138,7 @@ export function WorldClient({
               </div>
             </div>
 
-            {/* Lưới 30 ô ba lô */}
+            {/* Lưới 30 ô ba lô - Retro Pixel Inventory Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-10 gap-2.5">
               {Array.from({ length: 30 }).map((_, idx) => {
                 const slot = playerState.inventory.find((s) => s.slotIndex === idx);
@@ -997,7 +1149,7 @@ export function WorldClient({
                   return (
                     <div
                       key={idx}
-                      className="aspect-square rounded-2xl bg-slate-950/60 border border-slate-800/60 flex items-center justify-center text-slate-700 font-mono text-xs"
+                      className="aspect-square rounded-xl pixel-panel bg-slate-950/80 border-2 border-slate-800 flex items-center justify-center text-slate-600 font-mono text-xs shadow-inner"
                     >
                       {idx + 1}
                     </div>
@@ -1017,12 +1169,12 @@ export function WorldClient({
                       if (isEquippable) handleEquipItem(slot.slotIndex);
                       else if (canEat) handleEatItem(itemDef.id);
                     }}
-                    className={`aspect-square p-2 rounded-2xl border flex flex-col justify-between transition-all select-none ${
+                    className={`aspect-square p-2 rounded-xl pixel-panel border-2 flex flex-col justify-between transition-transform duration-150 select-none ${
                       isEquippable
-                        ? "bg-slate-900 border-amber-500/40 hover:border-amber-400 cursor-pointer shadow-md hover:scale-[1.02]"
+                        ? "bg-slate-900 border-amber-500/80 hover:border-amber-400 cursor-pointer shadow-md hover:scale-[1.02]"
                         : canEat
-                        ? "bg-slate-900 border-emerald-500/40 hover:border-emerald-400 cursor-pointer shadow-md hover:scale-[1.02]"
-                        : "bg-slate-900/70 border-slate-800"
+                        ? "bg-slate-900 border-emerald-500/80 hover:border-emerald-400 cursor-pointer shadow-md hover:scale-[1.02]"
+                        : "bg-slate-900/90 border-slate-700"
                     }`}
                     title={
                       isEquippable
@@ -1033,21 +1185,9 @@ export function WorldClient({
                     }
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-base sm:text-lg">
-                        {itemDef.category === "food"
-                          ? "🍖"
-                          : itemDef.category === "weapon"
-                          ? "⚔️"
-                          : itemDef.category === "helmet"
-                          ? "🪖"
-                          : itemDef.category === "armor"
-                          ? "🛡️"
-                          : itemDef.category === "shield"
-                          ? "🛡️"
-                          : itemDef.category === "consumable"
-                          ? "🧪"
-                          : "🪵"}
-                      </span>
+                      <div className="w-7 h-7 flex items-center justify-center p-0.5">
+                        <PixelItemIcon itemId={itemDef.id} size={24} />
+                      </div>
                       <span className="text-[11px] font-mono font-bold text-amber-300">
                         x{slot.qty}
                       </span>
@@ -1073,10 +1213,11 @@ export function WorldClient({
                     <button
                       type="button"
                       onClick={(e) => handleSellItem(slot.slotIndex, e)}
-                      className="w-full py-0.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/30 text-amber-300 border border-amber-500/25 text-[9px] font-mono font-bold flex items-center justify-center gap-0.5 cursor-pointer transition-colors active:scale-95"
+                      className="w-full py-0.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/30 text-amber-300 border border-amber-500/25 text-[9px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors active:scale-95 focus-visible:ring-1 focus-visible:ring-amber-400 focus-visible:outline-none"
                       title={isEn ? `Sell for +${totalSellPrice} Coins` : `Bán lấy +${totalSellPrice} Xu`}
                     >
-                      <span>Bán +{totalSellPrice}🪙</span>
+                      <span>{isEn ? "Sell" : "Bán"} +{totalSellPrice}</span>
+                      <Coins className="w-2.5 h-2.5 text-amber-400" />
                     </button>
                   </div>
                 );
@@ -1090,7 +1231,8 @@ export function WorldClient({
           <div className="space-y-6">
             <div>
               <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
-                <span>{isEn ? "🏆 Foggo Island Hall of Fame" : "🏆 Bảng Vinh Danh Đảo Foggo"}</span>
+                <Trophy className="w-5 h-5 text-amber-400" />
+                <span>{isEn ? "Foggo Island Hall of Fame" : "Bảng Vinh Danh Đảo Foggo"}</span>
               </h2>
               <p className="text-xs text-slate-400">
                 {isEn
@@ -1119,7 +1261,7 @@ export function WorldClient({
                     return (
                       <tr
                         key={p.id}
-                        className={`transition-colors ${
+                        className={`transition-colors duration-150 ${
                           isSelf
                             ? "bg-amber-500/15 font-bold border-l-4 border-amber-400"
                             : isTop1
@@ -1129,16 +1271,16 @@ export function WorldClient({
                       >
                         <td className="py-3 px-4 font-bold font-mono">
                           {isTop1 ? (
-                            <span className="inline-flex items-center gap-1 text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-lg border border-amber-500/30">
-                              🥇 Top 1
+                            <span className="inline-flex items-center gap-1.5 text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-lg border border-amber-500/30">
+                              <Trophy className="w-3.5 h-3.5 text-amber-400" /> Top 1
                             </span>
                           ) : isTop2 ? (
-                            <span className="inline-flex items-center gap-1 text-slate-200 bg-slate-700/40 px-2 py-0.5 rounded-lg border border-slate-600">
-                              🥈 Top 2
+                            <span className="inline-flex items-center gap-1.5 text-slate-200 bg-slate-700/40 px-2 py-0.5 rounded-lg border border-slate-600">
+                              <Trophy className="w-3.5 h-3.5 text-slate-300" /> Top 2
                             </span>
                           ) : isTop3 ? (
-                            <span className="inline-flex items-center gap-1 text-amber-500 bg-amber-900/30 px-2 py-0.5 rounded-lg border border-amber-700/40">
-                              🥉 Top 3
+                            <span className="inline-flex items-center gap-1.5 text-amber-500 bg-amber-900/30 px-2 py-0.5 rounded-lg border border-amber-700/40">
+                              <Trophy className="w-3.5 h-3.5 text-amber-600" /> Top 3
                             </span>
                           ) : (
                             <span className="text-slate-400">#{idx + 1}</span>
@@ -1148,7 +1290,7 @@ export function WorldClient({
                           <div className="flex items-center gap-2">
                             <span className="text-white font-semibold">{p.nickname}</span>
                             {isSelf && (
-                              <span className="px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 text-[9px] font-mono font-black uppercase">
+                              <span className="px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 text-[9px] font-mono font-bold">
                                 {isEn ? "You" : "Bạn"}
                               </span>
                             )}
@@ -1187,7 +1329,7 @@ export function WorldClient({
           }}
         />
       ) : activeAction && question && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150 motion-reduce:animate-none">
           <div className="bg-slate-900 border border-slate-800 max-w-2xl w-full rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative my-auto">
             {/* Nút đóng */}
             <button
@@ -1197,14 +1339,14 @@ export function WorldClient({
                 setActiveAction(null);
                 setFeedback(null);
               }}
-              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors"
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors duration-150 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Header hành động */}
             <div className="text-center space-y-1">
-              <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block">
+              <span className="text-[11px] font-mono font-bold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block">
                 {activeAction.targetName}
               </span>
               <p className="text-xs text-slate-400">
@@ -1214,27 +1356,28 @@ export function WorldClient({
               </p>
             </div>
 
-            {/* Feedback nếu vừa nộp bài */}
+            {/* Feedback nếu vừa nộp bài (Chuẩn Google Material 3) */}
             {feedback ? (
               <div
-                className={`p-5 rounded-2xl border text-center space-y-3 ${
+                className={`p-6 sm:p-7 rounded-3xl border-2 text-center space-y-4 shadow-sm ${
                   feedback.isCorrect
-                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-200"
-                    : "bg-rose-500/10 border-rose-500/30 text-rose-200"
+                    ? "bg-[#E6F4EA] border-[#34A853] text-[#137333] dark:bg-[#34A853]/20 dark:border-[#34A853] dark:text-[#81C995]"
+                    : "bg-[#FCE8E6] border-[#EA4335] text-[#C5221F] dark:bg-[#EA4335]/20 dark:border-[#EA4335] dark:text-[#F28B82]"
                 }`}
               >
-                <div className="flex items-center justify-center gap-2 font-bold text-sm sm:text-base">
+                <div className="flex items-center justify-center gap-2.5 font-bold text-base sm:text-lg font-sans">
                   {feedback.isCorrect ? (
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                    <CheckCircle2 className="w-6 h-6 text-[#34A853]" />
                   ) : (
-                    <XCircle className="w-5 h-5 text-rose-400" />
+                    <XCircle className="w-6 h-6 text-[#EA4335]" />
                   )}
                   <span>{feedback.message}</span>
                 </div>
 
                 {feedback.explanation && (
-                  <p className="text-xs text-slate-300 bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-left">
-                    💡 <strong>{isEn ? "Explanation:" : "Giải thích:"}</strong> {feedback.explanation}
+                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900/90 p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 text-left flex items-start gap-2 shadow-xs">
+                    <Sparkles className="w-4 h-4 text-[#FBBC05] shrink-0 mt-0.5" />
+                    <span><strong>{isEn ? "Explanation:" : "Giải thích:"}</strong> {feedback.explanation}</span>
                   </p>
                 )}
 
@@ -1244,7 +1387,7 @@ export function WorldClient({
                     setActiveAction(null);
                     setFeedback(null);
                   }}
-                  className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold font-mono text-xs transition-all shadow-md cursor-pointer"
+                  className="px-8 py-3.5 rounded-full bg-[#4285F4] hover:bg-[#3367D6] text-white font-semibold text-sm transition-all duration-150 shadow-xs cursor-pointer active:scale-95"
                 >
                   {isEn ? "Continue Survival Quest" : "Tiếp Tục Cuộc Sinh Tồn"}
                 </button>
@@ -1265,12 +1408,12 @@ export function WorldClient({
                   </div>
                 )}
 
-                {/* Nút nộp bài */}
+                {/* Nút nộp bài dạng Pill bo tròn Google Blue #4285F4 */}
                 <button
                   type="button"
                   disabled={userAnswer === null || submitting}
                   onClick={handleSubmitAnswer}
-                  className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black font-mono text-sm transition-all shadow-lg shadow-amber-500/25 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full py-3.5 px-8 rounded-full bg-[#4285F4] hover:bg-[#3367D6] disabled:bg-slate-300 dark:disabled:bg-slate-800 text-white disabled:text-slate-500 font-semibold text-sm transition-all duration-150 shadow-xs hover:shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-98"
                 >
                   <Sparkles className="w-4 h-4" />
                   <span>
@@ -1284,6 +1427,13 @@ export function WorldClient({
           </div>
         </div>
       )}
+
+      {/* SỔ TAY QUÁI VẬT HẦM NGỤC (7 CHỦNG LOÀI) */}
+      <MonsterBestiaryModal
+        isOpen={showBestiary}
+        onClose={() => setShowBestiary(false)}
+        language={language}
+      />
     </div>
   );
 }

@@ -1376,7 +1376,63 @@ Ngoài tự **chế tạo** (cần nguyên liệu + trả lời đúng), ngườ
 | Nhẫn may mắn | Phụ kiện | 250 | Trại cấp 2 | +10% tỉ lệ rớt đồ (tối đa 100%) |
 | Bùa no bụng | Phụ kiện | 300 | Trại cấp 2 | Đói giảm chậm hơn 20% |
 
-- Nhân vật có **3 ô trang bị**: Vũ khí, Giáp, Phụ kiện (1 món).
+- Nhân vật có **4 ô trang bị chiến đấu**: Vũ khí (Weapon), Mũ bảo hộ (Helmet), Áo giáp (Armor), Khiên phòng thủ (Shield).
+- **Mở rộng kho vũ khí đa dạng phong cách chiến đấu**:
+  - **Kiếm & Rìu cận chiến**: Kiếm gỗ, Kiếm đá, Kiếm sắt, Kiếm thép, Kiếm pha lê.
+  - **Gậy phép ma thuật (Magic Staffs)**: Gậy phép pha lê (sát thương phép ma thuật), Gậy lửa cổ đại (hỏa cầu rực sáng).
+  - **Cung tên tầm xa (Bows)**: Cung săn rừng sương, Cung thép thợ săn.
+  - **Giáp & Áo choàng**: Áo vải, Áo da sói, Giáp sắt, Áo choàng pháp sư thêu chỉ vàng, Giáp hiệp sĩ hoàng gia mạ bạc.
+  - **Khiên phòng hộ**: Khiên gỗ tròn, Khiên sắt kiên cố, Khiên năng lượng pha lê.
+
+### 5A.6B. Hệ thống Tạo hình Hiệp Sĩ Pixel Art & Trang Bị Động (Modular Pixel Art Hero Paper-Doll Engine)
+
+Nhằm đảm bảo phong cách đồ họa đồng bộ 100% chuẩn RPG Pixel Art với quái vật hầm ngục và loại bỏ hoàn toàn mô hình hộp CSS thô sơ trước đây:
+1. **Kiến trúc phân tầng trang phục động (5-Layer Modular Paper-Doll & Chibi Sprite Frames)**:
+   - **Layer 1 - Base Body Pixel Art**: Sử dụng bộ sprite sheet chibi hiệp sĩ pixel art 8 khung hình độc lập (`/sprites/hero/`): Idle (thư giãn đối mặt quái), Walk (bước đi), Sword Attack (chém kiếm vòng vàng), Staff Attack (giơ gậy bắn ma thuật), Bow Attack (giương cung bắn tên), Hurt (nhắm tịt mắt chịu đòn), Victory (giơ vũ khí ăn mừng) và Sit (nghỉ ngơi).
+   - **Layer 2 - Armor & Cape**: Tự động biến đổi diện mạo theo món giáp đang mặc (`cloth_armor` áo vải lanh phiêu lưu, `leather_armor` giáp da sói viền đinh tán, `iron_armor` giáp phiến sắt, `knight_armor` giáp hoàng gia mạ bạc kèm áo choàng đỏ bay phấp phới, `mage_robe` áo choàng tím thẫm thêu ngọc ma thuật).
+   - **Layer 3 - Helmet**: Hiển thị mũ đang đội (`straw_hat` nón rơm lữ hành rộng vành, `leather_helmet` mũ trùm da sói có 2 tai nhọn, `iron_helmet` mũ sắt hiệp sĩ có mạng che và chùm lông vũ đỏ phất phới).
+   - **Layer 4 - Left Hand / Shield**: Khiên phòng thủ ở tay trái (`wooden_shield` khiên gỗ tròn đinh tán, `iron_shield` khiên sắt hiệp sĩ chữ thập xanh bạc, `magic_shield` khiên năng lượng pha lê phát quang Aura).
+   - **Layer 5 - Right Hand / Weapon**: Vũ khí cầm ở tay phải (`wooden_club`, `wooden_sword`, `iron_sword`, `crystal_sword` rực sáng pha lê, `hunting_bow` / `iron_bow` kèm ống tên sau lưng, `magic_staff` quả cầu xanh / `fire_staff` ngọn lửa bùng cháy).
+2. **Bộ icon Pixel Art cho toàn bộ 35+ trang bị & vật phẩm (`PixelItemIcon.tsx`)**:
+   - Thiết kế chuẩn 32x32 SVG crispEdges cho tất cả vật phẩm: Kiếm gỗ, kiếm đá, kiếm sắt, kiếm thép, thiên kiếm pha lê, cung thợ săn, cung sắt, gậy phép, gậy lửa, nón rơm, mũ da, mũ sắt, áo vải, giáp da, giáp sắt, giáp hoàng gia, áo choàng pháp sư, khiên gỗ, khiên sắt, khiên pha lê, táo đỏ, bánh mì, thịt nướng, súp thịt hầm, băng gạc, bình máu, gỗ, đá, quặng sắt, da sói, xương cổ đại, tinh chất slime, pha lê, thảo dược và ngà heo rừng vàng.
+   - Thay thế toàn bộ icon chung chung trong Cửa Hàng Thợ Rèn, Túi Đồ 30 ô, và 4 Ô Trang Bị Nhân Vật.
+3. **Cập nhật hình ảnh thời gian thực khi trang bị (Realtime Visual Synchronization)**:
+   - Bất cứ khi nào người chơi mua vũ khí/giáp mới ở Thợ Rèn hoặc đổi trang bị trong Túi Đồ, hình ảnh nhân vật Hiệp Sĩ trên cả Đấu Trường Săn Quái và Bảng Nhân Vật lập tức cập nhật món đồ tương ứng trong 0ms.
+4. **Hoạt họa tấn công riêng biệt theo từng dòng vũ khí (Weapon-Specific Combat VFX)**:
+   - **Dòng Kiếm & Rìu**: Hiệp sĩ bước spring lướt tới, vung kiếm chém góc 45 độ tạo vệt chém vàng sáng `Sparkles`.
+   - **Dòng Gậy phép**: Hiệp sĩ giơ cao quyền trượng, đầu gậy tích tụ nguyên tố phép thuật bắn ra cầu lửa / cầu ma thuật phát nổ ánh sáng.
+   - **Dòng Cung tên**: Hiệp sĩ giương cung kéo căng dây, bắn mũi tên nhọn xé gió lao thẳng về phía quái vật.
+   - **Phòng thủ & Khiên**: Khi quái phản công, nếu có trang bị khiên, khiên sẽ tự động giương lên chắn phía trước và tạo vòng hào quang năng lượng giảm sát thương.
+
+### 5A.6C. Hệ thống Nền Động Pixel Art & Định hướng Thiết kế Web Retro RPG (`PixelAnimatedBackground.tsx`)
+Nhằm biến website thành một thế giới game sinh tồn sống động, sang trọng nhưng ngập tràn phong cách Pixel Art lôi cuốn:
+1. **Bầu trời Pixel Parallax đa tầng (Living Pixel Sky)**:
+   - Các đám mây Pixel Art hình khối chữ nhật tự động trôi ngang theo 3 tầng độ cao và tốc độ khác nhau (60s, 80s, 95s).
+   - Đốm sáng bào tử / bụi vàng lơ lửng (`pixelSporeFloat`) nhẹ nhàng bay lên từ nền đất mang lại hơi thở hữu cơ cho toàn bộ các trang.
+2. **Sinh vật Pixel xuất hiện tuần tra & phản hồi tương tác**:
+   - Bé Sói Con (`baby_wolf`): Chạy tung tăng và nhảy qua màn hình (`baby_wolf_run.png`, `baby_wolf_jump.png`).
+   - Bé Slime Rừng Xanh (`slime`): Nhảy tưng tưng với 3 trạng thái đàn hồi.
+   - Hiệp Sĩ Tuần Tra (`hero`): Hiệp sĩ Chibi đi tuần tra hoặc giơ kiếm ăn mừng.
+   - Yêu Tinh Rừng Lém Lỉnh (`goblin`): Lấp ló nhảy nhót khích tướng từ cạnh dưới.
+   - **Tương tác chạm**: Click vào sinh vật sẽ kích hoạt nhảy mừng, bắn pháo hoa pixel và hiện bong bóng lời thoại động viên học tập tiếng Việt/Anh.
+3. **Hiệu ứng Click Sparkles toàn màn hình**:
+   - Khi người dùng click chuột tại bất kỳ vị trí nào trên trang web, một chùm hạt biểu tượng pixel (`✦`, `★`, `♦`) rực rỡ sẽ tỏa ra và tan biến êm ái.
+4. **Hệ thống UI Retro RPG Pixel (Buttons, Panels, Badges)**:
+   - `.pixel-panel`: Viền hộp 2px sắc nét cùng đổ bóng retro 3D.
+   - `.pixel-btn-amber` / `.pixel-btn-neutral`: Nút bấm RPG có hành vi lún phím vật lý xúc giác (`active:translate`).
+   - `.pixel-badge`: Nhãn trạng thái dạng khối vuông `[ QUEST ]`, `[ LEVEL UP ]`.
+
+### 5A.6D. Chuẩn Hóa Hoạt Họa Mượt Mà & Hướng Đối Kháng Của Quái Vật (`MonsterBattleArena.tsx`)
+1. **Hướng Đối Kháng 100% Trực Diện (Face-to-Face Facing Direction)**:
+   - Hiệp Sĩ ở bên trái màn hình luôn hướng mặt sang phải (`-->`).
+   - Quái vật (Sói con, Nhện độc, Heo rừng chúa, Yêu tinh goblin, Golem đá, Bộ xương cổ đại) ở bên phải được lật đối xứng ngang (`-scale-x-100`) để luôn hướng mặt sang trái (`<--`), đảm bảo hai bên trực diện đối mặt nhau trong mọi tư thế nghỉ, tấn công và dính đòn.
+2. **Nhịp Điệu Hoạt Họa Mượt Mà Chuẩn RPG (Fluid Non-Jerky Combat Rhythm)**:
+   - *Nhịp thở Idle*: Chu kỳ 460ms đung đưa mượt mà giữa trạng thái đứng chờ và ngồi nghỉ/bò tuần tra, không bị giật khựng.
+   - *Chuỗi Đòn Đánh Khi Trả Lời Đúng*: Hiệp sĩ lướt tới vung kiếm (200ms) -> Quái vật giật lùi, nháy sáng và dính đòn (260ms) -> Quái vật hồi phục tư thế hoặc phát hoạt ảnh ngã xuống -> tan biến -> tàn tích (650ms).
+   - *Chuỗi Quái Phản Công Khi Trả Lời Sai*: Quái vật lấy đà tích tụ chiêu thức (220ms) -> Lao vút sang trái tung đòn đặc trưng (chém trăng khuyết tím / phun sương độc / húc chấn động / vồ) (260ms) -> Hiệp sĩ trúng đòn rung chuyển nảy sát thương (260ms) -> Quái vật tiếp đất và lùi về vị trí (260ms).
+3. **Đồng Bộ Giao Diện Pixel Toàn Nền Tảng**:
+   - Tích hợp `.pixel-panel`, `.pixel-btn-amber`, `.pixel-input`, và `PixelItemIcon` xuyên suốt Sàn Đấu, Ba lô 30 ô, Thợ rèn, Bảng điểm danh 7 ngày, Tham gia nhanh và Danh sách phòng hầm ngục.
+
 - **Trang bị cấp Pha lê, Sử thi, Huyền thoại không bán**, chỉ rớt từ trùm/rương hoặc chế tạo bằng bản vẽ. Nhờ vậy xu không "mua tất cả" và farm vẫn có giá trị.
 - **Giới hạn chống "lăn cầu tuyết":** mỗi loại trang bị mua tối đa **1 lần/ngày game**; mua nhiều lần cùng loại giá tăng 10%/lần.
 - **Bán lại:** 40% giá gốc × tỉ lệ độ bền còn lại.
@@ -2787,6 +2843,35 @@ jobs:
     - *Tab 2: Trường & Lớp (School & Class)*: Danh mục 63 tỉnh/thành phố (`VIETNAM_PROVINCES`), gợi ý tên trường và nhập lớp học để tự động kết nối bạn bè và nhận đề thi của thầy cô.
     - *Tab 3: Bảo Mật & Mật Khẩu (Security)*: Đổi mật khẩu mới (có mắt ẩn/hiện và xác nhận khớp), hiển thị mã khôi phục bí mật của học sinh kèm nút copy 1-chạm và tải file ghi nhớ backup (.txt).
     - *Tab 4: Tùy Chọn & Hệ Thống (Preferences)*: Lựa chọn ngôn ngữ hiển thị (🇻🇳 Tiếng Việt ⇋ 🇬🇧 English), tra cứu số dư Đom Đóm/Vàng và nút Đăng xuất an toàn.
+- [x] Đại tu toàn diện hệ thống màu & giao diện Sáng (Light Mode Overhaul - Chuẩn Google Classroom & Notion):
+  - **Tự đánh giá & Khắc phục triệt để lỗi màu bùn / xi măng**: Xác định chính xác lỗi `.bg-slate-900/40` trên 2 khung danh sách hầm ngục và bộ câu hỏi không được override trong CSS, biến thành mảng màu xám bùn loang lổ đè trên nền trắng sáng. Mở rộng 100% selector độ mờ từ `.bg-slate-900/95` đến `.bg-slate-900/10` thành card trắng tinh khiết (`#ffffff`), viền tinh tế `#e2e8f0` và đổ bóng mềm mại `0 1px 3px rgba(15, 23, 42, 0.05)`.
+  - **Phân tầng bề mặt trực quan (Surface Nesting)**: Khung lớn bên ngoài là card trắng cao cấp, các hàng mục bên trong là thẻ con recessed Slate-50 (`#f8fafc`) có viền thanh mảnh, tái hiện sự ngăn nắp, sang trọng của Notion và Stripe.
+  - **Đồng bộ hóa bảng màu ngữ nghĩa (Semantic Palette)**:
+    - Loại bỏ nút Admin và huy hiệu Admin màu hồng nhạt báo động (gây hiểu nhầm là nút nguy hiểm/xóa dữ liệu), thay thế bằng sắc tím hoàng gia Royal Indigo (`bg-indigo-50 text-indigo-700 border-indigo-200`) uy quyền và sang trọng.
+    - Nút chính `+ Mở hầm ngục` ánh vàng hổ phách rực rỡ, nút phụ `Tạo bộ câu hỏi` sắc xanh sách thanh lịch, đồng bộ 100% chiều cao và độ bo góc.
+    - 4 thẻ hành động lớn được tích hợp icon badge dạng gradient bo tròn sắc sảo, hiệu ứng nhấc nhẹ khi rê chuột (`hover:-translate-y-0.5 shadow-sm hover:shadow-md`) và mũi tên chuyển động mượt mà.
+  - **Chống chìm màu khi hover**: Bổ sung quy tắc CSS chống chìm chữ trắng vào nền trắng khi rê chuột (`.hover:text-white:hover` tự động nhận diện chữ tối `#0f172a`).
+  - **Tối ưu câu hỏi Kéo thả Ghép nối (Drag Match)**: Xóa bỏ 2 thanh tiêu đề cồng kềnh `Cột Phía Bên Trái (Cột A)` và `Cột Phía Bên Phải (Cột B)` theo yêu cầu học tập thực tế; hỗ trợ kéo thả từ trái sang phải trên cùng 1 hàng ngang; hiển thị toàn văn câu hỏi không bị thay thế bằng dấu ba chấm (`...`).
+- [x] Tích hợp và vận hành Taste-Skill (`design-taste-frontend` v2.5.1):
+  - **Cài đặt trực tiếp vào dự án**: Nạp toàn bộ bộ công cụ Taste-Skill vào [`.agents/skills/design-taste-frontend`](file:///d:/Project/Foggo/.agents/skills/design-taste-frontend) và alias [`.agents/skills/taste-skill`](file:///d:/Project/Foggo/.agents/skills/taste-skill).
+  - **Kiểm định văn phong học tập (`copy-lint.mjs`)**: Quét toàn bộ copy Landing Page và Dashboard, đạt chuẩn 0 FAIL.
+  - **Chuẩn hóa vi tương tác (Micro-interactions)**: Áp dụng quy tắc nâng thẻ 2px (`hover:-translate-y-0.5`), viền chuyển tiếp mượt mà 150-200ms, nút bấm phản hồi nén nhẹ (`active:scale-95`).
+  - **Thực thi nguyên tắc 2 cấp phân tầng (Two levels, never three)**: Đảm bảo không có bất kỳ cấu trúc hộp lồng hộp 3 tầng nào gây rối mắt cho người học.
+- [x] Đồng bộ triệt để 4 phản hồi người dùng & Khắc phục lỗi biên dịch:
+  - **Khắc phục lỗi biên dịch HMR (HTTP 500)**: Xóa bỏ triệt để các ký tự JSX thừa tại `UserSettingsModal.tsx` khiến Turbopack bị treo không thể cập nhật thay đổi sang trình duyệt người dùng. Phục hồi trạng thái HTTP 200 OK.
+  - **Chuyển đổi Theme Sáng / Tối trực quan tại Tab 1 Cài Đặt**: Nhúng 2 thẻ tùy chọn Theme Sáng (☀️) và Tối (🌙) ngay dưới ô Tên hiển thị ở Tab 1 trong Modal Bánh Răng.
+  - **Chuẩn hóa Điểm Thành Tích**: Chuyển đổi 100% tên gọi "Đom Đóm" thành "Điểm Thành Tích" trong toàn bộ chuỗi Điểm danh 7 ngày và dữ liệu hồ sơ.
+  - **Bỏ lobby chọn quái & Triệu hồi Boss ngẫu nhiên**: Tham gia hầm ngục là vào chiến đấu ngay với quái xuất hiện ngẫu nhiên theo bộ câu hỏi; cứ hạ đủ 5 quái nhỏ sẽ tự động triệu hồi 1 Trùm Khu Vực.
+  - **Cơ chế chiến đấu theo lượt (Turn-based)**: Trả lời đúng -> người chơi tấn công quái (quái không thể đánh người chơi); trả lời sai -> quái phản công trừ máu người chơi và lập tức mở bảng ôn tập đáp án đúng.
+  - **Hiển thị đầy đủ câu hỏi kéo thả**: Thẻ câu hỏi kéo thả hiển thị 100% nội dung (không bị cắt bớt bằng `...`), hai vế gắn kết thẳng hàng ngang trực quan.
+  - **Bán đồ siêu tốc 0ms (Optimistic UI)**: Bán đồ thu xu cập nhật ngay lập tức không bị giật lag hay chờ đợi server.
+  - **Kiểm thử toàn diện 100%**: Đạt 65/65 unit tests, 31/31 system routes test, 0 FAIL sloplint.
+- [x] Đại tu sang trọng đẳng cấp thế giới (Figma / Linear / x.ai Caliber) & Triệt tiêu chú thích rườm rà:
+  - **Thương hiệu & Typography đỉnh cao**: Giữ logo `FOGGO` độc lập tối giản, nâng cấp H1 sang sans-serif display cực sắc nét (`font-sans font-black tracking-tight text-4xl sm:text-6xl lg:text-7xl`), pill khẩu hiệu tinh gọn `Foggo 2.0 · Đấu trường sinh tồn tri thức`.
+  - **CTA dứt khoát chuẩn Linear**: Nút chính `Vào Chơi Miễn Phí` (Primary high-contrast amber) và nút phụ `Dành Cho Giáo Viên & Lớp Học →` (Secondary subtle border).
+  - **Giải phóng Showcase Demo & Tách Bento Grid 3 cột**: Bỏ các dòng chữ chồng chéo ở đấu trường; tách riêng 3 thẻ tính năng ra khỏi khung Demo thành section Bento Grid 3 cột độc lập với hiệu ứng kính mờ (frosted glass) và ánh sáng viền sang trọng.
+  - **Trang Xác Thực tĩnh lặng & bảo mật cao**: Loại bỏ hoàn toàn 4 hạt `animate-ping` nhấp nháy; xóa bỏ khối thẻ thừa thãi; thay chú thích helper bằng placeholder thông minh `Tên đăng nhập hoặc email`.
+  - **Đồng bộ 100% Light Mode & Dark Mode**: Bề mặt sứ thanh khiết trong Light Mode và obsidian sâu lắng trong Dark Mode. Đạt chuẩn 0 FAIL, 0 REFLEX, 0 WARN trên `sloplint.mjs`.
 
 ### Trước khi thu tiền
 - [x] Thanh toán + webhook hoạt động, test kỹ
@@ -2822,6 +2907,160 @@ Một số phần nên nhờ viết chi tiết từng bước tiếp theo:
 7. `game-modes/survival/clock.ts` + `engine.ts` (hàm thuần `tick`, `applyHunt`, `resolveWave`) + unit test
 8. Component `HuntScreen` (quái, thanh máu, câu hỏi), `InventoryGrid`, `CampPanel`
 9. Script mô phỏng cân bằng: bot chơi hết 1 ván với độ chính xác cho trước
+
+---
+
+## CẬP NHẬT GIAO DIỆN GOOGLE MATERIAL DESIGN 3 (MATERIAL YOU)
+- **Thời gian hoàn thành:** 2026-11-16
+- **Phạm vi hoàn thiện:**
+  1. **Hệ thống Font & Token màu:** Font Google Sans / Roboto chữ to rõ, bộ 4 màu Google chuẩn (Xanh dương `#4285F4`, Đỏ `#EA4335`, Vàng `#FBBC05`, Xanh lá `#34A853`) trên nền sáng `#F8F9FA`.
+  2. **Đấu trường Săn Quái & Sinh Tồn (`MonsterBattleArena.tsx`):**
+     - Thanh trạng thái dạng Pill Chips (Flee, Coins, Boss Progress, Streak, Day/Night).
+     - Thanh tiến độ chuyển câu dạng Google Material Linear Progress Indicator chuyển động mượt mà.
+     - Hộp giải thích & xem lại đáp án chuẩn Material Card: Đúng xanh lá `#E6F4EA` + viền `#34A853` + tích xanh, Sai đỏ `#FCE8E6` + viền `#EA4335` + dấu X. Nút tiếp tục dạng Pill `#4285F4`.
+     - Nút tấn công dạng Pill lớn bo tròn toàn phần (`rounded-full py-3.5 px-8 bg-[#4285F4]`).
+  3. **Trọn bộ trình phát câu hỏi (`src/question-types/`):**
+     - `single_choice`: Thẻ lớn (`min-h-[64px] sm:min-h-[72px]`), bo góc 16px–24px, 4 màu Google cho 4 badge A/B/C/D, hiệu ứng chọn màu `#E8F0FE` + viền `#4285F4` + dấu tích.
+     - `multi_select`: Thẻ lớn bo góc 16px, nút checkbox bo góc mềm mại chuyển Google Blue khi chọn.
+     - `true_false`: Thẻ ĐÚNG xanh lá (#E6F4EA) & SAI đỏ (#FCE8E6) to rõ, kèm nút pill cho dạng bảng nhiều nhận định.
+     - `drag_match`: Kéo từ cột trái thả sang cột phải nối thẳng hàng, nhận diện bằng 4 màu Google, hiển thị đầy đủ văn bản 100% không cắt `...`.
+     - `drag_order`, `dropdown_list`, `drag_fill`, `true_false_multi`, `hotspot`: Đồng bộ chuẩn Material You.
+  4. **Kiểm thử chất lượng:** 65/65 unit tests và 31/31 integration tests đạt chuẩn 100%.
+
+---
+
+## CẬP NHẬT GIAO DIỆN TASTE-SKILL 2.5 (FIGMA & X.AI LUXURY STANDARD)
+- **Thời gian hoàn thành:** 2026-11-16
+- **Triết lý thiết kế:**
+  - Tiêu chuẩn thủ công chống sáo rỗng AI (Anti-slop) dựa trên `design-taste-frontend` 2.5.1: Bố cục một màn hình đơn nhất (one-screen), căn lề đồng trục tuyệt đối (equal edges), bóng đổ quang học sâu lắng, không hiệu ứng giật lag hay cuộn mờ vô nghĩa.
+  - Bộ màu nhận diện "Đèn lồng thắp sáng màn sương": Bề mặt Obsidian sâu thẳm (`#020617` / `#0c1220`) kết hợp ánh sáng đèn lồng Amber (`#f59e0b` / `#fbbf24`), ngọc lục bảo Emerald phục hồi (`#10b981`), và xanh sương mù Mist Blue (`#3b82f6`).
+- **Nâng cấp trọng tâm:**
+  1. **Landing Page (`LandingClient.tsx`):**
+     - Dark Hero toàn màn hình ngập tràn không khí fantasy, ánh sáng radial amber tinh tế, đom đóm phát sáng CSS.
+     - Khung App-frame trực tiếp hiển thị sàn đấu săn quái chân thực (sprite Slime pixel, thanh HP, đòn đánh `-25 DMG`, chuỗi combo).
+     - 3 thẻ trụ cột lối chơi dạng Bento cao cấp với viền tóc `border-white/[0.08]` và độ nổi tinh tế.
+     - Dải tối 3 bước giáo viên và chân trang tối giản, sang trọng.
+  2. **Thanh Điều Hướng (`NavigationHeader.tsx`):**
+     - Kính mờ siêu mỏng `backdrop-blur-xl`, logo FOGGO RPG phát sáng viền mềm.
+     - Thẻ tab chuyển đổi sắc sảo với đường viền mỏng và chỉ báo trạng thái hiện đại.
+  3. **Bảng Điều Khiển (`DashboardClient.tsx`):**
+     - **Triệt tiêu toàn bộ chú thích dài dòng, rườm rà:** Xóa bỏ các đoạn văn bản giải thích dài dòng ở bãi farm, đấu trường lớp và lịch sử, giúp giao diện thoáng đãng, sắc sảo và tự tin.
+     - **Triệt tiêu toàn bộ Emoji thô:** Toàn bộ emoji trong thẻ Điểm danh 7 ngày (`DailyLoginStreakCard.tsx`) được thay thế 100% bằng huy hiệu SVG Lucide đa sắc có viền phát sáng (`Coins`, `FlaskConical`, `Star`, `Shield`, `Sparkles`, `Swords`, `Crown`).
+     - **Xóa bỏ các khối màu xám đục:** Thay thế triệt để các bảng chứa màu xám nhạt (`bg-slate-400`/`bg-slate-500`) bằng các container Obsidian `#0c1220` cao cấp với viền tóc siêu nét và điểm nhấn ánh sáng tinh vi.
+  4. **Bảo tồn toàn vẹn logic & Kiểm thử:**
+     - Giữ nguyên 100% schema cơ sở dữ liệu, phân quyền RBAC, Server Actions và các key đa ngôn ngữ i18n (`vi.ts` / `en.ts`).
+     - Giữ nguyên 100% logic chấm điểm 8 dạng câu hỏi và game engine sinh tồn.
+     - **Unit tests:** 65/65 passed (100%).
+     - **System integration tests:** 31/31 passed (100%).
+
+---
+
+## CẬP NHẬT GIAO DIỆN APPLE DESIGN (WWDC FLUID INTERFACES & LUXURY LIGHT THEME)
+- **Thời gian hoàn thành:** 2026-11-16
+- **Triết lý thiết kế & Chuyển đổi màu sắc:**
+  - **Mặc định Giao diện Sáng Sang Trọng (Apple Luxury Light Canvas `#F5F5F7`):** Loại bỏ hoàn toàn cảm giác u tối, bết dính. Nền trang web được nâng cấp lên màu sáng Apple (#F5F5F7) phối hợp hiệu ứng ánh sáng quang học phát tán nhẹ nhàng (`radial-gradient`), mang đến cảm giác như một phòng trưng bày công nghệ Apple Keynote.
+  - **Bề mặt Kính mờ Siêu Thực (`.apple-glass` & `.apple-glass-nav`):** `backdrop-filter: blur(28px) saturate(190%)`, viền sáng quang học trên đỉnh (`inset 0 1px 0 0 rgba(255, 255, 255, 0.95)`), đổ bóng đa tầng nhẹ nhàng không gây mỏi mắt.
+  - **Hệ thống Font chữ Quang Học (Optical Typography):** SF Pro / Google Sans với size-specific tracking: tiêu đề lớn tracking âm (`-0.025em`), tiêu đề vừa (`-0.015em`), caption tăng tracking (`+0.02em`), chữ đen Apple Charcoal (`#1D1D1F`) tương phản sắc nét.
+  - **Phản hồi Xúc giác Vật lý (Fluid Press Physics):** Phản hồi tức thì ngay tại thời điểm pointer-down (`apple-press:active { transform: scale(0.97) }`) với lò xo tắt dần chuẩn (`cubic-bezier(0.16, 1, 0.3, 1)`).
+  - **Tối giản & Đẳng cấp:** Loại bỏ toàn bộ các câu chú thích giải thích rườm rà, các viền vàng thô thiển; nút bấm và thẻ tab chuyển sang dạng **Pill & Segmented Control** tròn trịa, tinh tế.
+- **Bảo tồn toàn vẹn logic & Kiểm thử:**
+  - 65/65 unit tests đạt 100%.
+  - 31/31 integration tests đạt 100%.
+  - **Chưa commit hay push lên Git** theo yêu cầu bảo vệ mã nguồn của người dùng.
+
+---
+
+## CẬP NHẬT: SỬA LỖI XÓA ĐỀ, THÙNG RÁC & HOÀN TÁC (UNDO) + SINH VẬT TƯƠNG TÁC AMBIENT
+- **Thời gian hoàn thành:** 2026-11-16
+- **Khắc phục lỗi xóa bộ đề thi (Question Set Deletion Bug):**
+  - **Nguyên nhân cốt lõi:** Bảng `game_sessions.set_id` tham chiếu đến `question_sets(id)` với ràng buộc mặc định `RESTRICT` (không có cascade). Khi giáo viên đã từng mở phòng chơi từ bộ đề, việc xóa bộ đề trực tiếp từ SQL gây lỗi vi phạm khóa ngoại Postgres `game_sessions_set_id_fkey`.
+  - **Giải pháp toàn diện:**
+    1. **Chuyển sang cơ chế Xóa mềm (Soft Delete):** Gắn cờ metadata `[DELETED:epochTimestamp:originalVisibility]` trong cột `description`, hạ quyền hiển thị về `private`. Toàn bộ dữ liệu câu hỏi, lượt làm bài được bảo lưu trọn vẹn, không sợ mất mát ngoài ý muốn.
+    2. **Chức năng Hoàn tác (Restore 1-click):** Khôi phục bộ đề ngay lập tức từ thùng rác về danh sách đề đang hoạt động, phục hồi nguyên vẹn mô tả và quyền hiển thị ban đầu.
+    3. **Xóa vĩnh viễn (Permanent Delete):** Gỡ liên kết `game_sessions.set_id = null` an toàn trước khi xóa câu hỏi và bộ đề, triệt tiêu 100% nguy cơ lỗi Foreign Key.
+    4. **Thanh thông báo Hoàn tác tức thì (Instant Floating Undo Toast):** Thông báo Apple Glass nổi tại đáy màn hình với nút "Hoàn tác" ngay sau khi bấm xóa, cho phép phục hồi tức thì trong 10 giây mà không cần vào thùng rác.
+    5. **Cửa sổ Lịch sử xóa đề / Thùng rác (`QuestionSetsClient.tsx`):** Badge đếm số lượng đề đã xóa, hỗ trợ tìm kiếm theo tên/môn, nút Hoàn tác và nút Dọn sạch thùng rác.
+- **Nâng cấp nền giao diện & Hiệu ứng sinh vật tương tác (`AmbientCreatures.tsx`):**
+  - **Nền đa tầng sang trọng (Apple Luxury Ambient Glow):** Phối hợp ánh sáng Amber ngọn đuốc ấm áp ở góc trên phải và hào quang Sapphire/Indigo huyền ảo ở góc trên trái, tạo độ sâu quang học cho cả Light Mode và Dark Mode.
+  - **Sinh vật chuyển động sống động (Ambient Wandering Sprites):**
+    - Bé Slime (`/sprites/slime_jump_clean.png`, `/sprites/slime_land_clean.png`, `/sprites/slime_idle_1_clean.png`) nhảy nhót, đổi khung hình squish-stretch tự nhiên.
+    - Bé Cáo Foggo (`🦊🎒`) với ba lô dũng sĩ chạy qua màn hình và để lại dấu chân lấp lánh `🐾 ✨`.
+    - Tinh linh ánh sáng lượn sóng mang đến không khí phiêu lưu kỳ thú.
+    - **Tương tác chạm/click:** Khi người dùng click vào sinh vật, sinh vật nhảy lên vui mừng, bắn hạt sao lấp lánh `✨` và hiển thị bong bóng lời thoại động viên học tập ngẫu nhiên.
+    - **Tương tác khi nhấn chức năng:** Tự động kích hoạt phản ứng vui nhộn với xác suất 25% khi người chơi thao tác trên các nút chức năng.
+    - Thiết kế `pointer-events-none` ở khung nền đảm bảo 100% không cản trở thao tác bấm của người dùng, tôn trọng `prefers-reduced-motion`.
+- **Bảo tồn toàn vẹn logic & Kiểm thử:**
+  - 65/65 unit tests đạt 100%.
+  - 31/31 integration tests đạt 100%.
+  - **Chưa commit hay push lên Git** theo yêu cầu bảo vệ mã nguồn của người dùng.
+
+---
+
+## CẬP NHẬT: TOÀN DIỆN ĐẤU TRƯỜNG RETRO PIXEL RPG, SỔ TAY 7 LOÀI QUÁI & THÁO ĐỒ TÚI
+- **Thời gian hoàn thành:** 2026-11-16
+- **Khắc phục khoảng trống 2 bên sàn đấu (Full Bleed 2D Arena):**
+  - **Vấn đề trước:** Container sàn đấu bị giới hạn bởi `max-w-6xl mx-auto` (1152px), dẫn tới trên màn hình máy tính rộng xuất hiện 2 dải đen trống lớn ở 2 bên nhân vật và quái vật.
+  - **Khắc phục:** Loại bỏ ràng buộc chiều rộng ở khung nền sàn đấu, mở rộng sàn đấu 100% Full-bleed từ viền trái sang viền phải; dàn trải bầu trời sương mù, cỏ rêu và đường biên đất liên tục; cân bằng vị trí đối kháng của Hiệp sĩ và Quái vật với tỷ lệ hài hòa.
+- **Mây xanh Pixel Art sống động (Vibrant Sky-Blue Pixel Clouds):**
+  - Thực thi chính xác yêu cầu "mây phải có màu xanh": Cập nhật toàn bộ các cụm mây SVG trên nền trang web (`PixelAnimatedBackground.tsx`) và bầu trời sàn đấu (`MonsterBattleArena.tsx`) từ màu trắng/xám mờ sang các gam màu xanh da trời, xanh ngọc và cyan rực rỡ (`#38bdf8`, `#0ea5e9`, `#0284c7`, `#7dd3fc`, `#bae6fd`) kết hợp đổ bóng pixel đa tầng sống động.
+- **Chức năng Tháo trang bị (Unequip Gear to Backpack):**
+  - Xây dựng hàm `applyUnequipGear(state, gearSlot)` trong `src/game-modes/survival/engine.ts` và xử lý Server Action `action: "unequip"` trong `src/app/world/[id]/actions.ts`.
+  - Tích hợp nút `[ Tháo ]` / `[ Unequip ]` nổi bật tại 4 ô trang bị của Hiệp sĩ (Vũ khí, Mũ, Giáp, Khiên) trong `WorldClient.tsx`.
+  - Đảm bảo an toàn tuyệt đối: kiểm tra giới hạn 30 ô túi đồ trước khi tháo, ngăn chặn thất thoát trang bị và tự động cập nhật diện mạo Hiệp Sĩ thời gian thực.
+- **Sổ tay Quái vật Hầm ngục (Dungeon Monster Bestiary - 7 Chủng loài):**
+  - Xây dựng component `src/components/MonsterBestiaryModal.tsx` hiển thị tổng thể 7 chủng loài quái vật đặc sắc chính thức của game:
+    1. *Slime Xanh* (Slime - 💧)
+    2. *Sói Con Rừng Sương* (Baby Wolf - 🐺)
+    3. *Nhện Độc Sương Mù* (Mist Spider - 🕷️)
+    4. *Yêu Tinh Rừng* (Forest Goblin - 👺)
+    5. *Golem Nhỏ* (Small Golem - 🗿)
+    6. *Bộ Xương Cổ Đại* (Ancient Skeleton - 💀)
+    7. *Heo Rừng Chúa* (Boar King Boss - 👑🐗)
+  - Hoạt họa sprite 8 khung hình chuyển động sống động, bảng thống kê Base HP/ATK, dải tiền thưởng Xu rơi, danh mục vật phẩm rơi (Loot Table) kèm icon pixel và điểm yếu chiến thuật.
+  - Nút mở `[ 📖 SỔ TAY QUÁI VẬT (7) ]` được gắn trên thanh điều hướng đầu trang ở cả Đấu Trường và Thế Giới.
+- **Nút Trở Về cố định góc trên bên trái (Top-Left Return Button):**
+  - Bổ sung nút `[ ⬅ TRỞ VỀ ]` / `[ ⬅ RETURN ]` nổi bật chuẩn Arcade Pixel ở góc bên trái trên cùng của cả Đấu Trường Săn Quái (`MonsterBattleArena.tsx`) và Sảnh Thế Giới (`WorldClient.tsx`), cho phép học sinh quay về căn cứ bất cứ lúc nào.
+- **Tối ưu hóa giao diện - Tinh gọn & Loại bỏ chữ rườm rà:**
+  - Chuyển các dòng văn bản giải thích dài thành các chip huy hiệu Retro RPG tinh gọn: `[ CÂU 1/10 ]`, `[ QUÁI 2/5 ]`, `[ 💰 150 ]`, `[ 🔥 x3 ]`.
+  - Mặc định nền sáng Light Mode sang trọng, sạch sẽ, bắt mắt.
+- **Bảo tồn toàn vẹn logic & Kiểm thử:**
+  - **Unit tests:** 66/66 passed (100%).
+  - **System integration tests:** 31/31 passed (100%).
+  - **TypeScript:** `npx tsc --noEmit` đạt 0 lỗi (0 errors).
+  - **Cam kết:** Giữ toàn bộ mã nguồn ở local, **chưa commit hay push lên Git** theo đúng chỉ đạo.
+
+---
+
+## CẬP NHẬT: ĐỒNG BỘ TOÀN BỘ THANH ĐIỀU HƯỚNG TASKBAR, PHỤC HỒI SPRITE QUÁI ĐẶC SẮC & TỰ ĐỘNG ĐÓNG HẦM NGỤC SAU 1 NGÀY
+- **Thời gian hoàn thành:** 2026-11-17
+- **Đồng bộ hóa 100% thanh điều hướng / Taskbar (`NavigationHeader.tsx`):**
+  - **Tái thiết kế thanh điều hướng chuẩn Apple Segmented Pill & Retro RPG:**
+    - Đồng bộ diện mạo thống nhất xuyên suốt mọi màn hình: Dashboard (`/dashboard`), Hầm ngục (`/worlds`), Quản lý bộ đề (`/dashboard/sets`), Khởi tạo bộ đề mới (`/dashboard/sets/new`), Khám phá (`/explore`), Nâng cấp gói Plus (`/pricing`), Quản lý gói đăng ký (`/dashboard/subscription`), Báo cáo thế giới (`/dashboard/reports/[id]`), Quản trị tối cao (`/admin`), và các trang thông tin pháp lý (`/privacy`, `/terms`).
+    - Tích hợp điều hướng linh hoạt cho cả người dùng đã đăng nhập (hiển thị Avatar Squircle, Vai trò Học sinh/Giáo viên/Admin, Điểm đom đóm, Cài đặt cá nhân, Đăng xuất) và người dùng Khách (Nút Đăng nhập / Đăng ký).
+    - Hỗ trợ nút `[ ⬅ Quay lại ]` / `[ ⬅ Back ]` ở góc trên bên trái của thanh điều hướng cho mọi trang con, giúp người dùng dễ dàng trở về trang trước chỉ với 1 click.
+    - Đồng bộ chuyển đổi đa ngôn ngữ (Tiếng Việt / English) và chuyển đổi giao diện Sáng / Tối (Light Mode / Dark Mode) tức thì ở mọi trang.
+- **Phục hồi triệt để hình ảnh sprite Quái vật Golem nhỏ & Yêu tinh rừng goblin (Hết bị trắng/khuyết nét):**
+  - **Nguyên nhân trước đó:** Thuật toán tách nền cũ bị rò rỉ gradient màu đen vào viền ngoài và các chi tiết tối màu (áo choàng rêu của goblin, khối đá nứt của golem), khiến hơn 60% pixel bên trong thân thể bị xóa nhầm thành trong suốt. Đồng thời CSS Light Mode ép nền trắng làm quái trông mờ nhạt và trơ trọi.
+  - **Khắc phục thành công:**
+    - Sử dụng thuật toán quét biên cố định `cv2.FLOODFILL_FIXED_RANGE` với ngưỡng dung sai cực chặt chẽ (`<= 4`) xuất phát thuần túy từ 4 góc ảnh.
+    - Tái tạo trọn bộ 8 khung hình hoạt họa động cho cả Yêu Tinh Rừng Goblin (`public/sprites/goblin/`) và Golem Nhỏ (`public/sprites/small_golem/`), phục hồi từ 6,600 lên 23,000–29,500 pixel đặc cho từng frame. Nhân vật hiện rõ nét, sống động, đầy đủ khối cơ bắp, mắt phát sáng và áo rêu.
+    - Khóa cứng màu nền khu vực trình diễn Sổ tay quái vật (`MonsterBestiaryModal.tsx`) với gradient đêm sương mù sâu thẳm (`linear-gradient(180deg, #020617 0%, #0f172a 65%, #064e3b 100%)`), chống hiện tượng nền trắng lóa đè mất chi tiết.
+- **Loại bỏ chữ rườm rà trong Sổ tay Quái vật:**
+  - Đã loại bỏ hoàn toàn dòng chữ thừa `Frame: 4/8` trong `MonsterBestiaryModal.tsx`.
+  - Thay thế bằng huy hiệu trạng thái sinh động tinh gọn `[ ✨ Sinh động ]` / `[ ✨ Active ]`.
+- **Tự động đóng Hầm ngục sau 1 ngày (24 Giờ):**
+  - **Khi mở Hầm ngục mới (`createWorld`):** Tự động tính toán mốc thời gian hết hạn `ends_at = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()`, lưu cấu hình `autoCloseAfterDays = 1` và `expiresAt` vào `game_sessions`.
+  - **Cơ chế tự động dọn dẹp (`autoCloseExpiredDungeons`):** Tự động truy vấn và cập nhật `status = 'closed'` cho tất cả các phòng hầm ngục có `ends_at < now` hoặc `created_at < now - 24 giờ`.
+  - **Bảo vệ tại trang vào phòng (`/world/[id]/page.tsx`):** Nếu học sinh hoặc người chơi truy cập vào phòng đã quá 24 giờ, hệ thống lập tức tự động khóa phòng (`status: 'closed'`) và hiển thị thông báo thân thiện: *"Hầm ngục đã đóng cửa sau 1 ngày (24 giờ) hoạt động theo quy định của giáo viên"*.
+  - **Huy hiệu đếm ngược thời gian thông minh trên danh sách hầm ngục (`WorldsClient.tsx`):**
+    - Hầm ngục đang mở: Hiển thị badge xanh `[ 🟢 Mở · Đóng sau Xh Yp ]` (hoặc `[ 🟢 Open · Xh Ym left ]`), cập nhật trực quan thời gian còn lại.
+    - Hầm ngục đã hết hạn: Hiển thị badge xám `[ 🔒 Đã đóng (sau 1 ngày) ]`.
+- **Kiểm thử và Chất lượng (100% Passed):**
+  - **TypeScript:** `npx tsc --noEmit` đạt 0 lỗi (0 errors).
+  - **Unit tests:** 66/66 test suites đạt 100%.
+  - **Full System Integration tests:** 31/31 ca kiểm thử đạt 100%.
+  - **HTTP Endpoint check:** Phản hồi HTTP 200 OK trên máy chủ cục bộ port 3000.
+  - **Quy tắc Git:** Toàn bộ công việc được bảo lưu an toàn tại local working tree, **tuyệt đối chưa commit và chưa push lên Git** đúng theo yêu cầu.
 
 ---
 

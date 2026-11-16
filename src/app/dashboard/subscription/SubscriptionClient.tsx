@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowLeft, Sparkles, CheckCircle2, Calendar, CreditCard, Shield } from "lucide-react";
+import { NavigationHeader } from "@/components/NavigationHeader";
 
 interface SubscriptionClientProps {
   profile: any;
@@ -22,26 +23,15 @@ export function SubscriptionClient({
     : null;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-16">
-      {/* Header */}
-      <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </Link>
-            <div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400">
-                TÀI KHOẢN & DỊCH VỤ
-              </span>
-              <h1 className="text-base font-black text-white">Quản Lý Gói Đăng Ký</h1>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans pb-16">
+      {/* Unified Navigation Header */}
+      <NavigationHeader
+        profile={profile}
+        activeItem="subscription"
+        showBackButton
+        backHref="/dashboard"
+        backLabel="Về Dashboard"
+      />
 
       {/* Main Container */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 space-y-8">

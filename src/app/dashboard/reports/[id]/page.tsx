@@ -67,8 +67,16 @@ export default async function SessionReportPage({
     .order("created_at", { ascending: false })
     .limit(100);
 
+  // Lấy profile người dùng hiện tại
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
   return (
     <ReportClient
+      profile={profile}
       session={session}
       players={players || []}
       answers={answers || []}

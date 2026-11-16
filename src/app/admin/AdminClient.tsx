@@ -27,6 +27,7 @@ import {
   Check,
   Key,
 } from "lucide-react";
+import { NavigationHeader } from "@/components/NavigationHeader";
 import {
   updateUserRole,
   updateUserPlan,
@@ -217,7 +218,7 @@ export function AdminClient({
     setUsers((prev) =>
       prev.map((u) => (u.id === targetUserId ? { ...u, fireflies: res.newFireflies } : u))
     );
-    setAlertInfo(`Đã tặng thành công +${amount} Đom Đóm cho người dùng!`);
+    setAlertInfo(`Đã tặng thành công +${amount} Điểm Thành Tích cho người dùng!`);
   }
 
   async function handleResetRecoveryCode(studentId: string, studentName: string) {
@@ -248,53 +249,58 @@ export function AdminClient({
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-16">
-      {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-slate-950/80 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 lg:px-12 py-3.5">
-        <div className="w-full flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 transition-colors border border-slate-800"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </Link>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans pb-16">
+      {/* Đồng bộ Navigation Header toàn hệ thống */}
+      <NavigationHeader
+        profile={currentUser}
+        activeItem="admin"
+        showBackButton
+        backHref="/dashboard"
+        backLabel="Về Dashboard"
+      />
+
+      {/* Admin Title Sub-banner */}
+      <div className="bg-white/80 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800/80 px-4 sm:px-8 lg:px-12 py-3 backdrop-blur-xs">
+        <div className="w-full flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
+              <Crown className="w-4 h-4" />
+            </div>
             <div>
               <div className="flex items-center gap-2">
-                <Crown className="w-4 h-4 text-rose-400" />
-                <h1 className="text-sm font-bold text-white tracking-tight">
+                <h1 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">
                   Quản Trị Hệ Thống Foggo
                 </h1>
-                <span className="px-2 py-0.5 rounded bg-rose-500/15 border border-rose-500/30 text-rose-300 font-mono text-[10px] font-semibold">
+                <span className="px-2 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-700 dark:text-rose-300 font-mono text-[10px] font-bold">
                   Tối Cao
                 </span>
               </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Toàn quyền giám sát trường học, bộ câu hỏi, tài khoản và cấp phát đom đóm
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 text-xs font-mono">
-            <span className="text-slate-400 hidden sm:inline">
-              Quản trị viên: <strong className="text-slate-200">{currentUser?.display_name || currentUser?.username}</strong>
+          <div className="flex items-center gap-2 text-xs font-mono">
+            <span className="text-slate-500 dark:text-slate-400 hidden sm:inline">
+              Quản trị viên: <strong className="text-slate-900 dark:text-slate-200">{currentUser?.display_name || currentUser?.username}</strong>
             </span>
-            <Link
-              href="/dashboard"
-              className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-sans transition-colors"
-            >
-              Về Dashboard
-            </Link>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Main Container - Dàn trải đều toàn màn hình */}
       <main className="flex-1 w-full px-4 sm:px-8 lg:px-12 py-8 space-y-6">
         {alertInfo && (
-          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center justify-between">
-            <span>✨ {alertInfo}</span>
+          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
+              <span>{alertInfo}</span>
+            </span>
             <button
               type="button"
               onClick={() => setAlertInfo(null)}
-              className="text-slate-400 hover:text-white"
+              className="text-slate-500 hover:text-slate-900 dark:hover:text-white"
             >
               ✕
             </button>
@@ -303,51 +309,51 @@ export function AdminClient({
 
         {/* 4 Thống kê chính */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-            <span className="text-xs text-slate-400 flex items-center gap-1.5 mb-1">
-              <GraduationCap className="w-4 h-4 text-amber-400" />
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 shadow-xs">
+            <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mb-1">
+              <GraduationCap className="w-4 h-4 text-amber-500 dark:text-amber-400" />
               <span>Giáo viên</span>
             </span>
-            <div className="text-2xl font-bold text-white">{teachers.length}</div>
+            <div className="text-2xl font-bold text-slate-900 dark:text-white">{teachers.length}</div>
             <p className="text-[11px] text-slate-500 mt-0.5 font-mono">
               {teachers.filter((t) => t.plan === "plus").length} tài khoản Plus
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-            <span className="text-xs text-slate-400 flex items-center gap-1.5 mb-1">
-              <Users className="w-4 h-4 text-emerald-400" />
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 shadow-xs">
+            <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mb-1">
+              <Users className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <span>Học sinh</span>
             </span>
-            <div className="text-2xl font-bold text-emerald-400">{students.length}</div>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{students.length}</div>
             <p className="text-[11px] text-slate-500 mt-0.5 font-mono">
               {students.filter((s) => s.auth_type === "username").length} không dùng email
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-            <span className="text-xs text-slate-400 flex items-center gap-1.5 mb-1">
-              <School className="w-4 h-4 text-blue-400" />
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 shadow-xs">
+            <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mb-1">
+              <School className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               <span>Trường học</span>
             </span>
-            <div className="text-2xl font-bold text-blue-400">{metrics.totalSchools}</div>
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{metrics.totalSchools}</div>
             <p className="text-[11px] text-slate-500 mt-0.5 font-mono">
               {schools.filter((s) => s.status === "verified").length} trường đã duyệt
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-            <span className="text-xs text-slate-400 flex items-center gap-1.5 mb-1">
-              <Gamepad2 className="w-4 h-4 text-purple-400" />
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 shadow-xs">
+            <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mb-1">
+              <Gamepad2 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
               <span>Hầm ngục mở</span>
             </span>
-            <div className="text-2xl font-bold text-purple-400">{metrics.totalSessions}</div>
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{metrics.totalSessions}</div>
             <p className="text-[11px] text-slate-500 mt-0.5 font-mono">Phiên sinh tồn</p>
           </div>
         </div>
 
         {/* Tab Navigation & Search Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800/80 pb-4">
           <div className="flex items-center gap-1.5 text-xs font-semibold">
             <button
               type="button"
@@ -357,8 +363,8 @@ export function AdminClient({
               }}
               className={`px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer ${
                 activeTab === "teachers"
-                  ? "bg-amber-500 text-slate-950 font-bold shadow-sm"
-                  : "bg-slate-900 text-slate-400 hover:text-white"
+                  ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                  : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white border border-slate-200 dark:border-transparent"
               }`}
             >
               <GraduationCap className="w-3.5 h-3.5" />
@@ -373,8 +379,8 @@ export function AdminClient({
               }}
               className={`px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer ${
                 activeTab === "students"
-                  ? "bg-emerald-500 text-slate-950 font-bold shadow-sm"
-                  : "bg-slate-900 text-slate-400 hover:text-white"
+                  ? "bg-emerald-500 text-slate-950 font-bold shadow-xs"
+                  : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white border border-slate-200 dark:border-transparent"
               }`}
             >
               <Users className="w-3.5 h-3.5" />
@@ -389,8 +395,8 @@ export function AdminClient({
               }}
               className={`px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer ${
                 activeTab === "schools"
-                  ? "bg-blue-500 text-slate-950 font-bold shadow-sm"
-                  : "bg-slate-900 text-slate-400 hover:text-white"
+                  ? "bg-blue-500 text-slate-950 font-bold shadow-xs"
+                  : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white border border-slate-200 dark:border-transparent"
               }`}
             >
               <School className="w-3.5 h-3.5" />
@@ -400,13 +406,13 @@ export function AdminClient({
 
           {/* Search Input */}
           <div className="relative w-full sm:w-72">
-            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Tìm theo tên, tài khoản, trường..."
-              className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-amber-500 font-sans"
+              className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:outline-none focus:border-amber-500 font-sans shadow-2xs"
             />
           </div>
         </div>
@@ -415,10 +421,10 @@ export function AdminClient({
         {/* TAB 1: QUẢN LÝ GIÁO VIÊN */}
         {/* ========================================================================= */}
         {activeTab === "teachers" && (
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-2xl overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-sans">
-                <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 font-mono">
+                <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-mono">
                   <tr>
                     <th className="py-3 px-4">Giáo viên</th>
                     <th className="py-3 px-4">Tài khoản / Email</th>
@@ -429,7 +435,7 @@ export function AdminClient({
                     <th className="py-3 px-4 text-right">Tác vụ quản trị</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                   {filteredTeachers.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="py-8 text-center text-slate-500 text-xs">
@@ -438,16 +444,16 @@ export function AdminClient({
                     </tr>
                   ) : (
                     filteredTeachers.map((t) => (
-                      <tr key={t.id} className="hover:bg-slate-800/30 transition-colors">
-                        <td className="py-3 px-4 font-semibold text-white">
+                      <tr key={t.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                        <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">
                           <div className="flex items-center gap-2">
                             <span>{t.display_name || "Chưa đặt tên"}</span>
                             {t.role === "admin" && (
-                              <span title="Admin tối cao"><Crown className="w-3.5 h-3.5 text-rose-400" /></span>
+                              <span title="Admin tối cao"><Crown className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" /></span>
                             )}
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">
+                        <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-mono text-[11px]">
                           {t.email || t.username || "Tài khoản Google/Email"}
                         </td>
                         <td className="py-3 px-4 font-mono text-[11px]">
@@ -455,8 +461,8 @@ export function AdminClient({
                             <span
                               className={`px-2 py-0.5 rounded font-bold ${
                                 revealedPasswords[t.id]
-                                  ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
-                                  : "bg-slate-950 text-slate-500"
+                                  ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30"
+                                  : "bg-slate-100 dark:bg-slate-950 text-slate-500"
                               }`}
                             >
                               {revealedPasswords[t.id] ? t.managed_password || "Chưa lưu" : "••••••••"}
@@ -464,7 +470,7 @@ export function AdminClient({
                             <button
                               type="button"
                               onClick={() => toggleRevealPassword(t.id)}
-                              className="p-1 hover:bg-slate-800 text-slate-400 hover:text-white rounded transition-colors cursor-pointer"
+                              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded transition-colors cursor-pointer"
                               title={revealedPasswords[t.id] ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                             >
                               {revealedPasswords[t.id] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -473,31 +479,31 @@ export function AdminClient({
                               <button
                                 type="button"
                                 onClick={() => copyPassword(t.id, t.managed_password)}
-                                className="p-1 hover:bg-slate-800 text-slate-400 hover:text-emerald-400 rounded transition-colors cursor-pointer"
+                                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 rounded transition-colors cursor-pointer"
                                 title="Sao chép mật khẩu"
                               >
-                                {copiedId === t.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                                {copiedId === t.id ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                               </button>
                             )}
                             <button
                               type="button"
                               onClick={() => setPasswordModalUser({ id: t.id, name: t.display_name || t.email || "Giáo viên" })}
-                              className="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-semibold cursor-pointer"
+                              className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-semibold cursor-pointer border border-slate-200 dark:border-slate-700"
                               title="Đặt hoặc đổi mật khẩu"
                             >
                               Đổi MK
                             </button>
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-slate-300">
+                        <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
                           {t.schools?.name || "Chưa gắn trường"}
                         </td>
                         <td className="py-3 px-4">
                           <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
+                            className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
                               t.plan === "plus"
-                                ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                                : "bg-slate-800 text-slate-400"
+                                ? "bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40"
+                                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
                             }`}
                           >
                             {t.plan === "plus" ? "Gói Plus" : "Gói Free"}
@@ -505,10 +511,10 @@ export function AdminClient({
                         </td>
                         <td className="py-3 px-4">
                           <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
+                            className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
                               t.role === "admin"
-                                ? "bg-rose-500/20 text-rose-300"
-                                : "bg-amber-500/10 text-amber-400"
+                                ? "bg-rose-500/20 text-rose-700 dark:text-rose-300"
+                                : "bg-amber-500/10 text-amber-700 dark:text-amber-400"
                             }`}
                           >
                             {t.role === "admin" ? "Admin" : "Giáo viên"}
@@ -556,22 +562,22 @@ export function AdminClient({
         {/* TAB 2: QUẢN LÝ HỌC SINH */}
         {/* ========================================================================= */}
         {activeTab === "students" && (
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-2xl overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-sans">
-                <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 font-mono">
+                <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-mono">
                   <tr>
                     <th className="py-3 px-4">Học sinh</th>
                     <th className="py-3 px-4">Tên đăng nhập (Username)</th>
                     <th className="py-3 px-4">Mật khẩu</th>
                     <th className="py-3 px-4">Trường / Lớp</th>
                     <th className="py-3 px-4">Cấp độ & XP</th>
-                    <th className="py-3 px-4">Đom Đóm</th>
+                    <th className="py-3 px-4">Điểm Thành Tích</th>
                     <th className="py-3 px-4">Loại tài khoản</th>
                     <th className="py-3 px-4 text-right">Tác vụ quản trị</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                   {filteredStudents.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="py-8 text-center text-slate-500 text-xs">
@@ -580,11 +586,11 @@ export function AdminClient({
                     </tr>
                   ) : (
                     filteredStudents.map((s) => (
-                      <tr key={s.id} className="hover:bg-slate-800/30 transition-colors">
-                        <td className="py-3 px-4 font-semibold text-white">
+                      <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                        <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">
                           {s.display_name || "Chưa đặt tên"}
                         </td>
-                        <td className="py-3 px-4 text-emerald-400 font-mono text-[11px] font-bold">
+                        <td className="py-3 px-4 text-emerald-600 dark:text-emerald-400 font-mono text-[11px] font-bold">
                           {s.username || "Chưa có username"}
                         </td>
                         <td className="py-3 px-4 font-mono text-[11px]">
@@ -592,8 +598,8 @@ export function AdminClient({
                             <span
                               className={`px-2 py-0.5 rounded font-bold ${
                                 revealedPasswords[s.id]
-                                  ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
-                                  : "bg-slate-950 text-slate-500"
+                                  ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30"
+                                  : "bg-slate-100 dark:bg-slate-950 text-slate-500"
                               }`}
                             >
                               {revealedPasswords[s.id] ? s.managed_password || "Chưa lưu" : "••••••••"}
@@ -601,7 +607,7 @@ export function AdminClient({
                             <button
                               type="button"
                               onClick={() => toggleRevealPassword(s.id)}
-                              className="p-1 hover:bg-slate-800 text-slate-400 hover:text-white rounded transition-colors cursor-pointer"
+                              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded transition-colors cursor-pointer"
                               title={revealedPasswords[s.id] ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                             >
                               {revealedPasswords[s.id] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -610,23 +616,23 @@ export function AdminClient({
                               <button
                                 type="button"
                                 onClick={() => copyPassword(s.id, s.managed_password)}
-                                className="p-1 hover:bg-slate-800 text-slate-400 hover:text-emerald-400 rounded transition-colors cursor-pointer"
+                                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 rounded transition-colors cursor-pointer"
                                 title="Sao chép mật khẩu"
                               >
-                                {copiedId === s.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                                {copiedId === s.id ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                               </button>
                             )}
                             <button
                               type="button"
                               onClick={() => setPasswordModalUser({ id: s.id, name: s.display_name || s.username || "Học sinh" })}
-                              className="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-semibold cursor-pointer"
+                              className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-semibold cursor-pointer border border-slate-200 dark:border-slate-700"
                               title="Đặt hoặc đổi mật khẩu"
                             >
                               Đổi MK
                             </button>
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-slate-300">
+                        <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
                           {s.schools?.name || "Chưa gắn trường"}{" "}
                           {s.classes?.name ? `· Lớp ${s.classes.name}` : ""}
                         </td>
@@ -661,15 +667,15 @@ export function AdminClient({
                               <span>Cấp lại mã</span>
                             </button>
 
-                            {/* Tặng Đom Đóm */}
+                            {/* Tặng Điểm Thành Tích */}
                             <button
                               type="button"
                               disabled={loadingId === s.id}
                               onClick={() => handleAwardFireflies(s.id, 50)}
-                              title="Tặng 50 Đom Đóm"
+                              title="Tặng 50 Điểm Thành Tích"
                               className="px-2 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[11px] font-mono transition-colors cursor-pointer"
                             >
-                              +50 🪲
+                              +50 Điểm
                             </button>
 
                             {/* Nâng lên Giáo viên */}
@@ -697,10 +703,10 @@ export function AdminClient({
         {/* TAB 3: QUẢN LÝ TRƯỜNG HỌC */}
         {/* ========================================================================= */}
         {activeTab === "schools" && (
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-2xl overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-sans">
-                <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 font-mono">
+                <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-mono">
                   <tr>
                     <th className="py-3 px-4">Tên trường học</th>
                     <th className="py-3 px-4">Tỉnh / Thành phố</th>
@@ -710,7 +716,7 @@ export function AdminClient({
                     <th className="py-3 px-4 text-right">Kiểm duyệt</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                   {filteredSchools.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="py-8 text-center text-slate-500 text-xs">
@@ -719,21 +725,21 @@ export function AdminClient({
                     </tr>
                   ) : (
                     filteredSchools.map((s) => (
-                      <tr key={s.id} className="hover:bg-slate-800/30 transition-colors">
-                        <td className="py-3 px-4 font-semibold text-white">{s.name}</td>
-                        <td className="py-3 px-4 text-slate-300">{s.province}</td>
-                        <td className="py-3 px-4 text-slate-400">{s.district || "—"}</td>
-                        <td className="py-3 px-4 font-mono text-[11px] text-amber-400 uppercase">
+                      <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                        <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">{s.name}</td>
+                        <td className="py-3 px-4 text-slate-700 dark:text-slate-300">{s.province}</td>
+                        <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{s.district || "—"}</td>
+                        <td className="py-3 px-4 font-mono text-[11px] text-amber-600 dark:text-amber-400">
                           {s.level || "thcs"}
                         </td>
                         <td className="py-3 px-4">
                           <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
+                            className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
                               s.status === "verified"
-                                ? "bg-emerald-500/20 text-emerald-300"
+                                ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300"
                                 : s.status === "pending"
-                                ? "bg-amber-500/20 text-amber-300"
-                                : "bg-rose-500/20 text-rose-300"
+                                ? "bg-amber-500/20 text-amber-700 dark:text-amber-300"
+                                : "bg-rose-500/20 text-rose-700 dark:text-rose-300"
                             }`}
                           >
                             {s.status === "verified" ? "Đã duyệt" : s.status === "pending" ? "Chờ duyệt" : "Từ chối"}
@@ -776,7 +782,7 @@ export function AdminClient({
       {/* Modal Đặt / Đổi Mật Khẩu Dành Cho Admin */}
       {passwordModalUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-          <div className="w-full max-w-sm rounded-3xl bg-slate-900 border border-slate-700 p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
+          <div className="w-full max-w-sm rounded-3xl bg-slate-900 border border-slate-700 p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 motion-reduce:animate-none">
             <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
               <Key className="w-4 h-4" />
               <span>Đổi Mật Khẩu Người Dùng</span>

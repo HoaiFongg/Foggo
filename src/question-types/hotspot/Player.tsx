@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { Crosshair, MapPin } from "lucide-react";
+import { Crosshair } from "lucide-react";
 import type { PlayerProps } from "../types";
 import type { HotspotContent, HotspotUserAnswer } from "./schema";
 
@@ -33,16 +33,16 @@ export function HotspotPlayer({
   const hasSelected = value && typeof value.x === "number" && typeof value.y === "number";
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-2.5 sm:space-y-3">
-      {/* Tiêu đề câu hỏi */}
-      <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg">
-        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 inline-block mb-1">
+    <div className="w-full max-w-2xl mx-auto space-y-4">
+      {/* Tiêu đề câu hỏi Google Material 3 (Bo góc lớn 24px, nền sáng, bóng nhẹ) */}
+      <div className="py-4 px-5 sm:py-5 sm:px-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-center shadow-xs space-y-2">
+        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#E8F0FE] text-[#1967D2] dark:bg-[#4285F4]/20 dark:text-[#8AB4F8] border border-[#D2E3FC] dark:border-[#4285F4]/30 inline-block">
           Chạm vào điểm yếu (Hotspot)
         </span>
-        <h2 className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug font-sans">
+        <h2 className="text-base sm:text-lg md:text-xl font-bold text-slate-900 dark:text-white leading-relaxed font-sans px-2">
           {content?.prompt || "Chạm vào vị trí chính xác trên ảnh:"}
         </h2>
-        <p className="text-[11px] text-slate-400 mt-1 font-mono">
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">
           {hasSelected
             ? "Đã đánh dấu tọa độ! Nhấn nộp câu trả lời để tấn công."
             : "Chạm hoặc click lên ảnh để chọn vị trí mục tiêu."}
@@ -50,22 +50,22 @@ export function HotspotPlayer({
       </div>
 
       {/* Vùng ảnh tương tác */}
-      <div className="p-2 sm:p-3 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-lg flex flex-col items-center max-h-[36vh] overflow-y-auto">
+      <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xs flex flex-col items-center max-h-[45vh] overflow-y-auto">
         {content?.image_url ? (
           <div
             ref={containerRef}
             onClick={handleImageClick}
-            className={`relative max-w-full rounded-xl overflow-hidden border-2 select-none touch-none ${
+            className={`relative max-w-full rounded-2xl overflow-hidden border-2 select-none touch-none ${
               disabled
-                ? "cursor-not-allowed opacity-80 border-slate-800"
-                : "cursor-crosshair border-amber-500/40 hover:border-amber-400"
+                ? "cursor-not-allowed opacity-80 border-slate-200 dark:border-slate-800"
+                : "cursor-crosshair border-slate-200 hover:border-[#4285F4] dark:border-slate-700"
             }`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={content.image_url}
               alt="Mục tiêu Hotspot"
-              className="w-full h-auto max-h-[220px] object-contain pointer-events-none block"
+              className="w-full h-auto max-h-[260px] object-contain pointer-events-none block"
             />
 
             {/* Điểm ngắm mục tiêu */}
@@ -78,13 +78,13 @@ export function HotspotPlayer({
                 }}
               >
                 <div className="relative flex items-center justify-center">
-                  <div className="absolute w-8 h-8 rounded-full bg-amber-500/30 animate-ping" />
-                  <div className="w-6 h-6 rounded-full bg-amber-500/40 border-2 border-amber-400 flex items-center justify-center shadow-lg">
-                    <div className="w-1.5 h-1.5 rounded-full bg-amber-200" />
+                  <div className="absolute w-8 h-8 rounded-full bg-[#4285F4]/30 animate-ping" />
+                  <div className="w-6 h-6 rounded-full bg-[#4285F4]/40 border-2 border-[#4285F4] flex items-center justify-center shadow-md">
+                    <div className="w-2 h-2 rounded-full bg-white" />
                   </div>
-                  <Crosshair className="absolute w-10 h-10 text-amber-400/80 pointer-events-none" />
+                  <Crosshair className="absolute w-10 h-10 text-[#4285F4] pointer-events-none" />
                 </div>
-                <span className="mt-1 bg-slate-950/90 text-amber-300 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-amber-500/40 shadow">
+                <span className="mt-1 bg-white dark:bg-slate-900 text-[#1967D2] dark:text-[#8AB4F8] text-[11px] font-sans font-bold px-2.5 py-0.5 rounded-full border border-[#D2E3FC] dark:border-[#4285F4]/30 shadow-xs">
                   Mục tiêu
                 </span>
               </div>
@@ -99,4 +99,3 @@ export function HotspotPlayer({
     </div>
   );
 }
-

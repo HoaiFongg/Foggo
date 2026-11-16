@@ -53,36 +53,35 @@ export function DropdownListPlayer({
   ).length;
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-2.5 sm:space-y-3">
-      {/* 1. KHỐI CÂU HỎI / ĐỀ BÀI (Ở PHÍA TRÊN) */}
-      <div className="py-2.5 px-4 sm:py-3 sm:px-6 rounded-2xl bg-slate-900/90 border border-slate-800 text-center shadow-lg space-y-1.5">
-        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/20 inline-block">
+    <div className="w-full max-w-5xl mx-auto space-y-4">
+      {/* 1. KHỐI CÂU HỎI / ĐỀ BÀI (Ở PHÍA TRÊN) - GOOGLE MATERIAL 3 */}
+      <div className="py-4 px-5 sm:py-5 sm:px-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-center shadow-xs space-y-2">
+        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#E8F0FE] text-[#1967D2] dark:bg-[#4285F4]/20 dark:text-[#8AB4F8] border border-[#D2E3FC] dark:border-[#4285F4]/30 inline-block">
           {t.questionTypes.dropdown_list}
         </span>
 
-        {/* Câu hỏi ở phía trên */}
-        <h2 className="text-xs sm:text-sm md:text-base font-bold text-white leading-snug font-sans px-2">
+        <h2 className="text-base sm:text-lg md:text-xl font-bold text-slate-900 dark:text-white leading-relaxed font-sans px-2">
           {effectivePrompt || "Đọc các nhận định dưới đây và chọn đáp án thích hợp từ danh sách sổ xuống:"}
         </h2>
 
-        <p className="text-[11px] text-slate-400 font-mono">
-          Tiến độ: <span className="text-blue-400 font-bold">{answeredCount}</span>/{dropdowns.length} vị trí đã chọn
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">
+          Tiến độ: <span className="text-[#1967D2] dark:text-[#8AB4F8] font-bold">{answeredCount}</span>/{dropdowns.length} vị trí đã chọn
         </p>
 
         {content?.image_url && (
-          <div className="mt-2 max-w-xs mx-auto rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+          <div className="mt-3 max-w-sm mx-auto rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-[#F8F9FA] dark:bg-slate-950 p-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={content.image_url}
               alt="Minh họa"
-              className="w-full h-auto max-h-36 object-contain mx-auto"
+              className="w-full h-auto max-h-48 object-contain mx-auto rounded-xl"
             />
           </div>
         )}
       </div>
 
-      {/* 2. KHỐI NHẬN ĐỊNH BÊN DƯỚI (CÓ DANH SÁCH SỔ XUỐNG KHI NHẤN VÀO - KHÔNG GIỚI HẠN KHUNG) */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 text-slate-100 text-xs sm:text-sm md:text-base leading-relaxed shadow-lg relative">
+      {/* 2. KHỐI NHẬN ĐỊNH BÊN DƯỚI (CÓ DANH SÁCH SỔ XUỐNG DẠNG PILL) */}
+      <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm sm:text-base leading-loose shadow-xs relative">
         {(() => {
           let slotCounter = 0;
 
@@ -97,23 +96,23 @@ export function DropdownListPlayer({
 
               return (
                 <span key={idx} className="relative inline-block mx-1.5 my-1 align-middle">
-                  {/* Nút danh sách sổ xuống (theo đúng mẫu ảnh người dùng) */}
+                  {/* Nút danh sách sổ xuống dạng Pill Google Material 3 */}
                   <button
                     type="button"
                     disabled={disabled}
                     onClick={() => setActiveSlotId(isOpen ? null : slotId)}
-                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer active:scale-95 disabled:cursor-not-allowed ${
+                    className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer active:scale-95 disabled:cursor-not-allowed ${
                       hasAnswered
-                        ? "bg-[#0066ff] hover:bg-blue-600 text-white shadow-blue-900/40 ring-2 ring-blue-400/60"
-                        : "bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 ring-1 ring-slate-600/50"
+                        ? "bg-[#4285F4] hover:bg-[#3367D6] text-white shadow-sm ring-2 ring-[#4285F4]/30"
+                        : "bg-[#F8F9FA] dark:bg-slate-800 hover:bg-[#E8F0FE] text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700"
                     }`}
                   >
                     <ChevronDown
-                      className={`w-4 h-4 transition-transform duration-200 ${
+                      className={`w-3.5 h-3.5 transition-transform duration-200 shrink-0 ${
                         isOpen ? "rotate-180" : ""
                       }`}
                     />
-                    <span>{selectedVal || "Chọn..."}</span>
+                    <span className="break-words whitespace-normal">{selectedVal || (isEn ? "Select..." : "Chọn...")}</span>
                   </button>
 
                   {/* Popup Menu sổ xuống khi nhấn vào */}
@@ -126,11 +125,11 @@ export function DropdownListPlayer({
                       />
 
                       {/* Dropdown Menu sổ xuống */}
-                      <div className="absolute left-0 mt-1.5 z-50 min-w-[140px] max-w-[240px] py-1.5 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-                        <div className="px-3 py-1 border-b border-slate-800 text-[10px] font-mono text-slate-400 uppercase tracking-wider">
-                          Vị trí #{slotCounter}
+                      <div className="absolute left-0 mt-2 z-50 min-w-[180px] max-w-[360px] sm:max-w-md py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+                        <div className="px-4 py-1.5 border-b border-slate-100 dark:border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                          {isEn ? `Position #${slotCounter}` : `Vị trí #${slotCounter}`}
                         </div>
-                        <div className="max-h-48 overflow-y-auto py-1">
+                        <div className="max-h-52 overflow-y-auto py-1">
                           {currentSlot.options.map((opt, oIdx) => {
                             const isSelected = selectedVal === opt;
                             return (
@@ -138,14 +137,14 @@ export function DropdownListPlayer({
                                 key={oIdx}
                                 type="button"
                                 onClick={() => handleSelectOption(slotId, opt)}
-                                className={`w-full px-3.5 py-2 text-left text-xs sm:text-sm font-medium flex items-center justify-between gap-2 transition-colors cursor-pointer ${
+                                className={`w-full px-4 py-2.5 text-left text-xs sm:text-sm font-medium flex items-center justify-between gap-2.5 transition-colors cursor-pointer ${
                                   isSelected
-                                    ? "bg-blue-600 text-white font-bold"
-                                    : "text-slate-200 hover:bg-slate-800"
+                                    ? "bg-[#E8F0FE] text-[#1967D2] font-semibold dark:bg-[#4285F4]/20 dark:text-white"
+                                    : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
                                 }`}
                               >
-                                <span>{opt}</span>
-                                {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                                <span className="break-words whitespace-normal leading-relaxed">{opt}</span>
+                                {isSelected && <Check className="w-4 h-4 stroke-[3] text-[#4285F4] shrink-0" />}
                               </button>
                             );
                           })}

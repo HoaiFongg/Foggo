@@ -14,6 +14,8 @@ import {
   applyRevive,
   applyFlee,
   applySellItem,
+  applyEquipGear,
+  applyUnequipGear,
   addItemToInventory,
   removeItemFromInventory,
   countItemInInventory,
@@ -92,6 +94,28 @@ describe("Survival Game Engine Unit Tests", () => {
       assert.equal(res2.state.inventory.length, 1);
       assert.equal(res2.state.inventory[0].itemId, "slime_gel");
     });
+
+    test("trang bị và tháo trang bị trở lại túi đồ an toàn", () => {
+      const state = initSurvivalState(1000);
+      state.inventory = [
+        { slotIndex: 0, itemId: "iron_sword", qty: 1, durability: 60 },
+      ];
+      assert.equal(state.equipped.weapon?.itemId, "wooden_club");
+
+      // 1. Mặc thanh kiếm sắt vào người (hoán đổi gậy gỗ vào túi đồ)
+      const equipRes = applyEquipGear(state, 0);
+      assert.equal(equipRes.success, true);
+      assert.equal(equipRes.state.equipped.weapon?.itemId, "iron_sword");
+      assert.equal(equipRes.state.inventory.length, 1);
+      assert.equal(equipRes.state.inventory[0].itemId, "wooden_club");
+
+      // 2. Tháo thanh kiếm sắt ra -> cất lại vào túi đồ
+      const unequipRes = applyUnequipGear(equipRes.state, "weapon");
+      assert.equal(unequipRes.success, true);
+      assert.equal(unequipRes.state.equipped.weapon, undefined);
+      assert.equal(unequipRes.state.inventory.length, 2);
+      assert.ok(unequipRes.state.inventory.some((i) => i.itemId === "iron_sword"));
+    });
   });
 
   describe("Engine tick() - Đói và Sinh tồn", () => {
@@ -143,6 +167,8 @@ describe("Survival Game Engine Unit Tests", () => {
       const state = initSurvivalState(1000);
       const res = applyHunt(state, "slime", 1.0, false);
       assert.ok(res.damageDealt > 0);
+      assert.equal(res.damageTaken, 0); // Trả lời đúng thì quái không thể đánh mình
+      assert.equal(res.state.hp, 100); // Máu giữ nguyên
       assert.equal(res.state.streak, 1);
     });
 

@@ -24,7 +24,7 @@
 | `/register/student` | `src/app/(auth)/register/student/page.tsx` | Công khai | Điểm vào trực tiếp đăng ký Học sinh trên nền Auth Hub hợp nhất |
 | `/register/recovery-code` | `src/app/(auth)/register/recovery-code/page.tsx` | Công khai | Hiển thị và tải file mã khôi phục bí mật sau khi học sinh đăng ký |
 | `/dashboard` | `src/app/dashboard/page.tsx`, `DashboardClient.tsx`, `actions.ts` | User đã đăng nhập | Phân quyền: Giáo viên quản trị bộ đề & phòng; Học sinh có Hub Thám Hiểm: Đổi tên hiển thị, Cập nhật Trường & Lớp, Bạn cùng lớp & cùng trường, Lịch sử làm bài chi tiết (tỉ lệ đúng/sai %, quái hạ, xu), Điểm danh 7 ngày, Bãi Farm Solo 24/7, Đấu trường Lớp, 4 ô trang bị |
-| `/dashboard/sets` | `src/app/dashboard/sets/page.tsx` | Teacher, Admin | Danh sách bộ câu hỏi, Import/Export Excel, Xóa bộ đề (Học sinh bị ẩn) |
+| `/dashboard/sets` | `src/app/dashboard/sets/page.tsx`, `QuestionSetsClient.tsx`, `actions.ts` | Teacher, Admin | Quản lý kho bộ đề, Import/Export Excel, Xóa mềm an toàn vào Thùng rác (Trash Bin), Lịch sử xóa đề, Hoàn tác tức thì (Undo 1-click), Xóa vĩnh viễn không vướng Foreign Key |
 | `/dashboard/sets/new` | `src/app/dashboard/sets/new/page.tsx` | Teacher, Admin | Khởi tạo nhanh bộ đề mới (tiêu đề, môn, lớp) |
 | `/dashboard/sets/[id]/edit` | `src/app/dashboard/sets/[id]/edit/page.tsx` | Owner, Admin | Trình soạn thảo 8 dạng câu hỏi, Import Excel vào bộ đề, Tải file mẫu |
 | `/dashboard/reports/[id]` | `src/app/dashboard/reports/[id]/page.tsx`, `ReportClient.tsx` | Teacher, Admin | Báo cáo chi tiết phòng chơi: xếp hạng học sinh, Phân tích tỉ lệ làm sai câu nào nhiều và bao nhiêu phần trăm (Top câu hỏi sai nhiều nhất), giải thích đáp án, xuất CSV |
@@ -262,6 +262,51 @@ erDiagram
       3. **Bảo Mật & Mật Khẩu (Security):** Đổi mật khẩu tài khoản trực tiếp (`updateOwnPassword`), tra cứu mã khôi phục bí mật của học sinh kèm nút sao chép và tải file sao lưu `.txt`.
       4. **Tùy Chọn & Hệ Thống (Preferences):** Chuyển đổi ngôn ngữ hiển thị (VI / EN), xem số dư Đom Đóm / Vàng và nút Đăng xuất an toàn.
     - **Điểm truy cập toàn cục:** Nút Bánh răng (`Settings` icon) được nhúng ngay cạnh avatar tại [`NavigationHeader.tsx`](file:///d:/Project/Foggo/src/components/NavigationHeader.tsx) (truy cập từ mọi trang) và nút Bánh răng cài đặt nổi bật tại Hero Profile Card [`DashboardClient.tsx`](file:///d:/Project/Foggo/src/app/dashboard/DashboardClient.tsx), xóa bỏ triệt để các nút chỉnh sửa phân tán trước đây.
+21. **Hệ Thống Thùng Rác (Trash Bin) & Hoàn Tác Đề Thi (Undo) + Sinh Vật Ambient Tương Tác:**
+    - **Sửa Lỗi Xóa Bộ Đề & Cơ Chế Soft Delete:**
+      - Khắc phục triệt để lỗi vi phạm ràng buộc Foreign Key Postgres `game_sessions_set_id_fkey` khi xóa bộ đề đã từng được chơi/tạo phòng.
+      - Chuyển thao tác xóa mặc định sang **Soft Delete** an toàn: gắn tag `[DELETED:epochTimestamp:originalVisibility]`, đưa vào Thùng rác và bảo lưu 100% câu hỏi.
+      - **Hoàn tác (Restore 1-click):** Khôi phục tức thì bộ đề về trạng thái hoạt động với đầy đủ quyền hiển thị (`public`, `unlisted`, `private`) và dữ liệu gốc.
+      - **Xóa vĩnh viễn (Permanent Delete):** Gỡ liên kết `game_sessions.set_id = null` an toàn trước khi xóa cascading câu hỏi và bản ghi bộ đề trong DB.
+      - **Giao diện Quản lý Thùng rác (`QuestionSetsClient.tsx`):** Nút truy cập Thùng rác có badge đếm số lượng, thanh tìm kiếm lọc đề đã xóa, hộp thoại xác nhận cảnh báo an toàn và Floating Toast hoàn tác tức thì.
+    - **Thiết Kế Nền Sang Trọng & Sinh Vật Ambient (`AmbientCreatures.tsx`):**
+      - Nâng cấp dải màu nền đa tầng: Gradient Amber ấm áp kết hợp hào quang Sapphire/Indigo và viền gương phản chiếu ánh sáng Apple Glass.
+      - Sinh vật tương tác (`AmbientCreatures.tsx`): Bé Slime (`/sprites/slime_...`), Bé Cáo Foggo (`🦊🎒`) và Tinh linh ánh sáng lượn qua nền mỗi 20–35s, phản hồi khi người dùng bấm vào (bắn sao lấp lánh `✨`, hiện bong bóng lời thoại động viên, nhảy nhót vui nhộn). Tích hợp cơ chế không cản trở click (`pointer-events-none`) và tôn trọng `prefers-reduced-motion`.
+    - **Kiểm định hoàn hảo:** `npm test` đạt **65/65 unit tests (100%)**, `scripts/full-system-test.ts` đạt **31/31 integration tests (100%)**.
+22. **Hệ Thống Sprite Đồ Họa Quái Vật 8 Khung Hình & Animation Mượt Mà (`MonsterBattleArena.tsx`):**
+    - **6 Loại Quái Vật Có Sprite Sheet Riêng Biệt (6 Custom Animated Monsters):**
+      1. **Slime Xanh (`slime`)**: Sơ cấp, dạng khối thạch nhấp nhô.
+      2. **Sói Con Rừng Sương (`baby_wolf` / `wolf`)**: 8 khung hình (Idle, Chuẩn bị chạy, Chạy, Nhảy, Tiếp đất, Bị thương, Nằm xuống, Ngồi chờ).
+      3. **Nhện Độc Sương Mù (`mist_spider`)**: 8 khung hình (Idle, Bò, Tấn công, Phun sương độc, Bị choáng, Bị đánh bại, Tan biến, Sương độc còn sót lại).
+      4. **Heo Rừng Chúa (`boar_king` / `wild_boar`)**: 8 khung hình (Idle uy nghi, Đi tuần, Lao tới, Gầm thét, Húc mạnh, Choáng váng, Bị đánh bại, Tan biến để lại vương miện).
+      5. **Yêu Tinh Rừng Goblin (`forest_goblin` / `goblin`)**: 8 khung hình (Idle, Đi bộ, Chạy, Nhảy, Vui vẻ khích tướng, Tức giận, Ngủ gục, Ngồi nghỉ). Tách nền đen thành PNG trong suốt.
+      6. **Golem Nhỏ & Golem Đá Khổng Lồ (`small_golem` / `rock_golem`)**: 8 khung hình (Idle mắt pha lê, Bò nhô lên, Tấn công vung đấm, Phun khói đá độc, Bị choáng rạn nứt, Đổ gục vỡ vụn, Tan biến khói bụi, Tàn tích sỏi đá).
+      7. **Bộ Xương Cổ Đại (`skeleton`)**: 8 khung hình (Idle cầm kiếm rỉ, Bò rình mồi, Giương kiếm, Chém kiếm trăng khuyết tím uy lực, Bị choáng lung lay, Bị đánh bại, Tan biến linh hồn tím, Đống tro tàn sót lại).
+    - **Cân Chỉnh Hướng Mặt Đối Kháng Trực Diện (Face-to-Face Alignment):**
+      - Hiệp sĩ đứng ở bên TRÁI hướng sang phải (`-->`).
+      - Toàn bộ quái vật ở bên PHẢI đều được căn chỉnh/lật gương (`flipHorizontal`) để hướng sang TRÁI (`<--`), mắt đối mắt trực diện với Hiệp sĩ, xóa bỏ tình trạng quái vật quay lưng ra ngoài sân đấu.
+    - **Hoạt Họa 5 Giai Đoạn Mượt Mà Không Khựng (5-Phase Fluid Combat Flow):**
+      - Tối ưu nhịp thở Idle thành chu kỳ 380ms mượt mà kết hợp hiệu ứng thở Apple fluid breathing.
+      - Phản công và tấn công chia chuẩn 5 giai đoạn: Lấy đà (140ms) -> Lướt tới (180ms với `cubic-bezier(0.2, 0.8, 0.2, 1)`) -> Va chạm & chớp sáng (180ms) -> Tiếp đất (180ms) -> Hồi chiêu êm ái (180ms), triệt tiêu hoàn toàn hiện tượng giật cục hay khựng hình.
+23. **Hệ Thống Hiệp Sĩ Pixel Art & Trang Bị Động Thời Gian Thực (`PixelHero.tsx`):**
+    - **Thành phần [`src/components/PixelHero.tsx`](file:///d:/Project/Foggo/src/components/PixelHero.tsx):**
+      - Xóa bỏ triệt để mô hình khối HTML div thô sơ cũ, thay bằng đồ họa Pixel Art chuẩn RPG 32x32 với `shape-rendering="crispEdges"`, sắc nét tuyệt đối trên mọi độ phân giải.
+      - **Kiến trúc phân tầng trang phục động (5-Layer Modular Paper-Doll):**
+        1. *Layer Thân & Biểu Cảm*: Mắt to linh hoạt nhìn thẳng sang phải đối diện quái vật, chớp mắt, nhắm tịt `> <` khi bị đau (`heroAnim === "hurt"`), quyết đoán khi tấn công (`heroAnim === "attack"`).
+        2. *Layer Giáp & Áo Choàng*: `cloth_armor` (áo lữ hành), `leather_armor` (giáp da đinh tán), `iron_armor` (giáp phiến sắt), `knight_armor` (giáp bạc hoàng gia kèm áo choàng đỏ tung bay), `mage_robe` (áo choàng pháp sư xanh thêu chỉ vàng).
+        3. *Layer Mũ*: `straw_hat` (mũ rơm dã ngoại), `leather_helmet` (mũ da sói có tai), `iron_helmet` (mũ sắt hiệp sĩ có mạng che và chùm lông đỏ).
+        4. *Layer Khiên (Tay Trái)*: `wooden_shield` (khiên gỗ tròn), `iron_shield` (khiên sắt chữ thập xanh), `magic_shield` (khiên pha lê phát quang).
+        5. *Layer Vũ Khí (Tay Phải)*: Hỗ trợ đa dạng dòng vũ khí với hiệu ứng chiến đấu đặc trưng:
+           - Kiếm & Rìu (`iron_sword`, `steel_sword`, `crystal_sword`, `stone_axe`): vung kiếm chém góc 45 độ tạo vệt chém vàng sáng.
+           - Gậy phép (`magic_staff`, `fire_staff`): giơ gậy phóng luồng ánh sáng ma thuật / hỏa cầu rực sáng.
+           - Cung tên (`hunting_bow`, `iron_bow`): giương cung kéo căng dây và bắn mũi tên xé gió bay sang quái vật.
+    - **Trang Bị Mới Bổ Sung Vào Hệ Thống (`items.ts` & Thợ Rèn):**
+      - Bổ sung 7 trang bị mới: Cung săn rừng sương, Cung thép thợ săn, Gậy phép pha lê, Gậy lửa cổ đại, Áo choàng pháp sư, Giáp hiệp sĩ hoàng gia, Khiên năng lượng pha lê.
+    - **Tích Hợp Đồng Bộ Toàn Diện:**
+      - [`MonsterBattleArena.tsx`](file:///d:/Project/Foggo/src/app/world/[id]/MonsterBattleArena.tsx): Hiển thị Hiệp sĩ Pixel Art chiến đấu trực tiếp với quái vật hầm ngục.
+      - [`WorldClient.tsx`](file:///d:/Project/Foggo/src/app/world/[id]/WorldClient.tsx): Bục trình diễn nhân vật (Live Equipment Preview) ngay tại tab Thợ Rèn & Trang Bị, cập nhật diện mạo nhân vật tức thì 0ms khi mua đồ hoặc thay đổi trang bị.
+
+
 
 
 

@@ -362,52 +362,7 @@ export function applyHunt(
         scoreAwarded,
       };
     } else {
-      // === QUÁI CÒN SỐNG: ĐẾN LƯỢT QUÁI TẤN CÔNG PHẢN ĐÒN ===
-      const armorDef =
-        nextState.equipped?.armor?.durability && nextState.equipped.armor.durability > 0
-          ? (ITEM_REGISTRY[nextState.equipped.armor.itemId]?.defensePct || 0)
-          : 0;
-      const helmetDef =
-        nextState.equipped?.helmet?.durability && nextState.equipped.helmet.durability > 0
-          ? (ITEM_REGISTRY[nextState.equipped.helmet.itemId]?.defensePct || 0)
-          : 0;
-      const shieldDef =
-        nextState.equipped?.shield?.durability && nextState.equipped.shield.durability > 0
-          ? (ITEM_REGISTRY[nextState.equipped.shield.itemId]?.defensePct || 0)
-          : 0;
-
-      const totalDefPct = Math.min(0.60, armorDef + helmetDef + shieldDef);
-      const damageTaken = Math.max(1, Math.round(monster.atk * (1 - totalDefPct)));
-      nextState.hp = Math.max(0, nextState.hp - damageTaken);
-
-      // Hao mòn trang bị phòng thủ khi bị quái đánh trả
-      if (nextState.equipped?.armor && nextState.equipped.armor.durability > 0) {
-        nextState.equipped.armor.durability = Math.max(0, nextState.equipped.armor.durability - 1);
-      }
-      if (nextState.equipped?.helmet && nextState.equipped.helmet.durability > 0) {
-        nextState.equipped.helmet.durability = Math.max(0, nextState.equipped.helmet.durability - 1);
-      }
-      if (nextState.equipped?.shield && nextState.equipped.shield.durability > 0) {
-        nextState.equipped.shield.durability = Math.max(0, nextState.equipped.shield.durability - 1);
-      }
-
-      if (nextState.hp <= 0) {
-        nextState.hp = 0;
-        nextState.deaths += 1;
-        nextState.currentBattle = null;
-
-        return {
-          state: nextState,
-          result: "death",
-          damageDealt,
-          damageTaken,
-          lootAwarded: [],
-          coinsAwarded: 0,
-          scoreAwarded: 0,
-        };
-      }
-
-      // Quái còn sống, tiếp tục hiệp đấu tiếp theo
+      // === QUÁI CÒN SỐNG: BẠN ĐÃ TẤN CÔNG TRÚNG, QUÁI KHÔNG THỂ ĐÁNH LẠI BẠN ===
       nextState.currentBattle = {
         monsterId,
         monsterHp: currentHp,
@@ -419,7 +374,7 @@ export function applyHunt(
         state: nextState,
         result: "hit",
         damageDealt,
-        damageTaken,
+        damageTaken: 0,
         lootAwarded: [],
         coinsAwarded: 0,
         scoreAwarded: 100,
@@ -837,6 +792,49 @@ export function applyEquipGear(
     state: nextState,
     success: true,
     message: `Đã trang bị ${itemDef.name}!`,
+  };
+}
+
+/**
+ * Xử lý Tháo trang bị (vũ khí, giáp, mũ, khiên) từ người cất lại vào túi đồ
+ */
+export function applyUnequipGear(
+  state: SurvivalPlayerState,
+  gearSlot: "weapon" | "armor" | "helmet" | "shield"
+): { state: SurvivalPlayerState; success: boolean; message: string } {
+  const currentEquipped = state.equipped?.[gearSlot];
+  if (!currentEquipped) {
+    return { state, success: false, message: "Không có trang bị nào ở ô này để tháo" };
+  }
+
+  const nextState: SurvivalPlayerState = {
+    ...state,
+    equipped: { ...state.equipped },
+    inventory: state.inventory.map((s) => ({ ...s })),
+  };
+
+  // Thêm món trang bị đã tháo vào túi đồ
+  const { inventory, success } = addItemToInventory(
+    nextState.inventory,
+    currentEquipped.itemId,
+    1,
+    currentEquipped.durability
+  );
+
+  if (!success) {
+    return { state, success: false, message: "Túi đồ đã đầy (tối đa 30 ô), không thể tháo đồ!" };
+  }
+
+  nextState.inventory = inventory;
+  delete (nextState.equipped as any)[gearSlot];
+
+  const itemDef = getItemDef(currentEquipped.itemId);
+  const name = itemDef?.name || currentEquipped.itemId;
+
+  return {
+    state: nextState,
+    success: true,
+    message: `Đã tháo ${name} cất vào túi đồ!`,
   };
 }
 

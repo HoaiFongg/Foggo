@@ -22,6 +22,46 @@ export default async function WorldPage({ params }: WorldPageProps) {
     notFound();
   }
 
+  // Tự động đóng hầm ngục sau 1 ngày (24 giờ) hoạt động theo quy định
+  const nowMs = Date.now();
+  const createdAtMs = new Date(session.created_at).getTime();
+  const endsAtMs = session.ends_at
+    ? new Date(session.ends_at).getTime()
+    : createdAtMs + 24 * 60 * 60 * 1000;
+  const isExpired =
+    session.kind !== "solo" &&
+    (nowMs >= endsAtMs || nowMs - createdAtMs >= 24 * 60 * 60 * 1000);
+
+  if (isExpired && session.status === "open") {
+    const adminClient = createAdminClient();
+    await adminClient.from("game_sessions").update({ status: "closed" }).eq("id", id);
+    session.status = "closed";
+  }
+
+  if (session.status === "closed" && session.kind !== "solo") {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center px-4 text-center">
+        <div className="max-w-md w-full bg-slate-900 border-2 border-amber-500/40 rounded-3xl p-6 sm:p-8 space-y-4 shadow-2xl">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+            <span className="text-3xl">🔒</span>
+          </div>
+          <h1 className="text-xl font-bold text-white font-mono uppercase tracking-wide">
+            HẦM NGỤC ĐÃ ĐÓNG CỬA
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Hầm ngục này đã tự động đóng lại sau 1 ngày (24 giờ) hoạt động theo quy định. Bạn hãy liên hệ giáo viên để mở đợt thử thách mới nhé!
+          </p>
+          <a
+            href="/worlds"
+            className="inline-flex items-center justify-center gap-2 w-full py-3 px-5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold font-mono text-xs uppercase transition-all shadow-md cursor-pointer"
+          >
+            Quay lại Danh sách Thế giới
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   // 2. Tải thông tin người dùng
   const {
     data: { user },

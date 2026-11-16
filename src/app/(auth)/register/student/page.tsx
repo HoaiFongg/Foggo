@@ -3,7 +3,7 @@ import AuthUnifiedClient from "@/app/(auth)/AuthUnifiedClient";
 
 export const metadata = {
   title: "Đăng Ký Học Sinh | FOGGO",
-  description: "Đăng ký học sinh không cần email chỉ trong 30 giây để vào săn quái và tích lũy Đom Đóm.",
+  description: "Đăng ký học sinh không cần email chỉ trong 30 giây để vào săn quái và tích lũy Điểm Thành Tích.",
 };
 
 export default function StudentRegisterPage() {

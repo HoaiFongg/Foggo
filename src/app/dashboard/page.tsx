@@ -205,7 +205,7 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans text-slate-900 dark:text-slate-100">
       <NavigationHeader profile={profile} activeItem="dashboard" />
       <DashboardClient
         user={user}

@@ -14,7 +14,7 @@ export default async function PricingPage() {
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("plan, plan_expires_at")
+      .select("*")
       .eq("id", user.id)
       .single();
 
@@ -22,13 +22,23 @@ export default async function PricingPage() {
       userPlan = profile.plan;
       planExpiresAt = profile.plan_expires_at;
     }
+
+    return (
+      <PricingClient
+        profile={profile}
+        isLoggedIn={!!user}
+        currentPlan={userPlan}
+        planExpiresAt={planExpiresAt}
+      />
+    );
   }
 
   return (
     <PricingClient
-      isLoggedIn={!!user}
-      currentPlan={userPlan}
-      planExpiresAt={planExpiresAt}
+      profile={null}
+      isLoggedIn={false}
+      currentPlan="free"
+      planExpiresAt={null}
     />
   );
 }

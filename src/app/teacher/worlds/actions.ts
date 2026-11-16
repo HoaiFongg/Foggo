@@ -28,6 +28,9 @@ export async function createWorld(formData: FormData) {
   const token = generateJoinToken();
   const supabase = await createClient();
 
+  const now = new Date();
+  const endsAt = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(); // Hầm ngục mở ra sẽ tự động đóng lại sau 1 ngày (24 giờ)
+
   const { data, error } = await supabase
     .from("game_sessions")
     .insert({
@@ -40,12 +43,15 @@ export async function createWorld(formData: FormData) {
       join_token: token,
       allow_guests: allowGuests,
       status: "open",
-      starts_at: new Date().toISOString(),
+      starts_at: now.toISOString(),
+      ends_at: endsAt,
       settings: {
         dailyPlayLimitMinutes: dailyLimitMin,
         fogDensity: 1.0,
         isClassDungeon: true,
         dungeonDrops,
+        autoCloseAfterDays: 1,
+        expiresAt: endsAt,
       },
     })
     .select("id")
@@ -318,4 +324,25 @@ export async function toggleBanPlayer(
 
   revalidatePath(`/teacher/worlds/${sessionId}`);
   return { success: true };
+}
+
+/**
+ * Tự động đóng hầm ngục sau 1 ngày (24 giờ)
+ * Hầm ngục lớp/đấu trường sẽ tự động chuyển sang status: 'closed'
+ */
+export async function autoCloseExpiredDungeons() {
+  try {
+    const adminClient = createAdminClient();
+    const now = new Date().toISOString();
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+    await adminClient
+      .from("game_sessions")
+      .update({ status: "closed" })
+      .neq("kind", "solo")
+      .eq("status", "open")
+      .or(`ends_at.lt.${now},created_at.lt.${oneDayAgo}`);
+  } catch (err) {
+    console.error("Auto close expired dungeons error:", err);
+  }
 }
