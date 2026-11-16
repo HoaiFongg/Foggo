@@ -285,11 +285,3 @@ export function NavigationHeader({
     </>
   );
 }
-isOpen = { isSettingsOpen }
-onClose = {() => setIsSettingsOpen(false)}
-profile = { profile }
-  />
-      )}
-    </>
-  );
-}
